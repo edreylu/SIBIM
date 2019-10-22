@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+
+        <h:head>
+                <title>Menu</title>
+        <h:outputScript library="js" name="complementos.js" />
+        </h:head>
+
+        <h:body>
+            <ui:composition template="layout.xhtml">
+                <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
+            <f:metadata>
+                <f:viewAction action="#{menuControl.llenaMenu()}" />
+                <f:viewAction action="#{rolesControl.llenarpermisos(accesoC.noUsuario)}" />
+           </f:metadata>
+            <f:event type="preRenderView" rendered="#{facesContext.postBack}" listener="#{accesoC.validaSesion(' ')}"/>
+            
+                <ui:define name="content">
+                    <p:layout style="width: 99.2%; height:78%;">
+                    <p:layoutUnit id="centrado" position="center">
+                        <div style="font-size: 0.83vw; height:99% !important; border-style: none;">
+                            <ui:insert name="contenido">
+                                
+                            </ui:insert> 
+                        </div>
+                    </p:layoutUnit>
+                </p:layout>
+                </ui:define>
+                
+            </ui:composition>
+                
+
+        </h:body>
+
+</html>
+
