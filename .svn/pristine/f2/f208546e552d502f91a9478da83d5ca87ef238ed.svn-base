@@ -1,0 +1,530 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package mobiliario;
+
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.sql.CallableStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import org.primefaces.model.DefaultStreamedContent;
+import org.primefaces.model.StreamedContent;
+import utilerias.Procedimiento;
+
+/**
+ *
+ *
+ */
+public class MobiliarioDAO extends conexion.ConexionOracle implements Serializable {
+
+   public Procedimiento operacionesMobiliario(Mobiliario mo,int operacion) throws SQLException {
+        System.out.println("Entro a operacionesMobiliario: "+operacion);
+        Procedimiento pro=new Procedimiento();
+        CallableStatement cs = null;
+        Integer error=null;
+        String mensaje="";
+        int idBien=0;
+        int ime=0;
+        try {
+            super.abrirConexion();
+        cs = super.getConn().prepareCall("{call pdbMobiliario(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}");
+        cs.registerOutParameter( 1, Types.INTEGER ); // parametro de salida error
+        cs.registerOutParameter( 2, Types.VARCHAR ); // parametro de salida mensaje
+        cs.setInt(3, operacion); //operacion
+        cs.registerOutParameter( 4, Types.INTEGER ); // parametro de salida idBien
+        cs.setInt(4, mo.getIdBien()); //tabla
+        cs.registerOutParameter( 5, Types.INTEGER ); // parametro de salida IME
+        cs.setInt(5, mo.getIme()); //tabla
+        cs.setString(6, mo.getMarca()); //tabla
+        cs.setString(7, mo.getSerie()); //tabla
+        cs.setString(8, mo.getModelo()); //tabla
+        cs.setString(9, mo.getColor()); //tabla
+        cs.setString(10, mo.getMaterial()); //tabla
+        cs.setInt(11, mo.getCostoTotal()); //tabla
+        cs.setString(12, mo.getNumFactura()); //tabla
+        cs.setString(13, mo.getFechaFacturaStr()); //tabla
+        cs.setString(14, mo.getNumCheque()); //tabla
+        cs.setInt(15, mo.getIdProveedor()); //tabla
+        cs.setInt(16, mo.getIdFormaAdquisicion()); //tabla
+        cs.setInt(17, mo.getIdOrigenRecurso()); //tabla
+        cs.setInt(18, mo.getIdEstadoDelBien()); //tabla
+        cs.setString(19, mo.getObservaciones()); //tabla
+        cs.setInt(20, mo.getIdClasificador()); //tabla
+        cs.setInt(21, mo.getIdDepartamento()); //tabla
+        cs.setInt(22, mo.getNoUsuarioAlta()); //tabla
+        cs.setInt(23, mo.getCantidad()); //tabla
+        cs.execute();
+        idBien = cs.getInt(4);
+        ime = cs.getInt(5);
+        error = cs.getInt(1);
+        mensaje = cs.getString(2);
+        pro.setError(error);
+        pro.setMensaje(mensaje);
+        pro.setIme(ime);
+        } catch (Exception e) {
+            //System.out.println("Error en operacionesMobiliario() " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            try {
+                
+            } catch (Exception e) {
+                //System.out.println("Error en operacionesMobiliario() " + e.getMessage());
+                e.printStackTrace();
+            }
+            super.cerrarConexion();
+        }
+        return pro;
+    }
+
+
+    public List<Mobiliario> traeRegistros(int valor) {
+        List<Mobiliario> listaMobiliario;
+        System.out.println("Entro a cargar listaMobiliario");
+        Mobiliario mobiliario = null;
+        ResultSet rs = null;
+        String query = null;
+        String continuacion = valor == 1 ? " WHERE IDESTATUS = 1" : "";
+        query = "SELECT  IDBIEN,\n" +
+                        "  IME,\n" +
+                        "  MARCA,\n" +
+                        "  SERIE,\n" +
+                        "  MODELO,\n" +
+                        "  COLOR,\n" +
+                        "  MATERIAL,\n" +
+                        "  COSTOTOTAL,\n" +
+                        "  NUMFACTURA,\n" +
+                        "  FECHAFACTURA,\n" +
+                        "  NUMCHEQUE,\n" +
+                        "  FECHAALTA,\n" +
+                        "  NOUSUARIOALTA,\n" +
+                        "  IDPROVEEDOR,\n" +
+                        "  IDFORMAADQUISICION,\n" +
+                        "  IDORIGENRECURSO,\n" +
+                        "  IDESTADODELBIEN,\n" +
+                        "  OBSERVACIONES,\n" +
+                        "  IDCLASIFICADOR,\n" +
+                        "  IDDEPARTAMENTO,\n" +
+                        "  FECHABAJA,\n" +
+                        "  NOUSUARIOBAJA,\n" +
+                        "  FECHAULTIMAMODIF,\n" +
+                        "  NOUSUARIOULTIMAMODIF,\n" +
+                        "  IDESTATUS\n" +
+                        "FROM MOBILIARIO "
+                        +continuacion+" ORDER BY 1";
+                
+        try {
+            listaMobiliario = new ArrayList<>();
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query).executeQuery();
+
+            while (rs.next()) {
+                mobiliario = new Mobiliario();
+                mobiliario.setIdBien(rs.getInt("IDBIEN"));
+                mobiliario.setIme(rs.getInt("IME"));
+                mobiliario.setMarca(rs.getString("MARCA"));
+                mobiliario.setSerie(rs.getString("SERIE"));
+                mobiliario.setModelo(rs.getString("MODELO"));
+                mobiliario.setColor(rs.getString("COLOR"));
+                mobiliario.setMaterial(rs.getString("MATERIAL"));
+                mobiliario.setCostoTotal(rs.getInt("COSTOTOTAL"));
+                mobiliario.setNumFactura(rs.getString("NUMFACTURA"));
+                mobiliario.setFechaFactura(rs.getDate("FECHAFACTURA"));
+                mobiliario.setNumCheque(rs.getString("NUMCHEQUE"));
+                mobiliario.setFechaAlta(rs.getString("FECHAALTA"));
+                mobiliario.setNoUsuarioAlta(rs.getInt("NOUSUARIOALTA"));
+                mobiliario.setIdProveedor(rs.getInt("IDPROVEEDOR"));
+                mobiliario.setIdFormaAdquisicion(rs.getInt("IDFORMAADQUISICION"));
+                mobiliario.setIdOrigenRecurso(rs.getInt("IDORIGENRECURSO"));
+                mobiliario.setIdEstadoDelBien(rs.getInt("IDESTADODELBIEN"));
+                mobiliario.setObservaciones(rs.getString("OBSERVACIONES"));
+                mobiliario.setIdClasificador(rs.getInt("IDCLASIFICADOR"));
+                mobiliario.setIdDepartamento(rs.getInt("IDDEPARTAMENTO"));
+                mobiliario.setFechaBaja(rs.getString("FECHABAJA"));
+                mobiliario.setNoUsuarioBaja(rs.getInt("NOUSUARIOBAJA"));
+                mobiliario.setFechaUltimaModif(rs.getString("FECHAULTIMAMODIF"));
+                mobiliario.setNoUsuarioUltimaModif(rs.getInt("NOUSUARIOULTIMAMODIF"));
+                mobiliario.setIdEstatus(rs.getInt("IDESTATUS"));
+                listaMobiliario.add(mobiliario);
+
+            }
+            System.out.println("listaMobiliario.size() = " + listaMobiliario.size());
+        } catch (SQLException e) {
+            System.out.println("Error en listaMobiliario() " + e.getMessage());
+            listaMobiliario = null;
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en listaMobiliario() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        return listaMobiliario;
+    }
+
+    public List<Mobiliario> traeRegistrosLista(MobiliarioBusqueda mb,int valor) {
+        List<Mobiliario> listaMobiliario;
+        System.out.println("Entro a cargar traeRegistrosLista");
+        Mobiliario mobiliario = null;
+        ResultSet rs = null;
+        String query = null;
+        String continuacion = valor == 1 ? " WHERE MO.IDESTATUS = 1 \n" : "WHERE MO.IDESTATUS IN (1,2) \n";
+        if(mb.getIme()!=null){
+        continuacion+=" AND MO.IME="+mb.getIme()+"\n";  
+        }
+        if(mb.getSerie()!=null && !mb.getSerie().isEmpty()){
+        continuacion+=" AND MO.SERIE="+mb.getSerie()+"\n";  
+        }
+        if(mb.getIdDepartamento()!=0){
+        continuacion+=" AND MO.IDDEPARTAMENTO="+mb.getIdDepartamento()+"\n";  
+        }
+        if(mb.getIdClasificador()!=0){
+        continuacion+=" AND MO.IDCLASIFICADOR="+mb.getIdClasificador()+"\n";  
+        }
+        
+        query = "SELECT MO.IDBIEN,\n" +
+                        "  MO.IME,\n" +
+                        "  MO.MARCA,\n" +
+                        "  MO.SERIE,\n" +
+                        "  MO.MODELO,\n" +
+                        "  MO.COLOR,\n" +
+                        "  MO.MATERIAL,\n" +
+                        "  MO.COSTOTOTAL,\n" +
+                        "  MO.NUMFACTURA,\n" +
+                        "  MO.FECHAFACTURA,\n" +
+                        "  MO.NUMCHEQUE,\n" +
+                        "  MO.FECHAALTA,\n" +
+                        "  MO.NOUSUARIOALTA,\n" +
+                        "  MO.IDPROVEEDOR,\n" +
+                        "  MO.IDFORMAADQUISICION,\n" +
+                        "  MO.IDORIGENRECURSO,\n" +
+                        "  (SELECT KOR.DESCRIPCION\n" +
+                        "  FROM KORIGENRECURSO KOR\n" +
+                        "  WHERE KOR.IDORIGENRECURSO = MO.IDCLASIFICADOR\n" +
+                        "  ) ORIGENRECURSO,\n" +
+                        "  MO.IDESTADODELBIEN,\n" +
+                        "  (SELECT EB.ESTADODELBIEN\n" +
+                        "  FROM KESTADODELBIEN EB\n" +
+                        "  WHERE EB.IDESTADODELBIEN = MO.IDESTADODELBIEN\n" +
+                        "  ) ESTADODELBIEN,\n" +
+                        "  MO.OBSERVACIONES,\n" +
+                        "  MO.IDCLASIFICADOR,\n" +
+                        "  (SELECT CL.DESCRIPCION\n" +
+                        "  FROM CLASIFICADOR CL\n" +
+                        "  WHERE CL.IDCLASIFICADOR = MO.IDCLASIFICADOR\n" +
+                        "  ) CLASIFICADOR,\n" +
+                        "  MO.IDDEPARTAMENTO,\n" +
+                        "  (SELECT NOMDEPTO\n" +
+                        "  FROM departamento DE\n" +
+                        "  WHERE DE.IDDEPARTAMENTO = MO.IDDEPARTAMENTO\n" +
+                        "  ) DEPARTAMENTO,\n" +
+                        "  MO.FECHABAJA,\n" +
+                        "  MO.NOUSUARIOBAJA,\n" +
+                        "  MO.FECHAULTIMAMODIF,\n" +
+                        "  MO.NOUSUARIOULTIMAMODIF,\n" +
+                        "  MO.IDESTATUS\n" +
+                        "FROM MOBILIARIO MO \n"
+                        +continuacion+" ORDER BY 1";
+                System.out.println(query);
+        try {
+            listaMobiliario = new ArrayList<>();
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query).executeQuery();
+
+            while (rs.next()) {
+                mobiliario = new Mobiliario();
+                mobiliario.setIdBien(rs.getInt("IDBIEN"));
+                mobiliario.setIme(rs.getInt("IME"));
+                mobiliario.setMarca(rs.getString("MARCA"));
+                mobiliario.setSerie(rs.getString("SERIE"));
+                mobiliario.setModelo(rs.getString("MODELO"));
+                mobiliario.setColor(rs.getString("COLOR"));
+                mobiliario.setMaterial(rs.getString("MATERIAL"));
+                mobiliario.setCostoTotal(rs.getInt("COSTOTOTAL"));
+                mobiliario.setNumFactura(rs.getString("NUMFACTURA"));
+                mobiliario.setFechaFactura(rs.getDate("FECHAFACTURA"));
+                mobiliario.setNumCheque(rs.getString("NUMCHEQUE"));
+                mobiliario.setFechaAlta(rs.getString("FECHAALTA"));
+                mobiliario.setNoUsuarioAlta(rs.getInt("NOUSUARIOALTA"));
+                mobiliario.setIdProveedor(rs.getInt("IDPROVEEDOR"));
+                mobiliario.setIdFormaAdquisicion(rs.getInt("IDFORMAADQUISICION"));
+                mobiliario.setIdOrigenRecurso(rs.getInt("IDORIGENRECURSO"));
+                mobiliario.setOrigenrecurso(rs.getString("ORIGENRECURSO"));
+                mobiliario.setIdEstadoDelBien(rs.getInt("IDESTADODELBIEN"));
+                mobiliario.setEstadoDelBien(rs.getString("ESTADODELBIEN"));
+                mobiliario.setObservaciones(rs.getString("OBSERVACIONES"));
+                mobiliario.setIdClasificador(rs.getInt("IDCLASIFICADOR"));
+                mobiliario.setClasificador(rs.getString("CLASIFICADOR"));
+                mobiliario.setIdDepartamento(rs.getInt("IDDEPARTAMENTO"));
+                mobiliario.setDepartamento(rs.getString("DEPARTAMENTO"));
+                mobiliario.setFechaBaja(rs.getString("FECHABAJA"));
+                mobiliario.setNoUsuarioBaja(rs.getInt("NOUSUARIOBAJA"));
+                mobiliario.setFechaUltimaModif(rs.getString("FECHAULTIMAMODIF"));
+                mobiliario.setNoUsuarioUltimaModif(rs.getInt("NOUSUARIOULTIMAMODIF"));
+                mobiliario.setIdEstatus(rs.getInt("IDESTATUS"));
+                listaMobiliario.add(mobiliario);
+
+            }
+            System.out.println("traeRegistrosLista.size() = " + listaMobiliario.size());
+        } catch (SQLException e) {
+            System.out.println("Error en traeRegistrosLista() " + e.getMessage());
+            listaMobiliario = null;
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en traeRegistrosLista() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        return listaMobiliario;
+    }
+    
+    public int insertaImagen(MobiliarioStreamed ms,boolean existe) throws IOException {
+      
+        ResultSet rs = null;
+        String query="";
+        int valor=0;
+        if(existe){
+        query = "UPDATE IMAGENMOBILIARIO "
+                + " SET IMAGEN = ?,  NOMBREARCHIVO = ? "
+                + "  WHERE IDBIEN = ? AND TIPOARCHIVO = ? "; }
+        else{
+         query = "INSERT INTO IMAGENMOBILIARIO "
+                + " (IMAGEN,\n" +
+                    "  NOIMAGEN,\n" +
+                    "  IDBIEN,\n" +
+                    "  NOMBREARCHIVO,\n" +
+                    "  TIPOARCHIVO) "
+                + "  VALUES (?,(select nvl(max(NOIMAGEN),0)+1 from IMAGENMOBILIARIO),?,?,?) ";
+        }
+        System.out.println(query);
+        try {
+            super.abrirConexion();
+            if(existe){
+                rs = super.getPreparedStatement(query, new Object[]{ms.getImagenByte(),
+                                                                ms.getNombreArchivo(),
+                                                                ms.getIdBien(),
+                                                                ms.getTipoArchivo()
+                                                                }).executeQuery();
+            }else{
+                rs = super.getPreparedStatement(query, new Object[]{ms.getImagenByte(),
+                                                                ms.getIdBien(),
+                                                                ms.getNombreArchivo(),
+                                                                ms.getTipoArchivo()
+                                                                }).executeQuery();
+            }
+        }
+        catch (SQLException e) {
+            System.out.println("Error en insertaImagen() " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                    valor=1;
+                }
+            } 
+            catch (SQLException e) {
+                System.out.println("Error en insertaImagen() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+   return valor;
+     }
+     
+     public int eliminaImagen(int param, int tipo) throws IOException {
+      
+        ResultSet rs = null;
+        String query="";
+        int valor=0;
+        if(tipo==1){
+         query = "DELETE FROM IMAGENMOBILIARIO "
+                + "  where NOIMAGEN = ? ";
+        }
+        else{
+        query = "DELETE FROM IMAGENMOBILIARIO "
+                + "  where IDBIEN = ? AND TIPOARCHIVO='PDF' ";
+        }
+        System.out.println(query);
+        try {
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query, new Object[]{param}).executeQuery();
+            
+        } 
+        catch (SQLException e) {
+            System.out.println("Error en eliminaImagen() " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                    valor=1;
+                }
+            } 
+            catch (SQLException e) {
+                System.out.println("Error en eliminaImagen() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        return valor;
+   }
+     
+   public List<MobiliarioStreamed> traeRegistrosImagenes(int idBien) throws IOException {
+        List<MobiliarioStreamed> listaMobiliarioStreamed;
+        System.out.println("Entro a cargar la lista de registros listaMobiliarioStreamed");
+        MobiliarioStreamed ms = null;
+        ResultSet rs = null;
+        String query = null;
+        query = "SELECT NOIMAGEN,\n" +
+                        "  IDBIEN,\n" +
+                        "  NOMBREARCHIVO,\n" +
+                        "  TIPOARCHIVO \n" +
+                  "FROM IMAGENMOBILIARIO where IDBIEN = ? AND TIPOARCHIVO='JPG' ";
+        try {
+            listaMobiliarioStreamed = new java.util.ArrayList<>();
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query, new Object[]{idBien}).executeQuery();
+
+            while (rs.next()) {
+                ms = new MobiliarioStreamed();
+                ms.setNoImagen(rs.getInt(1));
+                ms.setIdBien(rs.getInt(2));
+                ms.setNombreArchivo(rs.getString(3));
+                ms.setTipoArchivo(rs.getString(4));
+                listaMobiliarioStreamed.add(ms);
+            }
+            System.out.println("listaMobiliarioStreamed.size() = " + listaMobiliarioStreamed.size());
+        } catch (SQLException e) {
+            System.out.println("Error en listaMobiliarioStreamed() " + e.getMessage());
+            listaMobiliarioStreamed = null;
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en listaMobiliarioStreamed() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        return listaMobiliarioStreamed;
+    }
+   
+   public StreamedContent getPDF(int idBien) throws FileNotFoundException, IOException {
+      
+        ResultSet rs = null;
+        byte[] bytearray = new byte[1048576];
+        StreamedContent sc=null;
+        ByteArrayInputStream bais=null;
+        String query = "SELECT IMAGEN, NOMBREARCHIVO from IMAGENMOBILIARIO where IDBIEN = ? AND TIPOARCHIVO='PDF'";
+        
+        try {
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query, new Object[]{idBien}).executeQuery();
+            ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
+            String path = context.getRealPath("/");
+            if(rs.next()){
+                bytearray=rs.getBytes(1);
+                System.out.println("Leyendo archivo "+idBien+" desde la base de datos...");
+                bais= new ByteArrayInputStream(bytearray);
+                sc = new DefaultStreamedContent(bais, "application/pdf",rs.getString(2));
+            }else{
+                String ruta = path+"\\resources\\reportes\\blanco.pdf";
+                InputStream inputStream = new FileInputStream(ruta);
+                sc = new DefaultStreamedContent(inputStream,"application/pdf","SinPDF.pdf");
+            }
+        }
+        catch (SQLException e) {
+            System.out.println("Error en getPDF() " + e.getMessage());
+            
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } 
+            catch (SQLException e) {
+                System.out.println("Error en getPDF() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        return sc;
+   }
+   
+   public StreamedContent getImage(String noImagen) throws FileNotFoundException, IOException {
+      
+        ResultSet rs = null;
+        byte[] bytearray = new byte[1048576];
+        StreamedContent sc= new DefaultStreamedContent();
+        ByteArrayInputStream bais=null;
+        String query = "SELECT IMAGEN from IMAGENMOBILIARIO where NOIMAGEN = ? AND TIPOARCHIVO='JPG' ";
+        
+        try {
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query, new Object[]{noImagen}).executeQuery();
+            while(rs.next()){
+                bytearray=rs.getBytes(1);
+                System.out.println("Leyendo imagen "+noImagen+" desde la base de datos...");
+                bais= new ByteArrayInputStream(bytearray);
+                sc = new DefaultStreamedContent(bais, "image/jpeg");    
+            }
+        
+        }
+        catch (SQLException e) {
+            System.out.println("Error en getImage() " + e.getMessage());
+            
+        } finally {
+            try {
+            rs.close();
+            } 
+            catch (SQLException e) {
+                System.out.println("Error en getImage() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        return sc;
+   }
+   
+   public boolean existeArchivoMobiliario(int clave, String tipo) {
+        boolean existe = false;
+        ResultSet rs = null;
+        final String query = "  SELECT COUNT(1) "
+                + "  FROM IMAGENMOBILIARIO "
+                + "  WHERE IDBIEN =  ?  AND TIPOARCHIVO = ? ";
+        try {
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query, new Object[]{clave,tipo}).executeQuery();
+            if (rs.next()) {
+                existe = (rs.getInt(1) >= 1);
+            }
+            System.err.println("valor de la consulta: " + existe);
+        } catch (SQLException e) {
+            System.out.println("Error en existeArchivoMobiliario() " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en existeArchivoMobiliario() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        return existe;
+    }
+}

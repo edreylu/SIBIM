@@ -1,0 +1,416 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package mobiliario;
+
+import acceso.AccesoControl;
+import clasificador.Clasificador;
+import clasificador.ClasificadorDAO;
+import departamento.Departamento;
+import departamento.DepartamentoDAO;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.faces.application.FacesMessage;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
+import javax.faces.bean.SessionScoped;
+import javax.faces.context.FacesContext;
+import javax.faces.event.PhaseId;
+import kestadobien.KestadoBien;
+import kestadobien.KestadoBienDAO;
+import kformaadquisicion.Kformaadquisicion;
+import kformaadquisicion.KformaadquisicionDAO;
+import korigenrecurso.KorigenRecurso;
+import korigenrecurso.KorigenRecursoDAO;
+import kproveedor.Proveedor;
+import kproveedor.ProveedorDAO;
+import org.apache.commons.io.IOUtils;
+import org.primefaces.PrimeFaces;
+import org.primefaces.context.RequestContext;
+import org.primefaces.event.FileUploadEvent;
+import org.primefaces.model.DefaultStreamedContent;
+import org.primefaces.model.StreamedContent;
+import utilerias.Mensaje;
+import utilerias.Procedimiento;
+
+@ManagedBean(name = "mobiliarioControl")
+@SessionScoped
+public class MobiliarioControl implements java.io.Serializable {
+    @ManagedProperty(value = "#{accesoC}")
+    private AccesoControl accesoC;
+    private final MobiliarioDAO modao;
+    private final DepartamentoDAO depdao;
+    private final KestadoBienDAO kebdao;
+    private final KformaadquisicionDAO kfadao;
+    private final KorigenRecursoDAO kordao;
+    private final ProveedorDAO prodao;
+    private final ClasificadorDAO cladao;
+    private List<Mobiliario> mobiliarios;
+    private Mobiliario mobiliario;
+    private MobiliarioBusqueda mobiliarioBusqueda;
+    private Mobiliario mobiliarioSeleccionado;
+    private List<Mobiliario> filteredMobiliario;
+    private List<Departamento> departamentos;
+    private List<KestadoBien> estadosbien;
+    private List<Kformaadquisicion> formasadquisicion;
+    private List<KorigenRecurso> origenesrecurso;
+    private List<Proveedor> proveedores;
+    private List<Clasificador> clasificadores;
+    private MobiliarioStreamed mobiliarioStreamed;
+    private List<MobiliarioStreamed> mobiliariosStreamed;
+    public StreamedContent fileJpg;
+    public StreamedContent filePdf;
+    private Procedimiento pro= new Procedimiento();
+    private String valorBuscado;
+    private final Mensaje msg = new Mensaje();
+
+    public MobiliarioControl() {
+        modao = new MobiliarioDAO();
+        depdao = new DepartamentoDAO();
+        kebdao = new KestadoBienDAO();
+        kfadao = new KformaadquisicionDAO();
+        kordao = new KorigenRecursoDAO();
+        prodao = new ProveedorDAO();
+        cladao = new ClasificadorDAO();
+        mobiliario = new Mobiliario();
+        mobiliarioBusqueda = new MobiliarioBusqueda();
+        mobiliarioStreamed = new MobiliarioStreamed();
+    }
+
+    public void init() {
+        mobiliarios=null;
+        mobiliarioSeleccionado = null;
+    }
+
+    public List<Mobiliario> getMobiliarios() {
+        return mobiliarios;
+    }
+
+    public void setMobiliarios(List<Mobiliario> mobiliarios) {
+        this.mobiliarios = mobiliarios;
+    }
+
+    public Mobiliario getMobiliario() {
+        return mobiliario;
+    }
+
+    public void setMobiliario(Mobiliario mobiliario) {
+        this.mobiliario = mobiliario;
+    }
+
+    public MobiliarioBusqueda getMobiliarioBusqueda() {
+        return mobiliarioBusqueda;
+    }
+
+    public void setMobiliarioBusqueda(MobiliarioBusqueda mobiliarioBusqueda) {
+        this.mobiliarioBusqueda = mobiliarioBusqueda;
+    }
+    
+    public Mobiliario getMobiliarioSeleccionado() {
+        return mobiliarioSeleccionado;
+    }
+
+    public void setMobiliarioSeleccionado(Mobiliario mobiliarioSeleccionado) {
+        this.mobiliarioSeleccionado = mobiliarioSeleccionado;
+    }
+
+    public List<Mobiliario> getFilteredMobiliario() {
+        return filteredMobiliario;
+    }
+
+    public void setFilteredMobiliario(List<Mobiliario> filteredMobiliario) {
+        this.filteredMobiliario = filteredMobiliario;
+    }
+
+    public List<Departamento> getDepartamentos() {
+        return departamentos;
+    }
+
+    public void setDepartamentos(List<Departamento> departamentos) {
+        this.departamentos = departamentos;
+    }
+
+    public List<KestadoBien> getEstadosbien() {
+        return estadosbien;
+    }
+
+    public void setEstadosbien(List<KestadoBien> estadosbien) {
+        this.estadosbien = estadosbien;
+    }
+
+    public List<Kformaadquisicion> getFormasadquisicion() {
+        return formasadquisicion;
+    }
+
+    public void setFormasadquisicion(List<Kformaadquisicion> formasadquisicion) {
+        this.formasadquisicion = formasadquisicion;
+    }
+
+    public List<KorigenRecurso> getOrigenesrecurso() {
+        return origenesrecurso;
+    }
+
+    public void setOrigenesrecurso(List<KorigenRecurso> origenesrecurso) {
+        this.origenesrecurso = origenesrecurso;
+    }
+
+    public List<Proveedor> getProveedores() {
+        return proveedores;
+    }
+
+    public void setProveedores(List<Proveedor> proveedores) {
+        this.proveedores = proveedores;
+    }
+
+    public List<Clasificador> getClasificadores() {
+        return clasificadores;
+    }
+
+    public void setClasificadores(List<Clasificador> clasificadores) {
+        this.clasificadores = clasificadores;
+    }
+    
+    public MobiliarioStreamed getMobiliarioStreamed() {
+        return mobiliarioStreamed;
+    }
+
+    public void setMobiliarioStreamed(MobiliarioStreamed mobiliarioStreamed) {
+        this.mobiliarioStreamed = mobiliarioStreamed;
+    }
+
+    public List<MobiliarioStreamed> getMobiliariosStreamed() {
+        return mobiliariosStreamed;
+    }
+
+    public void setMobiliariosStreamed(List<MobiliarioStreamed> mobiliariosStreamed) {
+        this.mobiliariosStreamed = mobiliariosStreamed;
+    }
+
+    public Procedimiento getPro() {
+        return pro;
+    }
+
+    public void setPro(Procedimiento pro) {
+        this.pro = pro;
+    }
+
+    public String getValorBuscado() {
+        return valorBuscado;
+    }
+
+    public void setValorBuscado(String valorBuscado) {
+        this.valorBuscado = valorBuscado.toUpperCase();
+    }
+
+    public StreamedContent getFileJpg() throws IOException {
+        FacesContext context = FacesContext.getCurrentInstance();
+        if (context.getCurrentPhaseId() == PhaseId.RENDER_RESPONSE) {
+            return new DefaultStreamedContent();
+        }
+        else {
+            String id = context.getExternalContext().getRequestParameterMap().get("noImagen");
+            return modao.getImage(id);
+        }
+    }
+
+    public StreamedContent getFilePdf() {
+        return filePdf;
+    }
+
+    
+    public void CargaVentanaInserta(String ob) {
+        llenarlistas();
+        mobiliario = new Mobiliario();
+        mobiliario.setCantidad(1);
+        PrimeFaces.current().ajax().update(":formInsertar");
+        PrimeFaces.current().executeScript("PF('dlginsertar').show();");
+    }
+
+    public void CargaVentanaModifica() {
+        llenarlistas();
+        PrimeFaces.current().ajax().update(":formModificar");
+        PrimeFaces.current().executeScript("PF('dlgmodificar').show();");
+    }
+    
+    public void CargaVentanaBusca(String ob) {
+        mobiliarioBusqueda = new MobiliarioBusqueda();
+        departamentos= depdao.traeRegistros(1);
+        clasificadores = cladao.traeRegistros(1);
+        PrimeFaces.current().ajax().update(":formBuscar");
+        PrimeFaces.current().executeScript("PF('dlgbuscar').show();");
+    }
+    
+    public void CargaVentanaImagenes(int ob) throws IOException{
+        mobiliariosStreamed = modao.traeRegistrosImagenes(ob);
+    }
+    
+    public void CargaVentanaPdf(int ob) throws IOException{
+        filePdf = modao.getPDF(ob);
+    }
+
+    public void insertar() throws ParseException {
+        
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+            if(mobiliario.getFechaFactura()!=null){
+            mobiliario.setFechaFacturaStr(format.format(mobiliario.getFechaFactura()));    
+            }
+            
+        mobiliario.setNoUsuarioAlta(accesoC.getNoUsuario());
+        try {
+            pro=modao.operacionesMobiliario(mobiliario,1);
+            if(pro.getError()!=-1){
+            msg.info("Procesado..", "Registro guardado");
+           String menssage=mobiliario.getCantidad()>1 ? "IME INICIAL: "+pro.getIme()+
+                   " Cantidad de Bienes: "+mobiliario.getCantidad() : "IME generado es: "+pro.getIme();
+           FacesMessage msj = new FacesMessage(menssage);
+           msj.setSeverity(FacesMessage.SEVERITY_INFO);
+           RequestContext.getCurrentInstance().showMessageInDialog(msj);
+           }else{
+            msg.warn("Error..", pro.getMensaje());
+           }
+           PrimeFaces.current().executeScript("PF('dlginsertar').hide();");
+        } catch (SQLException ex) {
+            Logger.getLogger(MobiliarioControl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+
+    public void modificar() throws ParseException {
+        try {
+            SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+            if(mobiliario.getFechaFactura()!=null){
+            mobiliario.setFechaFacturaStr(format.format(mobiliario.getFechaFactura()));    
+            }
+            mobiliario.setNoUsuarioUltimaModif(accesoC.getNoUsuario());
+            mobiliario.setCantidad(1);
+            pro = modao.operacionesMobiliario(mobiliario,2);
+            if(pro.getError()!=-1){
+                msg.info("Procesado..", "Registro actualizado");
+            } else {
+                msg.warn("Error", "No se actualizo la informacion: "+pro.getMensaje());
+
+            }
+            mobiliarios=modao.traeRegistrosLista(mobiliarioBusqueda, 2);
+            PrimeFaces.current().executeScript("PF('mobiliarioTabla').filter();");
+            PrimeFaces.current().executeScript("PF('dlgmodificar').hide();");
+        } catch (SQLException ex) {
+            Logger.getLogger(MobiliarioControl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public void ActivarInactivar(int opcion) {
+
+        System.out.println("valor: " + mobiliario.getIdBien());
+        String dato = opcion == 1 ? "activó" : "inactivó";
+        int valor = modao.eliminaMobiliario(mobiliario, opcion);
+        if (valor == 1) {
+
+            msg.info("Procesado..", "Registro se " + dato);
+        } else {
+            msg.warn("Error..", "No se " + dato + " el Registro");
+        }
+        mobiliarios=modao.traeRegistrosLista(mobiliarioBusqueda, 2);
+        PrimeFaces.current().executeScript("PF('mobiliarioTabla').filter();");
+        PrimeFaces.current().executeScript("PF('dlgeliminar').hide();");
+    }
+    
+    public void subirArchivo(FileUploadEvent event) throws IOException {
+        String tipoArchivo=event.getFile().getContentType().equalsIgnoreCase("image/jpeg") ? "JPG" : "PDF";
+        boolean existe;
+        int total = mobiliariosStreamed==null ? 0 : mobiliariosStreamed.size();
+        if(total>3 && tipoArchivo.equalsIgnoreCase("JPG")){
+        msg.warn("Atencion..", "Solo se permiten 4 fotos!");
+        }
+        else{
+        mobiliarioStreamed = new MobiliarioStreamed();
+        mobiliarioStreamed.setIdBien(mobiliario.getIdBien());
+        mobiliarioStreamed.setImagenByte(IOUtils.toByteArray(event.getFile().getInputstream()));
+        mobiliarioStreamed.setNombreArchivo(event.getFile().getFileName());
+        mobiliarioStreamed.setTipoArchivo(tipoArchivo);
+        System.out.println("valor idBien: "+mobiliarioStreamed.getIdBien());
+        System.out.println("valor setNombreArchivo: "+mobiliarioStreamed.getNombreArchivo());
+        System.out.println("valor setTipoArchivo: "+mobiliarioStreamed.getTipoArchivo());
+        if(tipoArchivo.equalsIgnoreCase("PDF")){
+        existe=modao.existeArchivoMobiliario(mobiliarioStreamed.getIdBien(),mobiliarioStreamed.getTipoArchivo());
+        }else{existe=false;}
+       int valor=modao.insertaImagen(mobiliarioStreamed,existe);
+        if(valor==1){
+               msg.info("Procesado..", "Archivo subido");
+           }else{
+               msg.warn("Error..", "No se subio Archivo");
+           }
+        }
+        mobiliariosStreamed=modao.traeRegistrosImagenes(mobiliario.getIdBien());
+    }
+       
+    public void eliminarImagen(int tipo, int param) throws SQLException, IOException{
+        int valor = 0;
+        switch (tipo) {
+            case 1:
+                System.out.println("valor noImg: " + param);
+                valor = modao.eliminaImagen(param, tipo);
+                break;
+
+            case 2:
+                System.out.println("valor PDF: " + param);
+                valor = modao.eliminaImagen(param, tipo);
+                break;
+        }
+        if (valor == 1) {
+            msg.info("Procesado..", "Archivo Eliminado");
+        } else {
+            msg.warn("Error..", "No se elimino Archivo");
+        }
+    }
+    
+    public void BuscarMobiliario(){
+        if (mobiliarioBusqueda.getIme() != null || !mobiliarioBusqueda.getSerie().equals("")
+                ||mobiliarioBusqueda.getIdDepartamento()!=0 || mobiliarioBusqueda.getIdClasificador()!=0) {
+        mobiliarios=modao.traeRegistrosLista(mobiliarioBusqueda, 2);
+        PrimeFaces.current().executeScript("PF('dlgbuscar').hide();");
+        PrimeFaces.current().executeScript("PF('mobiliarioTabla').filter();");
+        }else{
+        msg.warn("Alerta", "Se necesita algun valor para la busqueda");
+        }
+    }
+
+    public void llenarlistas() {
+    departamentos= depdao.traeRegistros(1);
+    estadosbien=kebdao.traeRegistros(1);
+    formasadquisicion=kfadao.traeRegistros(1);
+    origenesrecurso=kordao.traeRegistros(1);
+    proveedores=prodao.traeRegistrosProveedor(1);
+    clasificadores = cladao.traeRegistros(1);
+    }
+    
+    public void cancelarActualizar() {
+        PrimeFaces.current().executeScript("PF('dlgmodificar').hide();");
+    }
+
+    public void cancelarEliminar() {
+        PrimeFaces.current().executeScript("PF('dlgeliminar').hide();");
+    }
+    
+    public void cancelarAsignarPersonal() {
+        PrimeFaces.current().executeScript("PF('dlgasignarper').hide();");
+    }
+    public void cancelarAsignarEnlace() {
+        PrimeFaces.current().executeScript("PF('dlgasignarenla').hide();");
+    }
+    public AccesoControl getAccesoC() {
+        return accesoC;
+    }
+
+    public void setAccesoC(AccesoControl accesoC) {
+        this.accesoC = accesoC;
+    }
+
+
+}

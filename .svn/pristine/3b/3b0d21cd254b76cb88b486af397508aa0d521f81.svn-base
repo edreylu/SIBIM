@@ -1,0 +1,244 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition template="menu.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <ui:define name="contenido">
+        <h:head>
+            <title>Reportes</title>
+        </h:head>
+        <f:metadata>
+            <f:viewAction action="#{reportesControl.init()}" />   
+        </f:metadata>
+        <h:body>
+            <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"/>
+            <f:event type="preRenderView" rendered="#{facesContext.postBack}" listener="#{accesoC.validaSesion('reportes.xhtml')}"/>  
+            <center>
+                <h:outputText value="Reportes" class="tituloPantalla" />
+                <p:separator/>
+                <h:form id="formMostrar">
+
+                    <p:dataTable id="tablacat" var="rep" value="#{reportesControl.reportes}"
+                                 style="width:100%;" rows="10" rowsPerPageTemplate="5,8,10" 
+                                 emptyMessage ="No hay Formas Adquisicion disponibles" 
+                                 paginator="true" paginatorPosition="bottom"
+                                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+                                 filteredValue="#{reportesControl.filteredReporte}" widgetVar="catTabla"
+                                 selection="#{reportesControl.reporteSeleccionado}" selectionMode="single" 
+                                 rowKey="#{rep.idReporte}" currentPageReportTemplate="[ {endRecord} de {totalRecords} Reportes ]">
+                        <p:ajax event="rowSelect" update="panelBotones" global="false"/>
+                        <f:facet name="header">
+                            <p:commandButton id="inscat" value="Insertar" icon="fa fa-plus" update=":formInsertar" actionListener="#{reportesControl.CargaVentanaInserta('')}" style="float: left;" rendered="#{accesoC.rolbotones.ins}" >
+                            </p:commandButton>
+                            <p:tooltip for="inscat" value="Insertar Reporte" showEffect="clip" hideEffect="clip" position="top"/>
+                            <p:outputPanel>
+                                <h:outputText value="Buscar: " />
+                                <p:inputText id="globalFilter" onkeypress="if (event.keyCode === 13) {return false;}" style="width:150px" placeholder="Escribe para buscar"/>
+                                <p:commandButton id="bsearch" icon="fa fa-search" onclick="PF('catTabla').filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+                        <p:column headerText="#" width="20%" filterBy="#{rep.idReporte}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{rep.idReporte}" />
+                        </p:column>
+
+                        <p:column headerText="REPORTE" width="20%" filterBy="#{rep.reporte}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{rep.reporte}" />
+                        </p:column> 
+
+                        <p:column headerText="OBSERVACIONES" width="40%" filterBy="#{rep.observaciones}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{rep.observaciones}" />
+                        </p:column>
+                        <p:column headerText="IDESTATUS" width="20%">
+                            <h:outputText value="#{rep.idEstatus == '1' ? 'ACTIVO' : 'INACTIVO'}" />
+                        </p:column>
+                        <f:facet name="footer">
+                            <h:panelGroup id="panelBotones" >
+                                <p:commandButton id="actcat" value="Editar" icon="fa fa-pencil" disabled="#{reportesControl.reporteSeleccionado == null}" 
+                                                 rendered="#{accesoC.rolbotones.act}" actionListener="#{reportesControl.CargaVentanaModifica()}" 
+                                                 update=":formModificar">
+                                    <f:setPropertyActionListener target="#{reportesControl.reporte}" value="#{reportesControl.reporteSeleccionado}" />
+                                </p:commandButton>
+                                <p:tooltip for="actcat" value="Editar Reporte" showEffect="clip" hideEffect="clip" position="top"/>
+
+                                <p:commandButton id="elicat" value="#{reportesControl.reporteSeleccionado.idEstatus eq '1' ? 'Inactivar' : 'Activar'}" 
+                                                 icon="fa fa-trash" disabled="#{reportesControl.reporteSeleccionado == null}" 
+                                                 rendered="#{accesoC.rolbotones.eli}" oncomplete="PF('dlgeliminar').show()" update=":formEliminar" >
+                                    <f:setPropertyActionListener target="#{reportesControl.reporte}" value="#{reportesControl.reporteSeleccionado}" />
+                                </p:commandButton>
+                                <p:tooltip for="elicat" value="#{reportesControl.reporteSeleccionado.idEstatus eq '1' ? 'Inactivar' : 'Activar'} Reporte" 
+                                           showEffect="clip" hideEffect="clip" position="top"/>    
+                                <p:commandButton id="descat" value="Descargar" icon="fa fa-file-excel-o" disabled="#{reportesControl.reporteSeleccionado == null || reportesControl.reporteSeleccionado.query == null}" 
+                                                 rendered="#{accesoC.rolbotones.des}" oncomplete="PF('dlgparametros').show()" update=":formParametros">
+                               <f:setPropertyActionListener target="#{reportesControl.tipoReporte}" value="1" />
+                                </p:commandButton>
+                            <p:tooltip for="descat" value="Descargar Reporte XLS" showEffect="clip" hideEffect="clip" position="top"/>
+                            
+                            <p:commandButton id="jascat" value="Descargar" icon="fa fa-file-pdf-o" disabled="#{reportesControl.reporteSeleccionado == null || reportesControl.reporteSeleccionado.idReporte !=1}" 
+                                                 rendered="#{accesoC.rolbotones.des}" actionListener="#{reportesControl.CargaVentanaJasper()}" oncomplete="PF('dlgparametros').show()" update=":formParametros">
+                            <f:setPropertyActionListener target="#{reportesControl.tipoReporte}" value="2" />
+                            </p:commandButton>
+                            <p:tooltip for="jascat" value="Reporte PDF" showEffect="clip" hideEffect="clip" position="top"/>
+                            </h:panelGroup>
+                        </f:facet>
+                    </p:dataTable>
+
+
+                </h:form>
+
+            </center>
+
+            <p:dialog id="dlg1" header="Insertar Reporte" showEffect="explode" hideEffect="explode" widgetVar="dlginsertar" 
+                      resizable="false" minWidth="200" position="center" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+                <h:form id="formInsertar" class="dialogC">
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>
+                    <p:panelGrid columns="3" styleClass="sinBorde" style="width: 100%">
+
+                        <p:outputLabel value="TITULO REPORTE:" for="nombre" />
+                        <p:inputText id="nombre" size="55" value="#{reportesControl.reporte.reporte}" style="text-transform: uppercase;" requiredMessage="Se requiere descripcion" required="true" />
+                        <p:message for="nombre" display="icon" />
+                        <p:outputLabel value="TITULO 1" for="t1" />
+                        <p:inputText id="t1" size="50" value="#{reportesControl.reporte.titulo1}" style="text-transform: uppercase;"/>
+                        <p:message for="t1" display="icon" />
+                        <p:outputLabel value="TITULO 2" for="t2" />
+                        <p:inputText id="t2" size="50" value="#{reportesControl.reporte.titulo2}" style="text-transform: uppercase;"/>
+                        <p:message for="t2" display="icon" />
+                        <p:outputLabel value="TITULO 3" for="t3" />
+                        <p:inputText id="t3" size="50" value="#{reportesControl.reporte.titulo3}" style="text-transform: uppercase;"/>
+                        <p:message for="t3" display="icon" />
+                        <p:outputLabel value="TITULO 4" for="t4" />
+                        <p:inputText id="t4" size="50" value="#{reportesControl.reporte.titulo4}" style="text-transform: uppercase;"/>
+                        <p:message for="t4" display="icon" />
+                        <p:outputLabel value="TITULO 1" for="t5" />
+                        <p:inputText id="t5" size="50" value="#{reportesControl.reporte.titulo5}" style="text-transform: uppercase;"/>
+                        <p:message for="t5" display="icon" />
+                        <p:outputLabel value="QUERY" for="query" />
+                        <p:inputTextarea id="query" cols="70" value="#{reportesControl.reporte.query}" style="text-transform: uppercase;" requiredMessage="Se requiere query" required="true" />
+                        <p:message for="query" display="icon" />
+                        <p:outputLabel value="OBSERVACIONES" for="observa" />
+                        <p:inputTextarea id="observa" cols="70" value="#{reportesControl.reporte.observaciones}" style="text-transform: uppercase;"/>
+                        <p:message for="observa" display="icon" />
+
+                    </p:panelGrid>
+                    <p:separator/>
+                    <center>
+                        <p:commandButton value="Guardar" update="mg :formInsertar :formMostrar"
+                                         actionListener="#{reportesControl.insertar()}" oncomplete="actualizaList();"/>
+                    </center>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog id="dlg2" header="Modificar Reporte" showEffect="explode" hideEffect="explode" widgetVar="dlgmodificar" 
+                      resizable="false" minWidth="200" position="center" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+
+                <h:form id="formModificar" class="dialogC">
+
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>  
+                    <p:panelGrid columns="3" styleClass="sinBorde" style="width: 100%">
+
+                        <p:outputLabel value="TITULO REPORTE:" for="nombre" />
+                        <p:inputText id="nombre" size="55" value="#{reportesControl.reporte.reporte}" style="text-transform: uppercase;" requiredMessage="Se requiere descripcion" required="true" />
+                        <p:message for="nombre" display="icon" />
+                        <p:outputLabel value="TITULO 1" for="t1" />
+                        <p:inputText id="t1" size="50" value="#{reportesControl.reporte.titulo1}" style="text-transform: uppercase;"/>
+                        <p:message for="t1" display="icon" />
+                        <p:outputLabel value="TITULO 2" for="t2" />
+                        <p:inputText id="t2" size="50" value="#{reportesControl.reporte.titulo2}" style="text-transform: uppercase;"/>
+                        <p:message for="t2" display="icon" />
+                        <p:outputLabel value="TITULO 3" for="t3" />
+                        <p:inputText id="t3" size="50" value="#{reportesControl.reporte.titulo3}" style="text-transform: uppercase;"/>
+                        <p:message for="t3" display="icon" />
+                        <p:outputLabel value="TITULO 4" for="t4" />
+                        <p:inputText id="t4" size="50" value="#{reportesControl.reporte.titulo4}" style="text-transform: uppercase;"/>
+                        <p:message for="t4" display="icon" />
+                        <p:outputLabel value="TITULO 1" for="t5" />
+                        <p:inputText id="t5" size="50" value="#{reportesControl.reporte.titulo5}" style="text-transform: uppercase;"/>
+                        <p:message for="t5" display="icon" />
+                        <p:outputLabel value="QUERY" for="query" />
+                        <p:inputTextarea id="query" cols="70" value="#{reportesControl.reporte.query}" style="text-transform: uppercase;" requiredMessage="Se requiere query" required="true" />
+                        <p:message for="query" display="icon" />
+                        <p:outputLabel value="OBSERVACIONES" for="observa" />
+                        <p:inputTextarea id="observa" cols="70" value="#{reportesControl.reporte.observaciones}" style="text-transform: uppercase;"/>
+                        <p:message for="observa" display="icon" />
+
+                    </p:panelGrid>
+                    <p:separator/>
+                    <center>
+                        <p:commandButton value="Modificar" update="mg :formMostrar"
+                                         actionListener="#{reportesControl.modificar()}"
+                                         oncomplete="actualizaList();"
+                                         />
+
+                        <p:commandButton value="Cancelar" immediate="true" actionListener="#{reportesControl.cancelarActualizar()}"/>
+                    </center>
+
+
+                </h:form>
+
+
+            </p:dialog>
+
+
+            <p:dialog id="dlg3" header="Estatus Reporte" showEffect="explode" hideEffect="explode" position="center"
+                      widgetVar="dlgeliminar" resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+                <h:form id="formEliminar" class="dialogC">
+
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>
+
+                    <center>
+                        <h:outputText rendered="#{reportesControl.reporte.idEstatus eq '1'}" value="¿Desea Inactivar #{reportesControl.reporte.reporte} ?" />    
+                        <p:commandButton rendered="#{reportesControl.reporte.idEstatus eq '1'}" value="Si" update="mg :formMostrar" actionListener="#{reportesControl.ActivarInactivar(2)}" 
+                                         oncomplete="actualizaList();" > </p:commandButton>
+                        <h:outputText rendered="#{reportesControl.reporte.idEstatus eq '2'}" value="¿Desea Activar #{reportesControl.reporte.reporte} ?" />    
+                        <p:commandButton rendered="#{reportesControl.reporte.idEstatus eq '2'}" value="Si" update="mg :formMostrar" actionListener="#{reportesControl.ActivarInactivar(1)}" 
+                                         oncomplete="actualizaList();" > </p:commandButton>
+                        <p:commandButton value="No" actionListener="#{reportesControl.cancelarEliminar()}" />
+                    </center>
+
+                </h:form>
+            </p:dialog>
+            
+            <p:dialog id="dlg4" header="Parametros de Reporte" showEffect="explode" hideEffect="explode" closeOnEscape="true"
+                      widgetVar="dlgparametros" resizable="false" width="550" height="180" position="center" appendTo="@(body)" modal="true">
+
+                <h:form id="formParametros" class="dialogC">
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>
+
+                    <center>
+                        <p:panelGrid columns="2" styleClass="sinBorde" style="width: 100%">
+                            <p:outputLabel value="FECHA: " for="fecha" />
+                            <p:calendar id="fecha" readonlyInput="true" showOn="button" locale="ed" pattern="dd/MM/yyyy" value="#{reportesControl.fecha}" />
+                            
+                            <p:outputLabel value="DEPARTAMENTO: " for="depa" rendered="#{reportesControl.tipoReporte == 2}"/>
+                            <p:selectOneMenu id="depa" filter="true" filterMatchMode="contains" style="text-align: center; font-size: 1.4vw; font-weight: bolder; width: 80%;" 
+                                             value="#{reportesControl.dep}" rendered="#{reportesControl.tipoReporte == 2}">
+                        <f:selectItems var="dep" value="#{reportesControl.departamentos}" itemLabel="#{dep.idDepartamento} #{dep.nomDepto}" itemValue="#{dep.idDepartamento}" />
+                        </p:selectOneMenu>
+                        </p:panelGrid>
+                        <p:outputLabel value="* En caso de dejar vacio se generara con fecha actual." />
+                        <p:separator/>
+                        <p:commandButton value="Generar" update="mg :formMostrar" ajax="false" onclick="PrimeFaces.monitorDownload(start, stop);" 
+                                         actionListener="#{reportesControl.generar(reportesControl.tipoReporte)}" oncomplete="PF('dlgparametros').hide();">
+                            <p:fileDownload value="#{reportesControl.file}" />
+                        </p:commandButton>
+                    </center>
+
+                </h:form>
+            </p:dialog>
+
+            <h:form>
+                <p:remoteCommand name="actualizaList" update=":formMostrar" actionListener="#{reportesControl.init()}" /> 
+            </h:form>
+            <p:dialog widgetVar="statusDialog" appendTo="@(body)" modal="true" draggable="false" closable="false" resizable="false" showHeader="false">
+                <p:graphicImage value="resources/img/imagenes/loading.gif" />
+            </p:dialog>
+        </h:body>
+    </ui:define>
+</ui:composition>
+

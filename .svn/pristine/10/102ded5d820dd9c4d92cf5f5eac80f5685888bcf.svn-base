@@ -1,0 +1,60 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package bitacora;
+
+/**
+ *
+ * @author usuario
+ */
+public class OperacionesMobiliario {
+private int numeroCarga;
+private int noPersonalBm;
+private int idDepartamento;
+private int noUsuarioOperacion;
+
+    public OperacionesMobiliario() {
+    }
+
+    public OperacionesMobiliario(int numeroCarga, int noPersonalBm, int idDepartamento, int noUsuarioOperacion) {
+        this.numeroCarga = numeroCarga;
+        this.noPersonalBm = noPersonalBm;
+        this.idDepartamento = idDepartamento;
+        this.noUsuarioOperacion = noUsuarioOperacion;
+    }
+
+    public int getNumeroCarga() {
+        return numeroCarga;
+    }
+
+    public void setNumeroCarga(int numeroCarga) {
+        this.numeroCarga = numeroCarga;
+    }
+
+    public int getNoPersonalBm() {
+        return noPersonalBm;
+    }
+
+    public void setNoPersonalBm(int noPersonalBm) {
+        this.noPersonalBm = noPersonalBm;
+    }
+
+    public int getIdDepartamento() {
+        return idDepartamento;
+    }
+
+    public void setIdDepartamento(int idDepartamento) {
+        this.idDepartamento = idDepartamento;
+    }
+
+    public int getNoUsuarioOperacion() {
+        return noUsuarioOperacion;
+    }
+
+    public void setNoUsuarioOperacion(int noUsuarioOperacion) {
+        this.noUsuarioOperacion = noUsuarioOperacion;
+    }
+
+}

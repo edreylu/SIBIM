@@ -1,0 +1,305 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package departamento;
+
+import acceso.AccesoControl;
+import java.util.List;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
+import javax.faces.bean.SessionScoped;
+import knivelarea.KnivelArea;
+import knivelarea.KnivelAreaDAO;
+import org.primefaces.PrimeFaces;
+import org.primefaces.model.StreamedContent;
+import personal.Personal;
+import personal.PersonalDAO;
+import reportes.ReportesControl;
+import ur.*;
+import usuarios.UsuariosDAO;
+import utilerias.Mensaje;
+
+@ManagedBean(name = "departamentoControl")
+@SessionScoped
+public class DepartamentoControl implements java.io.Serializable {
+    @ManagedProperty(value = "#{accesoC}")
+    private AccesoControl accesoC;
+    private final DepartamentoDAO depdao;
+    private final PersonalDAO pdao;
+    private final UsuariosDAO udao;
+    private final UrDAO urdao;
+    private final KnivelAreaDAO knadao;
+    private List<Departamento> departamentos;
+    private Departamento departamento;
+    private Departamento departamentoSeleccionado;
+    private List<Departamento> filteredDepartamento;
+    private List<Ur> urs;
+    private List<KnivelArea> nivelesArea;
+    private List<Personal> personal;
+    private List<Personal> personalEnlace;
+    private ReportesControl rc;
+    private StreamedContent file;
+    private String valorBuscado;
+    private final Mensaje msg = new Mensaje();
+
+    public DepartamentoControl() {
+        depdao = new DepartamentoDAO();
+        urdao = new UrDAO();
+        knadao = new KnivelAreaDAO();
+        pdao = new PersonalDAO();
+        udao = new UsuariosDAO();
+        rc=new ReportesControl();
+        departamento = new Departamento();
+    }
+
+    public void init() {
+        departamentos = depdao.traeRegistrosLista(2);
+        departamentoSeleccionado = null;
+    }
+
+    public List<Departamento> getDepartamentos() {
+        return departamentos;
+    }
+
+    public void setDepartamentos(List<Departamento> departamentos) {
+        this.departamentos = departamentos;
+    }
+
+    public Departamento getDepartamento() {
+        return departamento;
+    }
+
+    public void setDepartamento(Departamento departamento) {
+        this.departamento = departamento;
+    }
+
+    public Departamento getDepartamentoSeleccionado() {
+        return departamentoSeleccionado;
+    }
+
+    public void setDepartamentoSeleccionado(Departamento departamentoSeleccionado) {
+        this.departamentoSeleccionado = departamentoSeleccionado;
+    }
+
+    public List<Departamento> getFilteredDepartamento() {
+        return filteredDepartamento;
+    }
+
+    public void setFilteredDepartamento(List<Departamento> filteredDepartamento) {
+        this.filteredDepartamento = filteredDepartamento;
+    }
+
+    public List<Personal> getPersonal() {
+        return personal;
+    }
+
+    public void setPersonal(List<Personal> personal) {
+        this.personal = personal;
+    }
+
+    public List<Personal> getPersonalEnlace() {
+        return personalEnlace;
+    }
+
+    public void setPersonalEnlace(List<Personal> personalEnlace) {
+        this.personalEnlace = personalEnlace;
+    }
+
+    public List<Ur> getUrs() {
+        return urs;
+    }
+
+    public void setUrs(List<Ur> urs) {
+        this.urs = urs;
+    }
+
+    public List<KnivelArea> getNivelesArea() {
+        return nivelesArea;
+    }
+
+    public void setNivelesArea(List<KnivelArea> nivelesArea) {
+        this.nivelesArea = nivelesArea;
+    }
+
+    public ReportesControl getRc() {
+        return rc;
+    }
+
+    public void setRc(ReportesControl rc) {
+        this.rc = rc;
+    }
+
+    public StreamedContent getFile() {
+        return file;
+    }
+
+    public void setFile(StreamedContent file) {
+        this.file = file;
+    }
+    
+    public String getValorBuscado() {
+        return valorBuscado;
+    }
+
+    public void setValorBuscado(String valorBuscado) {
+        this.valorBuscado = valorBuscado.toUpperCase();
+    }
+    
+    public void CargaVentanaInserta(String ob) {
+        llenarlistas();
+        filteredDepartamento = null;
+        departamento = new Departamento();
+        PrimeFaces.current().ajax().update(":formInsertar");
+        PrimeFaces.current().executeScript("PF('dlginsertar').show();");
+    }
+
+    public void CargaVentanaModifica() {
+        llenarlistas();
+        filteredDepartamento = null;
+        PrimeFaces.current().ajax().update(":formModificar");
+        PrimeFaces.current().executeScript("PF('dlgmodificar').show();");
+    }
+
+    public void insertar() {
+        departamento.setIdDepartamento(depdao.getNumeroSiguiente());
+        departamento.setNoUsuarioAlta(accesoC.getNoUsuario());
+        int valor = depdao.insertaDepartamento(departamento);
+        if (valor == 1) {
+            msg.info("Procesado..", "Registro guardado");
+        } else {
+            msg.warn("Error..", "No se guardo la informacion");
+        }
+        PrimeFaces.current().executeScript("PF('dlginsertar').hide();");
+    }
+
+    public void modificar() {
+        int valor = 0;
+        //System.out.println("departamento.DepartamentoControl.modificar()"+departamento.getNoUsuarioEnlace());
+        departamento.setNoUsuarioUltimaModif(accesoC.getNoUsuario());
+            valor = depdao.actualizaDepartamento(departamento);
+            if (valor == 1) {
+                msg.info("Procesado..", "Registro actualizado");
+            } else {
+                msg.warn("Error", "No se actualizo la informacion");
+
+            }
+
+        PrimeFaces.current().executeScript("PF('dlgmodificar').hide();");
+    }
+
+    public void ActivarInactivar(int opcion) {
+
+        System.out.println("valor: " + departamento.getIdDepartamento());
+        departamento.setNoUsuarioBaja(accesoC.getNoUsuario());
+                String dato = opcion == 1 ? "activó" : "inactivó";
+                int valor = depdao.eliminaDepartamento(departamento,opcion);
+                if (valor == 1) {
+                    
+                    msg.info("Procesado..", "Registro se "+dato);
+                } else {
+                    msg.warn("Error..", "No se "+dato+" el Registro");
+                }
+        PrimeFaces.current().executeScript("PF('dlgeliminar').hide();");
+    }
+    
+     public void asignaNoPersonal(Personal per) {
+        Integer noPer = per.getNoPersonalBm();
+        System.out.println("usuarios.UrControl.asignaNoPersonal()" + noPer);
+        departamento.setNoPersonalBm(noPer);
+        departamento.setNomPersonal(per.getNombre()+" "+per.getAp1()+" "+per.getAp2());
+        PrimeFaces.current().executeScript("PF('dlgasignarper').hide();");
+    }
+
+   public void asignapersonalBusqueda(String valor) {
+        if (!valor.isEmpty()) {
+            personal = pdao.traeRegistrosPersonalBusqueda(valor);
+            PrimeFaces.current().executeScript("PF('dlgasignarper').show();");
+            PrimeFaces.current().ajax().update(":formAsignarPer");
+            valorBuscado = null;
+        } else {
+            personal = null;
+            PrimeFaces.current().ajax().update(":formAsignarPer");
+            valorBuscado = null;
+        }
+
+    }
+   
+   public void asignaEnlace(Personal enla) {
+        Integer noPerEnlace = enla.getNoPersonalBm();
+        System.out.println("personal.asignaEnlace()" + noPerEnlace);
+        departamento.setNoPersonalBmEnlace(noPerEnlace);
+        departamento.setNomEnlace(enla.getNombre()+" "+enla.getAp1()+" "+enla.getAp2());
+        PrimeFaces.current().executeScript("PF('dlgasignarenla').hide();");
+    }
+
+   public void asignaenlaceBusqueda(String valor) {
+        if (!valor.isEmpty()) {
+            personalEnlace = pdao.traeRegistrosPersonalBusqueda(valor);
+            PrimeFaces.current().executeScript("PF('dlgasignarenla').show();");
+            PrimeFaces.current().ajax().update(":formAsignarEnla");
+            valorBuscado = null;
+        } else {
+            personalEnlace = null;
+            PrimeFaces.current().ajax().update(":formAsignarEnla");
+            valorBuscado = null;
+        }
+
+    }
+
+    public void llenarlistas() {
+        urs = urdao.traeRegistros();
+        nivelesArea = knadao.traeRegistros(1);
+    }
+    
+    public void reporte(){
+        String consulta = "SELECT DE.IDDEPARTAMENTO,\n" +
+                                "  DE.NOMDEPTO,\n" +
+                                "  DE.NOPERSONALBM,\n" +
+                                "  DE.DOMICILIO,\n" +
+                                "  DE.CLAVECT, DE.IDUR, \n" +
+                                " (select UR.CLAVEUR from UR UR where UR.IDUR = DE.IDUR) CLAVEUR,"+
+                                "  CLAVE_SUBUR, \n" +
+                                "  DE.IDNIVELAREA,\n" +
+                                "  DE.OBSERVACIONES,\n" +
+                                "  DE.NOBLOQUE,\n" +
+                                "  DE.FECHAALTA,\n" +
+                                "  DE.NOUSUARIOALTA,\n" +
+                                "  DE.FECHABAJA,\n" +
+                                "  DE.NOUSUARIOBAJA,\n" +
+                                "  DE.FECHAULTIMAMODIF,\n" +
+                                "  DE.NOUSUARIOULTIMAMODIF,\n" +
+                                "  DE.IDESTATUS\n" +
+                                "from DEPARTAMENTO DE",
+                tituloReporte = "REPORTE DEPARTAMENTOS",
+                nombreReporte = "REPORTE_DEPARTAMENTOS",
+                noUsuario = accesoC.getClave();
+
+     file=rc.generaExcelReporte(consulta, tituloReporte, nombreReporte,noUsuario);
+        }
+
+    public void cancelarActualizar() {
+        PrimeFaces.current().executeScript("PF('dlgmodificar').hide();");
+    }
+
+    public void cancelarEliminar() {
+        PrimeFaces.current().executeScript("PF('dlgeliminar').hide();");
+    }
+    
+    public void cancelarAsignarPersonal() {
+        PrimeFaces.current().executeScript("PF('dlgasignarper').hide();");
+    }
+    public void cancelarAsignarEnlace() {
+        PrimeFaces.current().executeScript("PF('dlgasignarenla').hide();");
+    }
+    public AccesoControl getAccesoC() {
+        return accesoC;
+    }
+
+    public void setAccesoC(AccesoControl accesoC) {
+        this.accesoC = accesoC;
+    }
+
+
+}

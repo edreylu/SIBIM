@@ -1,0 +1,403 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition template="menu.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <ui:define name="contenido">
+        <h:head>
+            <title>MOBILIARIO</title>
+
+        </h:head>
+        <f:metadata>
+            <f:viewAction action="#{mobiliarioControl.init()}" />   
+        </f:metadata>
+        <h:body>
+            <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"/>
+            <f:event type="preRenderView" rendered="#{facesContext.postBack}" listener="#{accesoC.validaSesion('mobiliario.xhtml')}"/>  
+            <center>
+                <h:outputText value="Mobiliario" class="tituloPantalla" />
+                <p:separator/>
+                <h:form id="formMostrar">
+
+                    <p:dataTable id="tablaMob" var="mo" value="#{mobiliarioControl.mobiliarios}"
+                                 style="width:100%;" rows="10"
+                                 emptyMessage ="No hay Mobiliario disponible" 
+                                 paginator="true" paginatorPosition="bottom"
+                                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+                                 widgetVar="mobiliarioTabla" filteredValue="#{mobiliarioControl.filteredMobiliario}"
+                                 selection="#{mobiliarioControl.mobiliarioSeleccionado}" selectionMode="single" 
+                                 rowKey="#{mo.idBien}" currentPageReportTemplate="[ {endRecord} de {totalRecords} mobiliarios ]">
+                        <p:ajax event="rowSelect" update="panelBotones" global="false"/>
+                        <f:facet name="header">
+                            <p:commandButton id="insmo" value="Insertar" icon="fa fa-plus" update=":formInsertar" actionListener="#{mobiliarioControl.CargaVentanaInserta('')}" style="float: left;" rendered="#{accesoC.rolbotones.ins}" >
+                            </p:commandButton>
+                            <p:tooltip for="insmo" value="Insertar Mobiliario" showEffect="clip" hideEffect="clip" position="top"/>
+                            <p:outputPanel>
+                                <p:commandButton id="bsearch" value="Buscar" icon="fa fa-search" actionListener="#{mobiliarioControl.CargaVentanaBusca('')}" update=":formBuscar"/>
+                                <p:tooltip for="bsearch" value="Buscar Mobiliario" showEffect="clip" hideEffect="clip" position="top"/>
+                            </p:outputPanel>
+                        </f:facet>
+
+                        <p:column headerText="IME" width="5%">
+                            <h:outputText value="#{mo.ime}" />
+                        </p:column>
+
+                        <p:column headerText="COLOR" width="10%" >
+                            <h:outputText value="#{mo.color}" />
+                        </p:column>
+
+                        <p:column headerText="MARCA" width="10%"  >
+                            <h:outputText value="#{mo.marca}" />
+                        </p:column>
+
+                        <p:column headerText="SERIE" width="10%"  >
+                            <h:outputText value="#{mo.serie}" />
+                        </p:column>
+
+                        <p:column headerText="DEPARTAMENTO" width="35%" >
+                            <h:outputText value="#{mo.departamento}" />
+                        </p:column>
+                        <p:column headerText="CLASIFICADOR" width="20%"  >
+                            <h:outputText value="#{mo.clasificador}" />
+                        </p:column>
+                        <p:column headerText="ESTADO DEL BIEN" width="5%" >
+                            <h:outputText value="#{mo.estadoDelBien}" />
+                        </p:column>
+                        <p:column headerText="ESTATUS" width="5%">
+                            <h:outputText value="#{mo.idEstatus == '1' ? 'ACTIVO' : 'INACTIVO'}" />
+                        </p:column>
+                        <f:facet name="footer">
+                            <h:panelGroup id="panelBotones" >
+                                <p:commandButton id="actmo" value="Editar" icon="fa fa-pencil" disabled="#{mobiliarioControl.mobiliarioSeleccionado == null}" 
+                                                 rendered="#{accesoC.rolbotones.act}" actionListener="#{mobiliarioControl.CargaVentanaModifica()}" 
+                                                 update=":formModificar">
+                                    <f:setPropertyActionListener target="#{mobiliarioControl.mobiliario}" value="#{mobiliarioControl.mobiliarioSeleccionado}" />
+                                </p:commandButton>
+                                <p:tooltip for="actmo" value="Editar Mobiliario" showEffect="clip" hideEffect="clip" position="top"/>
+                                <p:commandButton id="elimo" value="#{mobiliarioControl.mobiliarioSeleccionado.idEstatus eq '1' ? 'Inactivar' : 'Activar'}" 
+                                                 icon="fa fa-trash" disabled="#{mobiliarioControl.mobiliarioSeleccionado == null}" 
+                                                 rendered="#{accesoC.rolbotones.eli}" oncomplete="PF('dlgeliminar').show()" update=":formEliminar" >
+                                    <f:setPropertyActionListener target="#{mobiliarioControl.mobiliario}" value="#{mobiliarioControl.mobiliarioSeleccionado}" />
+                                </p:commandButton>
+                                <p:tooltip for="elimo" value="#{mobiliarioControl.mobiliarioSeleccionado.idEstatus eq '1' ? 'Inactivar' : 'Activar'} Mobiliario" 
+                                           showEffect="clip" hideEffect="clip" position="top"/>  
+                                <p:commandButton id="fotosmo" value="Fotos" icon="fa fa-picture-o" disabled="#{mobiliarioControl.mobiliarioSeleccionado == null}" 
+                                                 rendered="#{accesoC.rolbotones.act}"
+                                                 update=":formSubirJpg" oncomplete="PF('dlgsubirjpg').show();">
+                                    <f:setPropertyActionListener target="#{mobiliarioControl.mobiliario}" value="#{mobiliarioControl.mobiliarioSeleccionado}" />
+                                </p:commandButton>
+                                <p:tooltip for="fotosmo" value="Fotos Mobiliario" showEffect="clip" hideEffect="clip" position="top"/>
+                                <p:commandButton id="pdfmo" value="PDF" icon="fa fa-file-pdf-o" disabled="#{mobiliarioControl.mobiliarioSeleccionado == null}" 
+                                                 rendered="#{accesoC.rolbotones.act}" 
+                                                 update=":formSubirPdf" oncomplete="PF('dlgsubirpdf').show();">
+                                    <f:setPropertyActionListener target="#{mobiliarioControl.mobiliario}" value="#{mobiliarioControl.mobiliarioSeleccionado}" />
+                                </p:commandButton>
+                                <p:tooltip for="pdfmo" value="PDF Mobiliario" showEffect="clip" hideEffect="clip" position="top"/>    
+                            </h:panelGroup>
+                        </f:facet>
+                    </p:dataTable>
+
+
+                </h:form>
+
+            </center>
+
+            <p:dialog id="dlg1" header="Insertar Mobiliario" showEffect="explode" hideEffect="explode" widgetVar="dlginsertar" 
+                      resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+                <h:form id="formInsertar" class="dialogC">
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>
+                    <p:panelGrid columns="3" styleClass="sinBorde" style="width: 100%">
+
+                        <p:outputLabel value="MARCA:" for="marca" />
+                        <p:inputText id="marca" size="40" value="#{mobiliarioControl.mobiliario.marca}" requiredMessage="Se requiere marca" required="false"/>
+                        <p:message for="marca" display="icon" />
+                        <p:outputLabel value="SERIE:" for="serie" />
+                        <p:inputText id="serie" size="40" value="#{mobiliarioControl.mobiliario.serie}" requiredMessage="Se requiere serie" required="false"/>
+                        <p:message for="serie" display="icon" />
+                        <p:outputLabel value="MODELO:" for="modelo" />
+                        <p:inputText id="modelo" size="40" value="#{mobiliarioControl.mobiliario.modelo}" requiredMessage="Se requiere modelo" required="false" />
+                        <p:message for="modelo" display="icon" />
+                        <p:outputLabel value="COLOR:" for="color" />
+                        <p:inputText id="color" size="40" value="#{mobiliarioControl.mobiliario.color}" requiredMessage="Se requiere color" required="false" />
+                        <p:message for="color" display="icon" />
+                        <p:outputLabel value="MATERIAL:" for="material" />
+                        <p:inputText id="material" size="40" value="#{mobiliarioControl.mobiliario.material}" requiredMessage="Se requiere material" required="false" />
+                        <p:message for="material" display="icon" />
+                        <p:outputLabel value="COSTO TOTAL:" for="costo" />
+                        <p:inputText id="costo" size="40" value="#{mobiliarioControl.mobiliario.costoTotal}" requiredMessage="Se requiere costo total" required="false" >
+                        <p:keyFilter regEx="/[\d\-]/"/>
+                        </p:inputText>
+                        <p:message for="costo" display="icon" />
+                        <p:outputLabel value="NUM FACTURA:" for="numfactura" />
+                        <p:inputText id="numfactura" size="40" value="#{mobiliarioControl.mobiliario.numFactura}" requiredMessage="Se requiere numFactura" required="false" />
+                        <p:message for="numfactura" display="icon" />
+                        <p:outputLabel value="FECHA FACTURA: " for="fecha" />
+                        <p:calendar id="fecha" size="40" readonlyInput="true" showOn="button" locale="ed" pattern="dd/MM/yyyy" value="#{mobiliarioControl.mobiliario.fechaFactura}" requiredMessage="Se requiere fecha factura" required="false"/>
+                        <p:message for="fecha" display="icon" />
+                        <p:outputLabel value="NUM CHEQUE:" for="numcheque" />
+                        <p:inputText id="numcheque" size="40" value="#{mobiliarioControl.mobiliario.numCheque}" requiredMessage="Se requiere num Cheque" required="false" />
+                        <p:message for="numcheque" display="icon" />
+                        <p:outputLabel value="PROVEEDOR:" for="proveedor" />
+                        <p:selectOneMenu id="proveedor" filter="true" filterMatchMode="contains" value="#{mobiliarioControl.mobiliario.idProveedor}" style="width: 100%;" requiredMessage="Se requiere proveedor" required="false" >
+                            <f:selectItem itemValue="#{null}" itemLabel="Seleccione...." />
+                            <f:selectItems value="#{mobiliarioControl.proveedores}" var="pro" itemValue="#{pro.idProveedor}" itemLabel="#{pro.nombre}" />
+                        </p:selectOneMenu>
+                        <p:message for="proveedor" display="icon" />
+                        <p:outputLabel value="FORMA ADQUISICION:" for="fadquisicion" />
+                        <p:selectOneMenu id="fadquisicion" filter="true" filterMatchMode="contains" value="#{mobiliarioControl.mobiliario.idFormaAdquisicion}" style="width: 100%;" requiredMessage="Se requiere forma adquisicion" required="false">
+                            <f:selectItem itemValue="#{null}" itemLabel="Seleccione...." />
+                            <f:selectItems value="#{mobiliarioControl.formasadquisicion}" var="fa" itemValue="#{fa.idFormaAdquisicion}" itemLabel="#{fa.formaadquisicion}" />
+                        </p:selectOneMenu>
+                        <p:message for="fadquisicion" display="icon" />
+                        <p:outputLabel value="ORIGEN RECURSO:" for="orecurso" />
+                        <p:selectOneMenu id="orecurso" filter="true" filterMatchMode="contains" value="#{mobiliarioControl.mobiliario.idOrigenRecurso}" style="width: 100%;" requiredMessage="Se requiere origen recurso" required="false">
+                            <f:selectItem itemValue="#{null}" itemLabel="Seleccione...." />
+                            <f:selectItems value="#{mobiliarioControl.origenesrecurso}" var="ore" itemValue="#{ore.idOrigenRecurso}" itemLabel="#{ore.descripcion}" />
+                        </p:selectOneMenu>
+                        <p:message for="orecurso" display="icon" />
+                        <p:outputLabel value="ESTADO DEL BIEN:" for="ebien" />
+                        <p:selectOneMenu id="ebien" filter="true" filterMatchMode="contains" value="#{mobiliarioControl.mobiliario.idEstadoDelBien}" style="width: 100%;" requiredMessage="Se requiere estado del bien" required="false">
+                            <f:selectItem itemValue="#{null}" itemLabel="Seleccione...." />
+                            <f:selectItems value="#{mobiliarioControl.estadosbien}" var="edb" itemValue="#{edb.idEstadoDelBien}" itemLabel="#{edb.estadoDelBien}" />
+                        </p:selectOneMenu>
+                        <p:message for="ebien" display="icon" />
+                        <p:outputLabel value="CLASIFICADOR:" for="clasif" />
+                        <p:selectOneMenu id="clasif" filter="true" filterMatchMode="contains" value="#{mobiliarioControl.mobiliario.idClasificador}" style="width: 100%;" requiredMessage="Se requiere clasificador" required="true">
+                            <f:selectItem itemValue="#{null}" itemLabel="Seleccione...." />
+                            <f:selectItems value="#{mobiliarioControl.clasificadores}" var="cla" itemValue="#{cla.idClasificador}" itemLabel="#{cla.descripcion}" />
+                         </p:selectOneMenu>
+                        <p:message for="clasif" display="icon" />
+                        <p:outputLabel value="DEPARTAMENTO:" for="depa" />
+                        <p:selectOneMenu id="depa" filter="true" filterMatchMode="contains" value="#{mobiliarioControl.mobiliario.idDepartamento}" style="width: 100%;" requiredMessage="Se requiere departamento" required="true">
+                            <f:selectItem itemValue="#{null}" itemLabel="Seleccione...." />
+                            <f:selectItems value="#{mobiliarioControl.departamentos}" var="dep" itemValue="#{dep.idDepartamento}" itemLabel="#{dep.nomDepto}" />
+                        </p:selectOneMenu>
+                        <p:message for="depa" display="icon" />
+                        <p:outputLabel value="CANTIDAD:" for="cantidad" />
+                        <p:inputText id="cantidad" size="40" value="#{mobiliarioControl.mobiliario.cantidad}" requiredMessage="Se requiere cantidad" required="true"/>
+                        <p:message for="cantidad" display="icon" />
+                        <p:outputLabel value="OBSERVACIONES" for="observa" />
+                        <p:inputTextarea id="observa" cols="50" value="#{mobiliarioControl.mobiliario.observaciones}" />
+                        <p:message for="observa" display="icon" />
+                    </p:panelGrid>
+                    <p:separator/>
+                    <center>
+                    <p:commandButton value="Guardar" update="mg :formInsertar :formMostrar"
+                                     actionListener="#{mobiliarioControl.insertar()}" oncomplete="actualizaListMobiliario();"/>
+                    </center>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog id="dlg2" header="Modificar Mobiliario" showEffect="explode" hideEffect="explode" widgetVar="dlgmodificar" 
+                      resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+
+                <h:form id="formModificar" class="dialogC">
+
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>  
+                    <p:panelGrid columns="3" styleClass="sinBorde" style="width: 100%">
+
+                        <p:outputLabel value="MARCA:" for="marca" />
+                        <p:inputText id="marca" size="40" value="#{mobiliarioControl.mobiliario.marca}" requiredMessage="Se requiere marca" required="false"/>
+                        <p:message for="marca" display="icon" />
+                        <p:outputLabel value="SERIE:" for="serie" />
+                        <p:inputText id="serie" size="40" value="#{mobiliarioControl.mobiliario.serie}" requiredMessage="Se requiere serie" required="false"/>
+                        <p:message for="serie" display="icon" />
+                        <p:outputLabel value="MODELO:" for="modelo" />
+                        <p:inputText id="modelo" size="40" value="#{mobiliarioControl.mobiliario.modelo}" requiredMessage="Se requiere modelo" required="false" />
+                        <p:message for="modelo" display="icon" />
+                        <p:outputLabel value="COLOR:" for="color" />
+                        <p:inputText id="color" size="40" value="#{mobiliarioControl.mobiliario.color}" requiredMessage="Se requiere color" required="false" />
+                        <p:message for="color" display="icon" />
+                        <p:outputLabel value="MATERIAL:" for="material" />
+                        <p:inputText id="material" size="40" value="#{mobiliarioControl.mobiliario.material}" requiredMessage="Se requiere material" required="false" />
+                        <p:message for="material" display="icon" />
+                        <p:outputLabel value="COSTO TOTAL:" for="costo" />
+                        <p:inputText id="costo" size="40" value="#{mobiliarioControl.mobiliario.costoTotal}" requiredMessage="Se requiere costo total" required="false" >
+                        <p:keyFilter regEx="/[\d\-]/"/>
+                        </p:inputText>
+                        <p:message for="costo" display="icon" />
+                        <p:outputLabel value="NUM FACTURA:" for="numfactura" />
+                        <p:inputText id="numfactura" size="40" value="#{mobiliarioControl.mobiliario.numFactura}" requiredMessage="Se requiere numFactura" required="false" />
+                        <p:message for="numfactura" display="icon" />
+                        <p:outputLabel value="FECHA FACTURA: " for="fecha" />
+                        <p:calendar id="fecha" size="40" readonlyInput="true" showOn="button" locale="ed" pattern="dd/MM/yyyy" value="#{mobiliarioControl.mobiliario.fechaFactura}" requiredMessage="Se requiere fecha factura" required="false"/>
+                        <p:message for="fecha" display="icon" />
+                        <p:outputLabel value="NUM CHEQUE:" for="numcheque" />
+                        <p:inputText id="numcheque" size="40" value="#{mobiliarioControl.mobiliario.numCheque}" requiredMessage="Se requiere num Cheque" required="false" />
+                        <p:message for="numcheque" display="icon" />
+                        <p:outputLabel value="PROVEEDOR:" for="proveedor" />
+                        <p:selectOneMenu id="proveedor" filter="true" filterMatchMode="contains" value="#{mobiliarioControl.mobiliario.idProveedor}" style="width: 100%;" requiredMessage="Se requiere proveedor" required="false" >
+                            <f:selectItem itemValue="#{null}" itemLabel="Seleccione...." />
+                            <f:selectItems value="#{mobiliarioControl.proveedores}" var="pro" itemValue="#{pro.idProveedor}" itemLabel="#{pro.nombre}" />
+                        </p:selectOneMenu>
+                        <p:message for="proveedor" display="icon" />
+                        <p:outputLabel value="FORMA ADQUISICION:" for="fadquisicion" />
+                        <p:selectOneMenu id="fadquisicion" filter="true" filterMatchMode="contains" value="#{mobiliarioControl.mobiliario.idFormaAdquisicion}" style="width: 100%;" requiredMessage="Se requiere forma adquisicion" required="false">
+                            <f:selectItem itemValue="#{null}" itemLabel="Seleccione...." />
+                            <f:selectItems value="#{mobiliarioControl.formasadquisicion}" var="fa" itemValue="#{fa.idFormaAdquisicion}" itemLabel="#{fa.formaadquisicion}" />
+                        </p:selectOneMenu>
+                        <p:message for="fadquisicion" display="icon" />
+                        <p:outputLabel value="ORIGEN RECURSO:" for="orecurso" />
+                        <p:selectOneMenu id="orecurso" filter="true" filterMatchMode="contains" value="#{mobiliarioControl.mobiliario.idOrigenRecurso}" style="width: 100%;" requiredMessage="Se requiere origen recurso" required="false">
+                            <f:selectItem itemValue="#{null}" itemLabel="Seleccione...." />
+                            <f:selectItems value="#{mobiliarioControl.origenesrecurso}" var="ore" itemValue="#{ore.idOrigenRecurso}" itemLabel="#{ore.descripcion}" />
+                        </p:selectOneMenu>
+                        <p:message for="orecurso" display="icon" />
+                        <p:outputLabel value="ESTADO DEL BIEN:" for="ebien" />
+                        <p:selectOneMenu id="ebien" filter="true" filterMatchMode="contains" value="#{mobiliarioControl.mobiliario.idEstadoDelBien}" style="width: 100%;" requiredMessage="Se requiere estado del bien" required="false">
+                            <f:selectItem itemValue="#{null}" itemLabel="Seleccione...." />
+                            <f:selectItems value="#{mobiliarioControl.estadosbien}" var="edb" itemValue="#{edb.idEstadoDelBien}" itemLabel="#{edb.estadoDelBien}" />
+                        </p:selectOneMenu>
+                        <p:message for="ebien" display="icon" />
+                        <p:outputLabel value="CLASIFICADOR:" for="clasif" />
+                        <p:selectOneMenu id="clasif" filter="true" filterMatchMode="contains" value="#{mobiliarioControl.mobiliario.idClasificador}" style="width: 100%;" requiredMessage="Se requiere clasificador" required="true">
+                            <f:selectItem itemValue="#{null}" itemLabel="Seleccione...." />
+                            <f:selectItems value="#{mobiliarioControl.clasificadores}" var="cla" itemValue="#{cla.idClasificador}" itemLabel="#{cla.descripcion}" />
+                         </p:selectOneMenu>
+                        <p:message for="clasif" display="icon" />
+                        <p:outputLabel value="DEPARTAMENTO:" for="depa" />
+                        <p:selectOneMenu id="depa" filter="true" filterMatchMode="contains" value="#{mobiliarioControl.mobiliario.idDepartamento}" style="width: 100%;" requiredMessage="Se requiere departamento" required="true">
+                            <f:selectItem itemValue="#{null}" itemLabel="Seleccione...." />
+                            <f:selectItems value="#{mobiliarioControl.departamentos}" var="dep" itemValue="#{dep.idDepartamento}" itemLabel="#{dep.nomDepto}" />
+                        </p:selectOneMenu>
+                        <p:message for="depa" display="icon" />
+                        <p:outputLabel value="OBSERVACIONES" for="observa" />
+                        <p:inputTextarea id="observa" cols="50" value="#{mobiliarioControl.mobiliario.observaciones}" />
+                        <p:message for="observa" display="icon" />
+                    </p:panelGrid>
+                    <p:separator/>
+                    <center>
+                    <p:commandButton value="Modificar" update="mg :formMostrar"
+                                     actionListener="#{mobiliarioControl.modificar()}"
+                                     oncomplete="actualizaListMobiliario();"
+                                     />
+
+                    <p:commandButton value="Cancelar" immediate="true" actionListener="#{mobiliarioControl.cancelarActualizar()}"/>
+                    </center>
+                </h:form>
+            </p:dialog>
+            
+            <p:dialog id="dlg4" header="Subir fotos de mobiliario" appendTo="@(body)" modal="true" onShow="actualizaJPG();"
+                        resizable="false" closeOnEscape="true" widgetVar="dlgsubirjpg" width="90%" height="500" position="center">
+                  <p:growl id="mgjpg" showSummary="true" showDetail="true"/>
+                    <h:form id="formSubirJpg" class="dialogC">
+                            <center>
+                                <p:fileUpload fileUploadListener="#{mobiliarioControl.subirArchivo}" label="Elegir" uploadLabel="Subir" 
+                                              cancelLabel="Cancelar" mode="advanced" dragDropSupport="false" style="width: 100%; height: 100%;" 
+                                              update="mgjpg" sizeLimit="512000" invalidFileMessage="Solo se permite archivos JPG" fileLimit="1" fileLimitMessage="Solo un archivo a la vez"
+                                      invalidSizeMessage="El tamaño maximo de archivo es 512 KB." allowTypes="/(\.|\/)(jpe?g)$/" oncomplete="actualizaJPG();" ></p:fileUpload>
+                                
+                                <p:galleria value="#{mobiliarioControl.mobiliariosStreamed}" autoPlay="false" var="image" panelWidth="500" panelHeight="313">
+                                    <p:graphicImage cache="false" value="#{mobiliarioControl.fileJpg}" style="width: 100%; height: 100%;" alt="#{image.nombreArchivo}" title="#{image.nombreArchivo}">
+                                        <f:param name="noImagen" value="#{image.noImagen}"/>
+                                    </p:graphicImage>
+                                </p:galleria>
+                                </center>
+                        <br/>
+                        
+                    </h:form>
+                </p:dialog>
+            
+            <p:dialog id="dlg5" header="Subir PDF de mobiliario" appendTo="@(body)" modal="true" onShow="actualizaPDF();"
+                        resizable="false" closeOnEscape="true" widgetVar="dlgsubirpdf" width="90%" height="500" position="center">
+                  <p:growl id="mgpdf" showSummary="true" showDetail="true"/>
+                    <h:form id="formSubirPdf" class="dialogC">
+                        <p:growl id="mg" showSummary="true" showDetail="true"/>
+                        
+                            <center>
+                                <p:fileUpload fileUploadListener="#{mobiliarioControl.subirArchivo}" label="Elegir" uploadLabel="Subir" 
+                                              cancelLabel="Cancelar" mode="advanced" dragDropSupport="false" style="width: 100%; height: 100%;" 
+                                      update="mgpdf" sizeLimit="512000" invalidFileMessage="Solo se permite archivos PDF" fileLimit="1" fileLimitMessage="Solo un archivo a la vez"
+                                      invalidSizeMessage="El tamaño maximo de archivo es 512 KB." allowTypes="/(\.|\/)(pdf)$/" oncomplete="actualizaPDF();" ></p:fileUpload>
+                                
+                                <p:media player="pdf" value="#{mobiliarioControl.filePdf}" style="width: 100%; height: 420px;">
+                                    Tu explorador no puede vizualizar pdf, <h:outputLink value="#{mobiliarioControl.filePdf}">click</h:outputLink> Para descargar.
+                                 </p:media>
+
+                                <p:commandLink value="Eliminar" rendered="#{!mobiliarioControl.filePdf.name.equalsIgnoreCase('SinPDF.pdf')}" 
+                                               actionListener="#{mobiliarioControl.eliminarImagen(2,mobiliarioControl.mobiliario.idBien)}" 
+                                               update="mgpdf" oncomplete="actualizaPDF();">
+                                </p:commandLink>
+                                </center>
+                        <br/>
+                        
+                    </h:form>
+                </p:dialog>
+            
+            <p:dialog id="dlg6" header="Busqueda de mobiliario" appendTo="@(body)" modal="true" 
+                        resizable="false" closeOnEscape="true" widgetVar="dlgbuscar" width="50%" height="200" position="center">
+                  
+                    <h:form id="formBuscar" class="dialogC">
+                        <p:growl id="mg" showSummary="true" showDetail="true"/>
+                            <center>
+                                <p:panelGrid columns="2" styleClass="sinBorde" style="width: 100%">
+
+                        <p:outputLabel value="IME:" for="ime" />
+                        <p:inputText id="ime" size="20" value="#{mobiliarioControl.mobiliarioBusqueda.ime}">
+                        <p:keyFilter regEx="/[\d\-]/"/> 
+                        </p:inputText>
+                        <p:outputLabel value="SERIE:" for="serie" />
+                        <p:inputText id="serie" size="20" value="#{mobiliarioControl.mobiliarioBusqueda.serie}">
+                        </p:inputText>
+                        <p:outputLabel value="DEPARTAMENTO:" for="depabus" />
+                        <p:selectOneMenu id="depabus" filter="true" filterMatchMode="contains" value="#{mobiliarioControl.mobiliarioBusqueda.idDepartamento}" style="width: 100%;">
+                            <f:selectItem itemValue="#{0}" itemLabel="Seleccione...." />
+                            <f:selectItems value="#{mobiliarioControl.departamentos}" var="dep1" itemValue="#{dep1.idDepartamento}" itemLabel="#{dep1.nomDepto}" />
+                        </p:selectOneMenu>
+                        <p:outputLabel value="CLASIFICADOR:" for="clasifbus" />
+                        <p:selectOneMenu id="clasifbus" filter="true" filterMatchMode="contains" value="#{mobiliarioControl.mobiliarioBusqueda.idClasificador}" style="width: 100%;">
+                            <f:selectItem itemValue="#{0}" itemLabel="Seleccione...." />
+                            <f:selectItems value="#{mobiliarioControl.clasificadores}" var="cla1" itemValue="#{cla1.idClasificador}" itemLabel="#{cla1.descripcion}" />
+                         </p:selectOneMenu>
+
+                        
+                                </p:panelGrid>
+                                <p:separator />
+                                <p:commandButton value="Buscar" update="mg :formMostrar"
+                                         actionListener="#{mobiliarioControl.BuscarMobiliario()}"
+                                     />
+                                </center>
+                        <br/>
+                        
+                    </h:form>
+                </p:dialog>
+            
+            <p:dialog id="dlg7" header="Estatus Mobiliario" showEffect="explode" hideEffect="explode" position="center"
+                      widgetVar="dlgeliminar" resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+                <h:form id="formEliminar" class="dialogC">
+
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>
+
+                    <center>
+                        <h:outputText rendered="#{mobiliarioControl.mobiliario.idEstatus eq '1'}" value="¿Desea Inactivar este Mobiliario?" />    
+                        <p:commandButton rendered="#{mobiliarioControl.mobiliario.idEstatus eq '1'}" value="Si" update="mg :formMostrar" actionListener="#{mobiliarioControl.ActivarInactivar(2)}" 
+                                         oncomplete="actualizaListMobiliario();" > </p:commandButton>
+                        <h:outputText rendered="#{mobiliarioControl.mobiliario.idEstatus eq '2'}" value="¿Desea Activar este Mobiliario?" />    
+                        <p:commandButton rendered="#{mobiliarioControl.mobiliario.idEstatus eq '2'}" value="Si" update="mg :formMostrar" actionListener="#{mobiliarioControl.ActivarInactivar(1)}" 
+                                         oncomplete="actualizaListMobiliario();" > </p:commandButton>
+                        <p:commandButton value="No" actionListener="#{mobiliarioControl.cancelarEliminar()}" />
+                    </center>
+
+                </h:form>
+            </p:dialog>
+
+
+            <h:form>
+                <p:remoteCommand name="actualizaListMobiliario" update=":formMostrar"/>
+                <p:remoteCommand name="actualizaJPG" update="formSubirJpg" actionListener="#{mobiliarioControl.CargaVentanaImagenes(mobiliarioControl.mobiliario.idBien)}" />
+                <p:remoteCommand name="actualizaPDF" update="formSubirPdf" actionListener="#{mobiliarioControl.CargaVentanaPdf(mobiliarioControl.mobiliario.idBien)}" />
+            </h:form>
+            <p:dialog widgetVar="statusDialog" appendTo="@(body)" modal="true" draggable="false" closable="false" resizable="false" showHeader="false">
+                <p:graphicImage value="resources/img/imagenes/loading.gif" />
+            </p:dialog>
+        </h:body>
+    </ui:define>
+</ui:composition>
+

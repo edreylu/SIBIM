@@ -1,0 +1,341 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package mobiliario;
+
+import java.util.Date;
+
+/**
+ *
+ * @author usuario
+ */
+public class Mobiliario {
+    private int idBien;
+    private int ime;
+    private String marca;
+    private String serie;
+    private String modelo;
+    private String color;
+    private String material;
+    private int costoTotal;
+    private String numFactura;
+    private Date fechaFactura;
+    private String fechaFacturaStr;
+    private String numCheque;
+    private String fechaAlta;
+    private int noUsuarioAlta;
+    private int idProveedor;
+    private int idFormaAdquisicion;
+    private int idOrigenRecurso;
+    private int idEstadoDelBien;
+    private String observaciones;
+    private int idClasificador;
+    private int idDepartamento;
+    private String fechaBaja;
+    private int noUsuarioBaja;
+    private String fechaUltimaModif;
+    private int noUsuarioUltimaModif;
+    private Integer cantidad;
+    private int idEstatus;
+    private String origenrecurso;
+    private String departamento;
+    private String clasificador;
+    private String estadoDelBien;
+    private String estatus;
+    public Mobiliario() {
+    }
+
+    public Mobiliario(int idBien, int ime, String marca, String serie, String modelo, String color, String material, Integer costoTotal, String numFactura, Date fechaFactura, String fechaFacturaStr, String numCheque, String fechaAlta, int noUsuarioAlta, int idProveedor, int idFormaAdquisicion, int idOrigenRecurso, int idEstadoDelBien, String observaciones, int idClasificador, int idDepartamento, String fechaBaja, int noUsuarioBaja, String fechaUltimaModif, int noUsuarioUltimaModif, Integer cantidad, int idEstatus, String origenrecurso, String departamento, String clasificador, String estadoDelBien) {
+        this.idBien = idBien;
+        this.ime = ime;
+        this.marca = marca;
+        this.serie = serie;
+        this.modelo = modelo;
+        this.color = color;
+        this.material = material;
+        this.costoTotal = costoTotal;
+        this.numFactura = numFactura;
+        this.fechaFactura = fechaFactura;
+        this.fechaFacturaStr = fechaFacturaStr;
+        this.numCheque = numCheque;
+        this.fechaAlta = fechaAlta;
+        this.noUsuarioAlta = noUsuarioAlta;
+        this.idProveedor = idProveedor;
+        this.idFormaAdquisicion = idFormaAdquisicion;
+        this.idOrigenRecurso = idOrigenRecurso;
+        this.idEstadoDelBien = idEstadoDelBien;
+        this.observaciones = observaciones;
+        this.idClasificador = idClasificador;
+        this.idDepartamento = idDepartamento;
+        this.fechaBaja = fechaBaja;
+        this.noUsuarioBaja = noUsuarioBaja;
+        this.fechaUltimaModif = fechaUltimaModif;
+        this.noUsuarioUltimaModif = noUsuarioUltimaModif;
+        this.cantidad = cantidad;
+        this.idEstatus = idEstatus;
+        this.origenrecurso = origenrecurso;
+        this.departamento = departamento;
+        this.clasificador = clasificador;
+        this.estadoDelBien = estadoDelBien;
+    }
+    
+    public int getIdBien() {
+        return idBien;
+    }
+
+    public void setIdBien(int idBien) {
+        this.idBien = idBien;
+    }
+
+    public int getIme() {
+        return ime;
+    }
+
+    public void setIme(int ime) {
+        this.ime = ime;
+    }
+
+    public String getMarca() {
+        return marca;
+    }
+
+    public void setMarca(String marca) {
+        this.marca = marca;
+    }
+
+    public String getSerie() {
+        return serie;
+    }
+
+    public void setSerie(String serie) {
+        this.serie = serie;
+    }
+
+    public String getModelo() {
+        return modelo;
+    }
+
+    public void setModelo(String modelo) {
+        this.modelo = modelo;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public String getMaterial() {
+        return material;
+    }
+
+    public void setMaterial(String material) {
+        this.material = material;
+    }
+
+    public int getCostoTotal() {
+        return costoTotal;
+    }
+
+    public void setCostoTotal(int costoTotal) {
+        this.costoTotal = costoTotal;
+    }
+
+    public String getNumFactura() {
+        return numFactura;
+    }
+
+    public void setNumFactura(String numFactura) {
+        this.numFactura = numFactura;
+    }
+
+    public Date getFechaFactura() {
+        return fechaFactura;
+    }
+
+    public void setFechaFactura(Date fechaFactura) {
+        this.fechaFactura = fechaFactura;
+    }
+
+    public String getNumCheque() {
+        return numCheque;
+    }
+
+    public void setNumCheque(String numCheque) {
+        this.numCheque = numCheque;
+    }
+
+    public String getFechaAlta() {
+        return fechaAlta;
+    }
+
+    public void setFechaAlta(String fechaAlta) {
+        this.fechaAlta = fechaAlta;
+    }
+
+    public int getNoUsuarioAlta() {
+        return noUsuarioAlta;
+    }
+
+    public void setNoUsuarioAlta(int noUsuarioAlta) {
+        this.noUsuarioAlta = noUsuarioAlta;
+    }
+
+    public int getIdProveedor() {
+        return idProveedor;
+    }
+
+    public void setIdProveedor(int idProveedor) {
+        this.idProveedor = idProveedor;
+    }
+
+    public int getIdFormaAdquisicion() {
+        return idFormaAdquisicion;
+    }
+
+    public void setIdFormaAdquisicion(int idFormaAdquisicion) {
+        this.idFormaAdquisicion = idFormaAdquisicion;
+    }
+
+    public int getIdOrigenRecurso() {
+        return idOrigenRecurso;
+    }
+
+    public void setIdOrigenRecurso(int idOrigenRecurso) {
+        this.idOrigenRecurso = idOrigenRecurso;
+    }
+
+    public int getIdEstadoDelBien() {
+        return idEstadoDelBien;
+    }
+
+    public void setIdEstadoDelBien(int idEstadoDelBien) {
+        this.idEstadoDelBien = idEstadoDelBien;
+    }
+
+    public String getObservaciones() {
+        return observaciones;
+    }
+
+    public void setObservaciones(String observaciones) {
+        this.observaciones = observaciones;
+    }
+
+    public int getIdClasificador() {
+        return idClasificador;
+    }
+
+    public void setIdClasificador(int idClasificador) {
+        this.idClasificador = idClasificador;
+    }
+
+    public int getIdDepartamento() {
+        return idDepartamento;
+    }
+
+    public void setIdDepartamento(int idDepartamento) {
+        this.idDepartamento = idDepartamento;
+    }
+
+    public String getFechaBaja() {
+        return fechaBaja;
+    }
+
+    public void setFechaBaja(String fechaBaja) {
+        this.fechaBaja = fechaBaja;
+    }
+
+    public int getNoUsuarioBaja() {
+        return noUsuarioBaja;
+    }
+
+    public void setNoUsuarioBaja(int noUsuarioBaja) {
+        this.noUsuarioBaja = noUsuarioBaja;
+    }
+
+    public String getFechaUltimaModif() {
+        return fechaUltimaModif;
+    }
+
+    public void setFechaUltimaModif(String fechaUltimaModif) {
+        this.fechaUltimaModif = fechaUltimaModif;
+    }
+
+    public int getNoUsuarioUltimaModif() {
+        return noUsuarioUltimaModif;
+    }
+
+    public void setNoUsuarioUltimaModif(int noUsuarioUltimaModif) {
+        this.noUsuarioUltimaModif = noUsuarioUltimaModif;
+    }
+
+    public Integer getCantidad() {
+        return cantidad;
+    }
+
+    public void setCantidad(Integer cantidad) {
+        this.cantidad = cantidad;
+    }
+
+    public int getIdEstatus() {
+        return idEstatus;
+    }
+
+    public void setIdEstatus(int idEstatus) {
+        this.idEstatus = idEstatus;
+    }
+
+    public String getOrigenrecurso() {
+        return origenrecurso;
+    }
+
+    public void setOrigenrecurso(String origenrecurso) {
+        this.origenrecurso = origenrecurso;
+    }
+
+    public String getDepartamento() {
+        return departamento;
+    }
+
+    public void setDepartamento(String departamento) {
+        this.departamento = departamento;
+    }
+
+    public String getClasificador() {
+        return clasificador;
+    }
+
+    public void setClasificador(String clasificador) {
+        this.clasificador = clasificador;
+    }
+
+    public String getEstadoDelBien() {
+        return estadoDelBien;
+    }
+
+    public void setEstadoDelBien(String estadoDelBien) {
+        this.estadoDelBien = estadoDelBien;
+    }
+
+    public String getFechaFacturaStr() {
+        return fechaFacturaStr;
+    }
+
+    public void setFechaFacturaStr(String fechaFacturaStr) {
+        this.fechaFacturaStr = fechaFacturaStr;
+    }
+
+    public String getEstatus() {
+        return estatus;
+    }
+
+    public void setEstatus(String estatus) {
+        this.estatus = estatus;
+    }
+    
+    
+}

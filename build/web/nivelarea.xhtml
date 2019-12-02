@@ -1,0 +1,177 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition template="menu.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <ui:define name="contenido">
+        <h:head>
+            <title>Nivel Area</title>
+
+        </h:head>
+        <f:metadata>
+            <f:viewAction action="#{knivelAreaControl.init()}" />   
+        </f:metadata>       
+        <h:body>
+            <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
+            <f:event type="preRenderView" rendered="#{facesContext.postBack}" listener="#{accesoC.validaSesion('nivelarea.xhtml')}"/>  
+            <center>
+                <h:outputText value="Nivel Area" class="tituloPantalla" />
+                <p:separator/>
+                <h:form id="formMostrar">
+
+                    <p:dataTable id="tablacat" var="kna" value="#{knivelAreaControl.nivelesArea}"
+                                 style="width:100%;" rows="10" rowsPerPageTemplate="5,8,10" 
+                                 emptyMessage ="No hay Niveles Area disponibles" 
+                                 paginator="true" paginatorPosition="bottom"
+                                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+                                 filteredValue="#{knivelAreaControl.filteredNivelArea}" widgetVar="catTabla"
+                                 selection="#{knivelAreaControl.nivelAreaSeleccionado}" selectionMode="single" 
+                                 rowKey="#{kna.idNivelArea}" currentPageReportTemplate="[ {endRecord} de {totalRecords} Niveles Area ]">
+                        <p:ajax event="rowSelect" update="panelBotones" global="false"/>
+                        <f:facet name="header">
+                            <p:commandButton id="inscat" value="Insertar" icon="fa fa-plus" update=":formInsertar" actionListener="#{knivelAreaControl.CargaVentanaInserta('')}" style="float: left;" rendered="#{accesoC.rolbotones.ins}" >
+                            </p:commandButton>
+                            <p:tooltip for="inscat" value="Insertar Nivel Area" showEffect="clip" hideEffect="clip" position="top"/>
+                            <p:outputPanel>
+                                <h:outputText value="Buscar: " />
+                                <p:inputText id="globalFilter" onkeypress="if (event.keyCode === 13) {return false;}" style="width:150px" placeholder="Escribe para buscar"/>
+                                <p:commandButton id="bsearch" icon="fa fa-search" onclick="PF('catTabla').filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+
+                        <p:column headerText="#" width="20%" filterBy="#{kna.idNivelArea}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{kna.idNivelArea}" />
+                        </p:column>
+
+                        <p:column headerText="DESCRIPCION" width="20%" filterBy="#{kna.descripcion}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{kna.descripcion}" />
+                        </p:column>
+
+                        <p:column headerText="OBSERVACIONES" width="40%" filterBy="#{kna.observaciones}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{kna.observaciones}" />
+                        </p:column>
+                        <p:column headerText="IDESTATUS" width="20%">
+                            <h:outputText value="#{kna.idEstatus == '1' ? 'ACTIVO' : 'INACTIVO'}" />
+                        </p:column>
+                        <f:facet name="footer">
+                            <h:panelGroup id="panelBotones" >
+                                <p:commandButton id="actcat" value="Editar" icon="fa fa-pencil" disabled="#{knivelAreaControl.nivelAreaSeleccionado == null}" 
+                                                 rendered="#{accesoC.rolbotones.act}" actionListener="#{knivelAreaControl.CargaVentanaModifica()}" 
+                                                 update=":formModificar">
+                                    <f:setPropertyActionListener target="#{knivelAreaControl.nivelArea}" value="#{knivelAreaControl.nivelAreaSeleccionado}" />
+                                </p:commandButton>
+                                <p:tooltip for="actcat" value="Editar Nivel Area" showEffect="clip" hideEffect="clip" position="top"/>
+
+                                <p:commandButton id="elicat" value="#{knivelAreaControl.nivelAreaSeleccionado.idEstatus eq '1' ? 'Inactivar' : 'Activar'}" 
+                                                 icon="fa fa-trash" disabled="#{knivelAreaControl.nivelAreaSeleccionado == null}" 
+                                                 rendered="#{accesoC.rolbotones.eli}" oncomplete="PF('dlgeliminar').show()" update=":formEliminar" >
+                                    <f:setPropertyActionListener target="#{knivelAreaControl.nivelArea}" value="#{knivelAreaControl.nivelAreaSeleccionado}" />
+                                </p:commandButton>
+                                <p:tooltip for="elicat" value="#{knivelAreaControl.nivelAreaSeleccionado.idEstatus eq '1' ? 'Inactivar' : 'Activar'} Nivel Area" 
+                                           showEffect="clip" hideEffect="clip" position="top"/>    
+                            </h:panelGroup>
+                        </f:facet>
+                    </p:dataTable>
+
+
+                </h:form>
+
+            </center>
+
+            <p:dialog id="dlg1" header="Insertar Nivel Area" showEffect="explode" hideEffect="explode" widgetVar="dlginsertar" 
+                      resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+                <h:form id="formInsertar" class="dialogC">
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>
+                    <p:panelGrid columns="3" styleClass="sinBorde" style="width: 100%">
+
+                        <p:outputLabel value="DESCRIPCION:" for="nombre" />
+                        <p:inputText id="nombre" value="#{knivelAreaControl.nivelArea.descripcion}" style="text-transform: uppercase;" requiredMessage="Se requiere descripcion" required="true" />
+                        <p:message for="nombre" display="icon" />
+                        <p:outputLabel value="ORDEN" for="orden" />
+                        <p:inputText id="orden" value="#{knivelAreaControl.nivelArea.orden}" />
+                        <p:message for="orden" display="icon" />
+                        <p:outputLabel value="OBSERVACIONES" for="observa" />
+                        <p:inputText id="observa" value="#{knivelAreaControl.nivelArea.observaciones}" />
+                        <p:message for="observa" display="icon" />
+
+                    </p:panelGrid>
+                    <p:separator/>
+                    <center>
+                    <p:commandButton value="Guardar" update="mg :formInsertar :formMostrar"
+                                     actionListener="#{knivelAreaControl.insertar()}" oncomplete="actualizaList();"/>
+                    </center>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog id="dlg2" header="Modificar Nivel Area" showEffect="explode" hideEffect="explode" widgetVar="dlgmodificar" 
+                      resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+
+                <h:form id="formModificar" class="dialogC">
+
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>  
+                    <p:panelGrid columns="3" styleClass="sinBorde" style="width: 100%">
+
+                        <p:outputLabel value="DESCRIPCION:" for="nombre" />
+                        <p:inputText id="nombre" value="#{knivelAreaControl.nivelArea.descripcion}" style="text-transform: uppercase;" requiredMessage="Se requiere descripcion" required="true" />
+                        <p:message for="nombre" display="icon" />
+                        <p:outputLabel value="ORDEN" for="orden" />
+                        <p:inputText id="orden" value="#{knivelAreaControl.nivelArea.orden}" />
+                        <p:message for="orden" display="icon" />
+                        <p:outputLabel value="OBSERVACIONES" for="observa" />
+                        <p:inputText id="observa" value="#{knivelAreaControl.nivelArea.observaciones}" />
+                        <p:message for="observa" display="icon" />
+
+                    </p:panelGrid>
+                    <p:separator/>
+                    <center>
+                    <p:commandButton value="Modificar" update="mg :formMostrar"
+                                     actionListener="#{knivelAreaControl.modificar()}"
+                                     oncomplete="actualizaList();"
+                                     />
+
+                    <p:commandButton value="Cancelar" immediate="true" actionListener="#{knivelAreaControl.cancelarActualizar()}"/>
+                    </center>
+
+
+                </h:form>
+
+
+            </p:dialog>
+
+
+            <p:dialog id="dlg3" header="Estatus Nivel Area" showEffect="explode" hideEffect="explode" 
+                      widgetVar="dlgeliminar" resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+                <h:form id="formEliminar" class="dialogC">
+
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>
+
+                    <center>
+                    <h:outputText rendered="#{knivelAreaControl.nivelArea.idEstatus eq '1'}" value="¿Desea Inactivar #{knivelAreaControl.nivelArea.descripcion} ?" />    
+                    <p:commandButton rendered="#{knivelAreaControl.nivelArea.idEstatus eq '1'}" value="Si" update="mg :formMostrar" actionListener="#{knivelAreaControl.ActivarInactivar(2)}" 
+                                     oncomplete="actualizaList();" > </p:commandButton>
+                    <h:outputText rendered="#{knivelAreaControl.nivelArea.idEstatus eq '2'}" value="¿Desea Activar #{knivelAreaControl.nivelArea.descripcion} ?" />    
+                    <p:commandButton rendered="#{knivelAreaControl.nivelArea.idEstatus eq '2'}" value="Si" update="mg :formMostrar" actionListener="#{knivelAreaControl.ActivarInactivar(1)}" 
+                                     oncomplete="actualizaList();" > </p:commandButton>
+                    <p:commandButton value="No" actionListener="#{knivelAreaControl.cancelarEliminar()}" />
+                    </center>
+
+                </h:form>
+            </p:dialog>
+
+            <h:form>
+                <p:remoteCommand name="actualizaList" update=":formMostrar" actionListener="#{knivelAreaControl.init()}" /> 
+            </h:form>
+            <p:dialog widgetVar="statusDialog" appendTo="@(body)" modal="true" draggable="false" closable="false" resizable="false" showHeader="false">
+                <p:graphicImage value="resources/img/imagenes/loading.gif" />
+            </p:dialog>
+        </h:body>
+    </ui:define>
+</ui:composition>
+

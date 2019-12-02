@@ -1,0 +1,307 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package departamento;
+
+import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ *
+ *
+ */
+public class DepartamentoDAO extends conexion.ConexionOracle implements Serializable {
+
+   
+
+    public int insertaDepartamento(Departamento departamento) {
+        System.out.println("Entro a insertar ");
+        int valor = 0;
+        ResultSet rs = null;
+        final String query = "INSERT INTO DEPARTAMENTO (IDDEPARTAMENTO, \n" +
+                                            "       NOMDEPTO, \n" +
+                                            "       NOPERSONALBM, \n" +
+                                            "       DOMICILIO, \n" +
+                                            "       CLAVECT, \n" +
+                                            "       IDUR, \n" +
+                                            "       IDNIVELAREA, \n" +
+                                            "       OBSERVACIONES, \n" +
+                                            "       NOBLOQUE, \n" +
+                                            "       FECHAALTA, \n" +
+                                            "       NOUSUARIOALTA, \n" +
+                                            "       FECHABAJA, \n" +
+                                            "       NOUSUARIOBAJA, \n" +
+                                            "       FECHAULTIMAMODIF, \n" +
+                                            "       NOUSUARIOULTIMAMODIF, \n" +
+                                            "       NOPERSONALBM_ENLACE, IDESTATUS) "
+                + "VALUES (?,?,?,?,?,?,?,?,?,SYSDATE,?,null,null,null,null,?,1)";
+        try {
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query, new Object[]{
+                departamento.getIdDepartamento(),
+                departamento.getNomDepto(),
+                departamento.getNoPersonalBm(),
+                departamento.getDomicilio(),
+                departamento.getClaveCt(),
+                departamento.getIdUr(),
+                departamento.getIdNivelArea(),
+                departamento.getObservaciones(),
+                departamento.getNoBloque(),
+                departamento.getNoUsuarioAlta(),
+                departamento.getNoPersonalBmEnlace()
+            }
+            ).executeQuery();
+
+        } catch (SQLException e) {
+            System.out.println("Error en insertaDepartamento() " + e.getMessage());
+
+        } finally {
+            try {
+                if (null != rs) {
+                    valor = 1;
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en insertaDepartamento() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        System.out.println("valor: " + valor);
+        return valor;
+    }
+
+    public int actualizaDepartamento(Departamento departamento) {
+        int valor = 0;
+        ResultSet rs = null;
+        final String query = "UPDATE DEPARTAMENTO set NOMDEPTO = ?, \n" +
+                            "       NOPERSONALBM = ?, \n" +
+                            "       DOMICILIO = ?, \n" +
+                            "       CLAVECT = ?, \n" +
+                            "       IDUR = ?, \n" +
+                            "       IDNIVELAREA = ?, \n" +
+                            "       OBSERVACIONES = ?, \n" +
+                            "       NOBLOQUE = ?, \n" +
+                            "       FECHAULTIMAMODIF = SYSDATE, \n" +
+                            "       NOUSUARIOULTIMAMODIF = ?, NOPERSONALBM_ENLACE = ? "+
+                            " where IDDEPARTAMENTO = ? ";
+
+        try {
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query, new Object[]{
+                departamento.getNomDepto(),
+                departamento.getNoPersonalBm(),
+                departamento.getDomicilio(),
+                departamento.getClaveCt(),
+                departamento.getIdUr(),
+                departamento.getIdNivelArea(),
+                departamento.getObservaciones(),
+                departamento.getNoBloque(),
+                departamento.getNoUsuarioUltimaModif(),
+                departamento.getNoPersonalBmEnlace(),
+                departamento.getIdDepartamento()
+                }).executeQuery();
+            
+        } catch (SQLException e) {
+            System.out.println("Error en actualizaDepartamento() " + e.getMessage());
+        } finally {
+            try {
+                if (null != rs) {
+                    valor = 1;
+                    rs.close();
+                }
+
+            } catch (SQLException e) {
+                System.out.println("Error en actualizaDepartamento() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        return valor;
+    }
+
+    public int eliminaDepartamento(Departamento departamento, int opcion) {
+        int valor = 0;
+        ResultSet rs = null;
+        final String query = "UPDATE DEPARTAMENTO set IDESTATUS = ? WHERE IDDEPARTAMENTO = ? ";
+        try {
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query, new Object[]{opcion,departamento.getIdDepartamento()}).executeQuery();
+
+        } catch (SQLException e) {
+            System.out.println("Error en eliminaDepartamento() " + e.getMessage());
+        } finally {
+            try {
+                if (null != rs) {
+                    valor = 1;
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en eliminaDepartamento() " + e.getMessage());
+
+            }
+            super.cerrarConexion();
+        }
+        return valor;
+    }
+
+    public int getNumeroSiguiente() {
+        int id=0;
+        ResultSet rs = null;
+        final String query = "select nvl(max(IDDEPARTAMENTO),0)+ 1 from DEPARTAMENTO ";
+        try {
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query).executeQuery();
+            if (rs.next()) {
+                id = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error en getNumeroSiguiente() " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en getNumeroSiguiente() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        return id;
+    }
+
+    public List<Departamento> traeRegistros(int valor) {
+        List<Departamento> listaDepartamento;
+        System.out.println("Entro a cargar listaDepartamento");
+        Departamento departamento = null;
+        ResultSet rs = null;
+        String query = null;
+        String continuacion = valor == 1 ? " WHERE IDESTATUS = 1" : "";
+        query = "select IDDEPARTAMENTO, \n" +
+                "       NOMDEPTO, \n" +
+                "       NOPERSONALBM, \n" +
+                "       DOMICILIO, \n" +
+                "       CLAVECT, \n" +
+                "       IDUR, \n" +
+                "       IDNIVELAREA, \n" +
+                "       OBSERVACIONES, \n" +
+                "       NOBLOQUE, \n" +
+                "       FECHAALTA, \n" +
+                "       NOUSUARIOALTA, \n" +
+                "       FECHABAJA, \n" +
+                "       NOUSUARIOBAJA, \n" +
+                "       FECHAULTIMAMODIF, \n" +
+                "       NOUSUARIOULTIMAMODIF, \n" +
+                "       IDESTATUS from DEPARTAMENTO "
+                        +continuacion+" ORDER BY 1";
+                
+        try {
+            listaDepartamento = new ArrayList<>();
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query).executeQuery();
+
+            while (rs.next()) {
+                departamento = new Departamento();
+                departamento.setIdDepartamento(rs.getInt("IDDEPARTAMENTO"));
+                departamento.setNomDepto(rs.getString("NOMDEPTO"));
+                departamento.setNoPersonalBm(rs.getInt("NOPERSONALBM"));
+                departamento.setDomicilio(rs.getString("DOMICILIO"));
+                departamento.setClaveCt(rs.getString("CLAVECT"));
+                departamento.setIdUr(rs.getInt("IDUR"));
+                departamento.setIdNivelArea(rs.getInt("IDNIVELAREA"));
+                departamento.setObservaciones(rs.getString("OBSERVACIONES"));
+                departamento.setNoBloque(rs.getInt("NOBLOQUE"));
+                departamento.setFechaAlta(rs.getString("FECHAALTA"));
+                departamento.setNoUsuarioAlta(rs.getInt("NOUSUARIOALTA"));
+                departamento.setFechaBaja(rs.getString("FECHABAJA"));
+                departamento.setNoUsuarioBaja(rs.getInt("NOUSUARIOBAJA"));
+                departamento.setFechaUltimaModif(rs.getString("FECHAULTIMAMODIF"));
+                departamento.setNoUsuarioUltimaModif(rs.getInt("NOUSUARIOULTIMAMODIF"));
+                departamento.setIdEstatus(rs.getInt("IDESTATUS"));
+                listaDepartamento.add(departamento);
+
+            }
+            System.out.println("listaDepartamento.size() = " + listaDepartamento.size());
+        } catch (SQLException e) {
+            System.out.println("Error en listaDepartamento() " + e.getMessage());
+            listaDepartamento = null;
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en listaDepartamento() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        return listaDepartamento;
+    }
+
+    public List<Departamento> traeRegistrosLista(int valor) {
+        List<Departamento> listaDepartamento;
+        System.out.println("Entro a cargar listaDepartamento");
+        Departamento departamento = null;
+        ResultSet rs = null;
+        String query = null;
+        String continuacion = valor == 1 ? " WHERE IDESTATUS = 1" : "";
+        query = "select DE.IDDEPARTAMENTO, \n" +
+                "       DE.NOMDEPTO, \n" +
+                "       DE.NOPERSONALBM, \n" +
+                "       DE.DOMICILIO, \n" +
+                "       DE.CLAVECT, \n" +
+                "       DE.IDUR,\n" +
+                "       (select UR.CLAVEUR from UR UR where UR.IDUR = DE.IDUR) CLAVEUR,\n" +
+                "       (select UR.UR from UR UR where UR.IDUR = DE.IDUR) NOMUR,\n" +
+                "       (select PE.NOMBRE||' '||PE.AP1||' '||PE.AP2 from PERSONAL PE where PE.NOPERSONALBM = DE.NOPERSONALBM) RESPONSABLE,\n" +
+                "       (select PE.NOMBRE||' '||PE.AP1||' '||PE.AP2 from PERSONAL PE where PE.NOPERSONALBM = DE.NOPERSONALBM_ENLACE) ENLACE,\n" +
+                "       DE.NOPERSONALBM_ENLACE, \n" +
+                "       DE.OBSERVACIONES, \n" +
+                "       DE.IDESTATUS, DE.NOBLOQUE, DE.IDNIVELAREA from DEPARTAMENTO DE "
+                        +continuacion+" ORDER BY 1";
+                
+        try {
+            listaDepartamento = new ArrayList<>();
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query).executeQuery();
+
+            while (rs.next()) {
+                departamento = new Departamento();
+                departamento.setIdDepartamento(rs.getInt("IDDEPARTAMENTO"));
+                departamento.setNomDepto(rs.getString("NOMDEPTO"));
+                departamento.setNoPersonalBm(rs.getInt("NOPERSONALBM")==0?null:rs.getInt("NOPERSONALBM"));
+                departamento.setDomicilio(rs.getString("DOMICILIO"));
+                departamento.setClaveCt(rs.getString("CLAVECT"));
+                departamento.setIdUr(rs.getInt("IDUR"));
+                departamento.setClaveUr(rs.getString("CLAVEUR"));
+                departamento.setNomUr(rs.getString("NOMUR"));
+                departamento.setNomPersonal(rs.getString("RESPONSABLE")==null?"NO TIENE RESPONSABLE":rs.getString("RESPONSABLE"));
+                departamento.setNomEnlace(rs.getString("ENLACE")==null?"NO TIENE ENLACE":rs.getString("ENLACE"));
+                departamento.setNoPersonalBmEnlace(rs.getInt("NOPERSONALBM_ENLACE")==0?null:rs.getInt("NOPERSONALBM_ENLACE"));
+                departamento.setObservaciones(rs.getString("OBSERVACIONES"));
+                departamento.setNoBloque(rs.getInt("NOBLOQUE"));
+                departamento.setIdNivelArea(rs.getInt("IDNIVELAREA"));
+                departamento.setIdEstatus(rs.getInt("IDESTATUS"));
+                listaDepartamento.add(departamento);
+
+            }
+            System.out.println("traeRegistrosLista.size() = " + listaDepartamento.size());
+        } catch (SQLException e) {
+            System.out.println("Error en traeRegistrosLista() " + e.getMessage());
+            listaDepartamento = null;
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en traeRegistrosLista() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        return listaDepartamento;
+    }
+}

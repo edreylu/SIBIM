@@ -1,0 +1,254 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package personal;
+
+import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ *
+ * @author usuario
+ */
+public class PersonalDAO extends conexion.ConexionOracle implements Serializable {
+
+    public int insertaPersona(Personal persona) {
+
+        ResultSet rs = null;
+        int existe = 0;
+        int id = 0;
+        int regreso = 0;
+
+        final String queryExiste = "select count(*) from personal where rfc = ? or  curp = ?";
+
+        final String noPersonalNext = "select NVL2( FOLIO, FOLIO+1, 1 ) from folio where tabla = 'PERSONAL'";
+
+        final String query = "insert into personal (NOPERSONALBM, "
+                + "                                 NOPERSONAL, "
+                + "                                 RFC, "
+                + "                                 CURP, "
+                + "                                 AP1, "
+                + "                                 AP2, "
+                + "                                 NOMBRE, "
+                + "                                 FUNCION, "
+                + "                                 IDESTATUS) "
+                + "                         values (?,NULL,?,?,?,?,?,?,1)";
+
+        final String queryActualizaFolio = "update FOLIO set FOLIO = ? where TABLA = 'PERSONAL'";
+
+        try {
+            //System.out.println(query);
+            super.abrirConexion();
+
+            rs = super.getPreparedStatement(queryExiste, new Object[]{persona.getRfc(), persona.getCurp()}).executeQuery();
+
+            if (rs.next()) {
+                existe = rs.getInt(1);
+
+            }
+            if (existe == 0) {
+
+                rs = super.getPreparedStatement(noPersonalNext).executeQuery();
+
+                if (rs.next()) {
+                    id = rs.getInt(1);
+
+                }
+
+                regreso = super.getPreparedStatement(query, new Object[]{id,
+                    persona.getRfc(),
+                    persona.getCurp(),
+                    persona.getAp1(),
+                    persona.getAp2(),
+                    persona.getNombre(),
+                    persona.getFuncion()}).executeUpdate();
+
+                if (regreso == 1) {
+                    regreso = super.getPreparedStatement(queryActualizaFolio, new Object[]{id}).executeUpdate();
+                    if (regreso == 1) {
+                        regreso = id;
+                    }
+                }
+
+            } else {
+                regreso = -1;
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error al insertar persona: " + e.getMessage());
+            regreso = 0;
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en existePersona() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+
+        return regreso;
+    }
+
+    public List<Personal> traeRegistrosPersonal() {
+        List<Personal> listaPersonal;
+        System.out.println("Entro a cargar la lista de registros personal");
+        Personal per = null;
+        ResultSet rs = null;
+        String query = null;
+        query = "select nopersonalbm, nopersonal, rfc, curp, ap1, ap2, nombre, idestatus, funcion from personal";
+
+        try {
+            listaPersonal = new ArrayList<>();
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query).executeQuery();
+
+            while (rs.next()) {
+                per = new Personal();
+                per.setNoPersonalBm(rs.getInt("nopersonalbm"));
+                per.setNoPersonal(rs.getInt("nopersonal"));
+                per.setRfc(rs.getString("rfc"));
+                per.setCurp(rs.getString("curp"));
+                per.setAp1(rs.getString("ap1"));
+                per.setAp2(rs.getString("ap2"));
+                per.setNombre(rs.getString("nombre"));
+                per.setIdEstatus(rs.getInt("idestatus"));
+                per.setFuncion(rs.getString("funcion"));
+                listaPersonal.add(per);
+
+            }
+            System.out.println("listaPersonal.size() = " + listaPersonal.size());
+        } catch (SQLException e) {
+            System.out.println("Error en listaPersonal() " + e.getMessage());
+            listaPersonal = null;
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en listaPersonal() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        return listaPersonal;
+    }
+
+    public List<Personal> traeRegistrosPersonalBusqueda(String valor) {
+        List<Personal> listaPersonal;
+        System.out.println("Entro a cargar la lista de registros personal busqueda");
+        Personal per = null;
+        ResultSet rs = null;
+        String query = null;
+        query = "select nopersonalbm, "
+                + "nopersonal, "
+                + "rfc, "
+                + "curp, "
+                + "ap1, "
+                + "ap2, "
+                + "nombre, "
+                + "idestatus, "
+                + "funcion "
+                + "from personal "
+                + " where (nombre||' '||ap1||' '||ap2 like '%" + valor + "%' OR rfc like '%" + valor + "%')";
+        System.out.println(query);
+        try {
+            listaPersonal = new ArrayList<>();
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query).executeQuery();
+
+            while (rs.next()) {
+                per = new Personal();
+                per.setNoPersonalBm(rs.getInt("nopersonalbm"));
+                per.setNoPersonal(rs.getInt("nopersonal"));
+                per.setRfc(rs.getString("rfc"));
+                per.setCurp(rs.getString("curp"));
+                per.setAp1(rs.getString("ap1"));
+                per.setAp2(rs.getString("ap2"));
+                per.setNombre(rs.getString("nombre"));
+                per.setIdEstatus(rs.getInt("idestatus"));
+                per.setFuncion(rs.getString("funcion"));
+                listaPersonal.add(per);
+
+            }
+            System.out.println("listaPersonalBusqueda.size() = " + listaPersonal.size());
+        } catch (SQLException e) {
+            System.out.println("Error en listaPersonalBusqueda() " + e.getMessage());
+            listaPersonal = null;
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en listaPersonalBusqueda() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        return listaPersonal;
+    }
+    
+    
+    public int actualizaPersona(Personal persona) {
+
+        int valor = 0;
+        final String query = "update personal \n"
+                + "      set rfc = ?, \n"
+                + "          curp = ?, \n"
+                + "          ap1 = ?, \n"
+                + "          ap2 = ?, \n"
+                + "          nombre = ?, \n"
+                + "          funcion = ?\n"
+                + "    where NOPERSONALBM = ?";
+
+        try {
+            super.abrirConexion();
+            valor = super.getPreparedStatement(query, new Object[]{persona.getRfc(),
+                persona.getCurp(),
+                persona.getAp1(),
+                persona.getAp2(),
+                persona.getNombre(),
+                persona.getFuncion(),
+                persona.getNoPersonalBm()}).executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println("Error al actualizar persona() " + e.getMessage());
+        } finally {
+           
+            super.cerrarConexion();
+        }
+        return valor;
+    }
+    
+    public int eliminaPersonal(Personal personal, int opcion) {
+        int valor=0;
+        ResultSet rs = null;
+        final String query = "UPDATE personal set IDESTATUS = ? WHERE NOPERSONALBM = ? ";
+        try {
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query, new Object[]{opcion,personal.getNoPersonalBm()}).executeQuery();
+            
+        } catch (SQLException e) {
+            System.out.println("Error en eliminaPersonal() " + e.getMessage());
+        } finally {
+            try {
+                if (null != rs) {
+                    valor=1;
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en eliminaPersonal() " + e.getMessage());
+                
+            }
+            super.cerrarConexion();
+        }
+        return valor;
+    }
+
+}

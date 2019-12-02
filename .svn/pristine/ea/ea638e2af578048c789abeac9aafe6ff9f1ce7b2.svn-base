@@ -1,0 +1,134 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package clasificador;
+
+import java.util.List;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.SessionScoped;
+import org.primefaces.PrimeFaces;
+import utilerias.Mensaje;
+
+@ManagedBean(name = "clasificadorControl")
+@SessionScoped
+public class ClasificadorControl implements java.io.Serializable {
+
+    private final ClasificadorDAO cladao;
+    private List<Clasificador> clasificadores;
+    private Clasificador clasificador;
+    private Clasificador clasificadorSeleccionado;
+    private List<Clasificador> filteredClasificador;
+    private final Mensaje msg = new Mensaje();
+
+    public ClasificadorControl() {
+        cladao = new ClasificadorDAO();
+        clasificador = new Clasificador();
+    }
+
+    public void init() {
+        clasificadores = cladao.traeRegistros(2);
+        clasificadorSeleccionado = null;
+    }
+
+    public List<Clasificador> getClasificadores() {
+        return clasificadores;
+    }
+
+    public void setClasificadores(List<Clasificador> clasificadores) {
+        this.clasificadores = clasificadores;
+    }
+
+    public Clasificador getClasificador() {
+        return clasificador;
+    }
+
+    public void setClasificador(Clasificador clasificador) {
+        this.clasificador = clasificador;
+    }
+
+    public Clasificador getClasificadorSeleccionado() {
+        return clasificadorSeleccionado;
+    }
+
+    public void setClasificadorSeleccionado(Clasificador clasificadorSeleccionado) {
+        this.clasificadorSeleccionado = clasificadorSeleccionado;
+    }
+
+    public List<Clasificador> getFilteredClasificador() {
+        return filteredClasificador;
+    }
+
+    public void setFilteredClasificador(List<Clasificador> filteredClasificador) {
+        this.filteredClasificador = filteredClasificador;
+    }
+
+    public void CargaVentanaInserta(String ob) {
+
+        filteredClasificador = null;
+        clasificador = new Clasificador();
+        PrimeFaces.current().ajax().update(":formInsertar");
+        PrimeFaces.current().executeScript("PF('dlginsertar').show();");
+    }
+
+    public void CargaVentanaModifica() {
+        filteredClasificador = null;
+        PrimeFaces.current().ajax().update(":formModificar");
+        PrimeFaces.current().executeScript("PF('dlgmodificar').show();");
+    }
+
+    public void insertar() {
+
+        clasificador.setIdClasificador(cladao.getNumeroSiguiente());
+        int valor = cladao.insertaClasificador(clasificador);
+        if (valor == 1) {
+            msg.info("Procesado..", "Registro guardado");
+        } else {
+            msg.warn("Error..", "No se guardo la informacion");
+        }
+        PrimeFaces.current().executeScript("PF('dlginsertar').hide();");
+    }
+
+    public void modificar() {
+        int valor = 0;
+        
+            valor = cladao.actualizaClasificador(clasificador);
+            if (valor == 1) {
+                msg.info("Procesado..", "Registro actualizado");
+            } else {
+                msg.warn("Error", "No se actualizo la informacion");
+
+            }
+
+        PrimeFaces.current().executeScript("PF('dlgmodificar').hide();");
+    }
+
+    public void ActivarInactivar(int opcion) {
+
+        System.out.println("valor: " + clasificador.getIdClasificador());
+                String dato = opcion == 1 ? "activó" : "inactivó";
+                int valor = cladao.eliminaClasificador(clasificador,opcion);
+                if (valor == 1) {
+                    
+                    msg.info("Procesado..", "Registro se "+dato);
+                } else {
+                    msg.warn("Error..", "No se "+dato+" el Registro");
+                }
+        PrimeFaces.current().executeScript("PF('dlgeliminar').hide();");
+    }
+
+    public void llenarlistas() {
+        clasificadores = cladao.traeRegistros(2);
+    }
+
+    public void cancelarActualizar() {
+        PrimeFaces.current().executeScript("PF('dlgmodificar').hide();");
+    }
+
+    public void cancelarEliminar() {
+        PrimeFaces.current().executeScript("PF('dlgeliminar').hide();");
+    }
+
+
+}

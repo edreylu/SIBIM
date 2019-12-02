@@ -1,0 +1,136 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package korigenrecurso;
+
+import java.util.List;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.SessionScoped;
+import org.primefaces.PrimeFaces;
+import utilerias.Mensaje;
+
+@ManagedBean(name = "korigenRecursoControl")
+@SessionScoped
+public class KorigenRecursoControl implements java.io.Serializable {
+
+    private final KorigenRecursoDAO kordao;
+    private List<KorigenRecurso> origenesrecurso;
+    private KorigenRecurso origenrecurso;
+    private KorigenRecurso origenRecursoSeleccionado;
+    private List<KorigenRecurso> filteredOrigenRecurso;
+    private final Mensaje msg = new Mensaje();
+
+    public KorigenRecursoControl() {
+        kordao = new KorigenRecursoDAO();
+        origenrecurso = new KorigenRecurso();
+    }
+
+    public void init() {
+        origenesrecurso = kordao.traeRegistros(2);
+        origenRecursoSeleccionado = null;
+    }
+
+    public List<KorigenRecurso> getOrigenesrecurso() {
+        return origenesrecurso;
+    }
+
+    public void setOrigenesrecurso(List<KorigenRecurso> origenesrecurso) {
+        this.origenesrecurso = origenesrecurso;
+    }
+
+    public KorigenRecurso getOrigenrecurso() {
+        return origenrecurso;
+    }
+
+    public void setOrigenrecurso(KorigenRecurso origenrecurso) {
+        this.origenrecurso = origenrecurso;
+    }
+
+    public KorigenRecurso getOrigenRecursoSeleccionado() {
+        return origenRecursoSeleccionado;
+    }
+
+    public void setOrigenRecursoSeleccionado(KorigenRecurso origenRecursoSeleccionado) {
+        this.origenRecursoSeleccionado = origenRecursoSeleccionado;
+    }
+
+    public List<KorigenRecurso> getFilteredOrigenRecurso() {
+        return filteredOrigenRecurso;
+    }
+
+    public void setFilteredOrigenRecurso(List<KorigenRecurso> filteredOrigenRecurso) {
+        this.filteredOrigenRecurso = filteredOrigenRecurso;
+    }
+
+
+
+    public void CargaVentanaInserta(String ob) {
+
+        filteredOrigenRecurso = null;
+        origenrecurso = new KorigenRecurso();
+        PrimeFaces.current().ajax().update(":formInsertar");
+        PrimeFaces.current().executeScript("PF('dlginsertar').show();");
+    }
+
+    public void CargaVentanaModifica() {
+        filteredOrigenRecurso = null;
+        PrimeFaces.current().ajax().update(":formModificar");
+        PrimeFaces.current().executeScript("PF('dlgmodificar').show();");
+    }
+
+    public void insertar() {
+
+        origenrecurso.setIdOrigenRecurso(kordao.getNumeroSiguiente());
+        int valor = kordao.insertaOrigenRecurso(origenrecurso);
+        if (valor == 1) {
+            msg.info("Procesado..", "Registro guardado");
+        } else {
+            msg.warn("Error..", "No se guardo la informacion");
+        }
+        PrimeFaces.current().executeScript("PF('dlginsertar').hide();");
+    }
+
+    public void modificar() {
+        int valor = 0;
+        
+            valor = kordao.actualizaOrigenRecurso(origenrecurso);
+            if (valor == 1) {
+                msg.info("Procesado..", "Registro actualizado");
+            } else {
+                msg.warn("Error", "No se actualizo la informacion");
+
+            }
+
+        PrimeFaces.current().executeScript("PF('dlgmodificar').hide();");
+    }
+
+    public void ActivarInactivar(int opcion) {
+
+        System.out.println("valor: " + origenrecurso.getIdOrigenRecurso());
+                String dato = opcion == 1 ? "activó" : "inactivó";
+                int valor = kordao.eliminaOrigenRecurso(origenrecurso,opcion);
+                if (valor == 1) {
+                    
+                    msg.info("Procesado..", "Registro se "+dato);
+                } else {
+                    msg.warn("Error..", "No se "+dato+" el Registro");
+                }
+        PrimeFaces.current().executeScript("PF('dlgeliminar').hide();");
+    }
+
+    public void llenarlistas() {
+        origenesrecurso = kordao.traeRegistros(2);
+    }
+
+    public void cancelarActualizar() {
+        PrimeFaces.current().executeScript("PF('dlgmodificar').hide();");
+    }
+
+    public void cancelarEliminar() {
+        PrimeFaces.current().executeScript("PF('dlgeliminar').hide();");
+    }
+
+
+}

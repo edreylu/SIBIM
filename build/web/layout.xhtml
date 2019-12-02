@@ -11,8 +11,9 @@ and open the template in the editor.
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:p="http://primefaces.org/ui">
     <h:head>
-        <title>::SIBIM::</title>
+        <title>::SIBIEM::</title>
         <h:outputStylesheet library="css" name="main.css" />
+        <h:outputScript library="js" name="complementos.js" />
         <link href="../resources/img/icobitve.ico" rel="shortcut icon" type="image/x-icon" />
     </h:head>
     <h:body>
@@ -31,7 +32,7 @@ and open the template in the editor.
         
         <f:facet name="options">
             <p:outputLabel rendered="#{accesoC.noUsuario != 0}" value="BIENVENIDO: #{accesoC.nombreCompleto}  " class="textBannerUsuario"/> 
-            <p:commandButton rendered="#{accesoC.noUsuario != 0}" iconPos="right" action="#{direcciona.index()}" value="Salir" icon="fa fa-sign-out" >
+            <p:commandButton rendered="#{accesoC.noUsuario != 0}" iconPos="right" action="#{accesoC.index()}" value="Salir" icon="fa fa-sign-out" >
             <p:confirm header="CONFIRMACIÓN" message="¿Estás seguro de cerrar sesión?" />
             </p:commandButton>
              <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">

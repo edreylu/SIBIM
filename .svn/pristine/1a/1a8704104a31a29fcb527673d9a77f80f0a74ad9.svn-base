@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<ui:composition template="menu.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <ui:define name="contenido">
+        <h:head>
+            <title>Alta de proveedor</title>
+        </h:head>
+        <f:metadata>
+            <f:viewAction action="#{proveedoresControl.init()}" />  
+        </f:metadata>      
+        <h:body>
+            <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
+            <f:event type="preRenderView" rendered="#{facesContext.postBack}" listener="#{accesoC.validaSesion('proveedores.xhtml')}"/>  
+            <center>
+
+                <h:outputText value="Proveedores" class="tituloPantalla"/>
+                <p:separator/>
+                <h:form id="formMostrar">
+
+                    <p:dataTable id="tablauser" var="proveedor" value="#{proveedoresControl.listProveedor}"
+                                 style="width:100%;" rows="10" rowsPerPageTemplate="5,8,10"
+                                 emptyMessage ="No hay usuarios disponibles"
+                                 paginator="true" paginatorPosition="bottom"
+                                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+                                 filteredValue="#{proveedoresControl.listProveedorFiltrado}" widgetVar="proveedorTabla"
+                                 selection="#{proveedoresControl.proveedorSeleccionado}" selectionMode="single"
+                                 rowKey="#{proveedor.idProveedor}" currentPageReportTemplate="[ {endRecord} de {totalRecords} Proveedores ]">
+                        <p:ajax event="rowSelect" update="panelBotones" global="false"/>
+                        <f:facet name="header">
+                            <p:commandButton id="insus" value="Insertar" icon="fa fa-plus" update=":formInsertar" actionListener="#{proveedoresControl.cargaVentanaInserta('')}" style="float: left;" rendered="#{accesoC.rolbotones.ins}" >
+                            </p:commandButton>
+                            <p:tooltip for="insus" value="Insertar Usuario" showEffect="clip" hideEffect="clip" position="top"/>
+                            <p:outputPanel>
+                                <h:outputText value="Buscar: " />
+                                <p:inputText id="globalFilter" style="width:150px" onkeypress="if (event.keyCode === 13) {
+                                            return false;
+                                        }" placeholder="Escribe para buscar"/>
+                                <p:commandButton id="bsearch" icon="fa fa-search" onclick="PF('proveedorTabla').filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+                        <p:column headerText="#" width="4%" filterBy="#{proveedor.idProveedor}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{proveedor.idProveedor}" />
+                        </p:column>
+
+                   
+                        <p:column headerText="NOMBRE" width="20%" filterBy="#{proveedor.nombre}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{proveedor.nombre}" />
+                        </p:column>
+                        <p:column headerText="RFC" width="22%" filterBy="#{proveedor.rfc}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{proveedor.rfc}" />
+                        </p:column>
+                        <p:column headerText="DIRECCION" width="12%" filterBy="#{proveedor.direccion}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{proveedor.direccion}" />
+                        </p:column>
+                        <p:column headerText="CIUDAD" width="12%" filterBy="#{proveedor.ciudad}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{proveedor.ciudad}" />
+                        </p:column>
+                        <p:column headerText="TELEFONO" width="12%" filterBy="#{proveedor.telefono}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{proveedor.telefono}" />
+                        </p:column>
+                        <p:column headerText="OBSERVACIONES" width="12%" filterBy="#{proveedor.observaciones}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{proveedor.observaciones}" />
+                        </p:column>
+                        <p:column headerText="ESTATUS" width="12%" filterBy="#{proveedor.idEstatus}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{proveedor.idEstatus==1?'ACTIVO':'INACTIVO'}" />
+                        </p:column>
+                        <f:facet name="footer">
+                            <h:panelGroup id="panelBotones" >
+                                <p:commandButton id="actcat" value="Editar" icon="fa fa-pencil"
+                                                 disabled="#{proveedoresControl.proveedorSeleccionado == null}"
+                                                 oncomplete="PF('dlgmodificar').show()" rendered="#{accesoC.rolbotones.act}"
+                                                 actionListener="#{proveedoresControl.preparaEdicion()}"
+                                                 update=":formModificar">
+
+                                </p:commandButton>
+                                <p:tooltip for="actcat" value="Editar Usuario" showEffect="clip" hideEffect="clip" position="top"/>
+                                <p:commandButton id="elicat" value="#{proveedoresControl.proveedorSeleccionado.idEstatus eq '1' ? 'Inactivar' : 'Activar'}" 
+                                                 icon="fa fa-trash" disabled="#{proveedoresControl.proveedorSeleccionado == null}" 
+                                                 rendered="#{accesoC.rolbotones.eli}" oncomplete="PF('dlgeliminar').show()" update=":formEliminar" >
+                                    <f:setPropertyActionListener target="#{proveedoresControl.proveedor}" value="#{proveedoresControl.proveedorSeleccionado}" />
+                                </p:commandButton>
+                                <p:tooltip for="elicat" value="#{proveedoresControl.proveedorSeleccionado.idEstatus eq '1' ? 'Inactivar' : 'Activar'} Proveedor" 
+                                           showEffect="clip" hideEffect="clip" position="top"/>   
+                            </h:panelGroup>
+                        </f:facet>
+                    </p:dataTable>
+
+
+                </h:form>
+
+            </center>
+            <p:dialog id="dlg1" header="Insertar Proveedor" widgetVar="dlginsertar" showEffect="explode" hideEffect="explode"
+                      resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+
+                <h:form id="formInsertar" class="dialogC">
+                    <p:messages id="messages1" closable="true"/>
+                    <p:growl id="mg1" showSummary="true" showDetail="true"/>
+                    <p:panelGrid columns="2" styleClass="sinBorde" style="width: 100%">
+                        <p:outputLabel value="Nombre" style="float: right"/>
+                        <p:inputText id="itApPaterno" value="#{proveedoresControl.proveedor.nombre}" required="true"
+                                     requiredMessage="Se requiere nombre" maxlength="75" style="text-transform: uppercase"/>
+                        <p:outputLabel value="RFC" style="float: right"/>
+                        <p:inputText id="itApMaterno" value="#{proveedoresControl.proveedor.rfc}" required="true"
+                                     requiredMessage="Se requiere RFC" maxlength="13" style="text-transform: uppercase"/>
+                        <p:outputLabel value="Dirección" style="float: right"/>
+                        <p:inputText id="itNombre" value="#{proveedoresControl.proveedor.direccion}"
+                                      maxlength="75" style="text-transform: uppercase"/>
+                           
+                        <p:outputLabel value="Ciudad" style="float: right"/>
+                        <p:inputText id="itCurp" value="#{proveedoresControl.proveedor.ciudad}"
+                                     maxlength="35" style="text-transform: uppercase"/>
+                        <p:outputLabel value="Teléfono" style="float: right"/>
+                        <p:inputText id="itRfc" value="#{proveedoresControl.proveedor.telefono}"
+                                     maxlength="15" style="text-transform: uppercase"/>
+                        <p:outputLabel value="Observaciones" style="float: right"/>
+                        <p:inputText id="itFuncion" value="#{proveedoresControl.proveedor.observaciones}"
+                                     maxlength="100" style="text-transform: uppercase"/>
+                    </p:panelGrid>
+                    <p:separator/>
+                    <center>
+                    <p:commandButton value="Guardar" update="mg1 :formInsertar :formMostrar"
+                                     actionListener="#{proveedoresControl.insertar()}"
+                                     oncomplete="actualizaListProveedor();"
+                                     />
+                    </center>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog id="dlg2" header="Editar proveedor" widgetVar="dlgmodificar" showEffect="explode" hideEffect="explode"
+                      resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+                <p:growl id="mg2" showSummary="true" showDetail="true"/>
+
+                <h:form id="formModificar" class="dialogC">
+                    <p:messages id="messages2" closable="true"/>
+                    <p:panelGrid columns="2" styleClass="sinBorde">
+                        <p:outputLabel value="Nombre" style="float: right"/>
+                        <p:inputText id="itApPaternoEdit" value="#{proveedoresControl.proveedorEditar.nombre}" required="true"
+                                     requiredMessage="Se requiere apellido paterno" maxlength="75" style="text-transform: uppercase"/>
+                        <p:outputLabel value="RFC" style="float: right"/>
+                        <p:inputText id="itApMaternoEdit" value="#{proveedoresControl.proveedorEditar.rfc}"  required="true"
+                                     requiredMessage="Se requiere apellido paterno" maxlength="13" style="text-transform: uppercase"/>
+                        <p:outputLabel value="Dirección" style="float: right"/>
+                        <p:inputText id="itNombreEdit" value="#{proveedoresControl.proveedorEditar.direccion}"
+                                     maxlength="75" style="text-transform: uppercase"/>
+                           
+                        <p:outputLabel value="Ciudad" style="float: right"/>
+                        <p:inputText id="itCurpEdit" value="#{proveedoresControl.proveedorEditar.ciudad}"
+                                     maxlength="35" style="text-transform: uppercase"/>
+                        <p:outputLabel value="Teléfono" style="float: right"/>
+                        <p:inputText id="itRfcEdit" value="#{proveedoresControl.proveedorEditar.telefono}"
+                                     maxlength="15" style="text-transform: uppercase"/>
+                        <p:outputLabel value="Observaciones" style="float: right"/>
+                        <p:inputText id="itFuncionEdit" value="#{proveedoresControl.proveedorEditar.observaciones}"
+                                     maxlength="100" style="text-transform: uppercase"/>
+                    </p:panelGrid>
+                    <p:separator/>
+                    <center>
+                        <p:commandButton value="Modificar" update="mg2 :formModificar"
+                                     actionListener="#{proveedoresControl.editar()}" oncomplete="actualizaListProveedor();"
+                                     />
+                        </center>
+                </h:form>
+            </p:dialog>
+            
+            <p:dialog id="dlg3" header="Estatus Proveedor" showEffect="explode" hideEffect="explode" 
+                      widgetVar="dlgeliminar" resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+                <h:form id="formEliminar" class="dialogC">
+
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>
+
+                    <center>
+                        <h:outputText rendered="#{proveedoresControl.proveedor.idEstatus eq '1'}" value="¿Desea Inactivar #{proveedoresControl.proveedor.nombre} ?" />    
+                    <p:commandButton rendered="#{proveedoresControl.proveedor.idEstatus eq '1'}" value="Si" update="mg :formMostrar" actionListener="#{proveedoresControl.ActivarInactivar(2)}" 
+                                     oncomplete="actualizaListProveedor();" > </p:commandButton>
+                        <h:outputText rendered="#{proveedoresControl.proveedor.idEstatus eq '2'}" value="¿Desea Activar #{proveedoresControl.proveedor.nombre} ?" />    
+                    <p:commandButton rendered="#{proveedoresControl.proveedor.idEstatus eq '2'}" value="Si" update="mg :formMostrar" actionListener="#{proveedoresControl.ActivarInactivar(1)}" 
+                                     oncomplete="actualizaListProveedor();" > </p:commandButton>
+                    <p:commandButton value="No" actionListener="#{proveedoresControl.cancelarEliminar()}" />
+                    </center>
+
+                </h:form>
+            </p:dialog>
+
+            <h:form>
+                <p:remoteCommand name="actualizaListProveedor" update=":formMostrar" actionListener="#{proveedoresControl.init()}" />
+
+            </h:form>
+            <p:dialog widgetVar="statusDialog" appendTo="@(body)" modal="true" draggable="false" closable="false" resizable="false" showHeader="false">
+                <p:graphicImage cache="false" value="resources/img/imagenes/loading.gif" />
+            </p:dialog>
+        </h:body>
+    </ui:define>
+</ui:composition>

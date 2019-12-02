@@ -19,19 +19,20 @@ and open the template in the editor.
             <h:outputScript library="js" name="funciones.js" />
         </h:head>
         <h:body>
-            <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
+            <f:event type="preRenderView" rendered="#{facesContext.postBack}" listener="#{accesoC.validaSesion('log')}"/>
+            <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"/>
             <div id="loginDiv">
                 <h:form id="formLogin">
                     <p:growl id="growl" sticky="true" life="2000" showDetail="true" showSummary="true"/>
                     <p:panel class="panelLogin" header="SIBIM" >
                         <h:panelGrid columns="3" cellpadding="3" class="panelGridLogin">
                             <h:outputLabel for="itClave" value="USUARIO:"/>
-                            <p:inputText id="itClave" value="#{accesoC.clave}" required="true" requiredMessage="El usuario es requerido" maxlength="10"  onfocus="true" size="10" style="text-transform: uppercase;"/>
+                            <p:inputText id="itClave" value="#{accesoC.clave}" size="13" required="true" requiredMessage="El usuario es requerido" maxlength="13"  onfocus="true" style="text-transform: uppercase;"/>
                             <span class="input-group-addon" style="background: transparent !important; border: transparent !important;" onclick="mostrarContrasena();">
 
                             </span>
                             <h:outputLabel for="itPasaporte" value="PASSWORD:" />
-                            <p:password id="itPasaporte" value="#{accesoC.pasaporte}" placeholder="******" required="true" requiredMessage="El password es requerido" maxlength="10" size="10" style="text-transform: uppercase;" />
+                            <p:password id="itPasaporte" value="#{accesoC.pasaporte}" size="13" placeholder="******" required="true" requiredMessage="El password es requerido" maxlength="13" style="text-transform: uppercase;" />
 
                             <p:commandLink id="eye" immediate="true" title="Password oculto - Click para mostrar" style="background: transparent !important; border: transparent !important;" onclick="mostrarContrasena();">
                                 <i id="verpass" class="fa fa-eye-slash" >
@@ -55,7 +56,7 @@ and open the template in the editor.
                         <br/>
                         <f:facet name="footer">
                             <center>
-                                <h:outputLabel value="SIBM Version 1.0.0" style="font-weight: bold; font-size: 0.9vw;"/>
+                                <h:outputLabel value="SIBIM Version 1.0.15" style="font-weight: bold; font-size: 0.9vw;"/>
                             </center>
                         </f:facet>
                     </p:panel>
@@ -72,12 +73,12 @@ and open the template in the editor.
                     <br/>
                     <p:panelGrid columns="3">
                         <p:outputLabel value="Usuario" for="clave"/>
-                        <p:inputText id="clave" value="#{accesoC.clavec}" maxlength="10" size="10" required="true" style="text-transform: uppercase;">
+                        <p:inputText id="clave" value="#{accesoC.clavec}" size="13" maxlength="13" required="true" style="text-transform: uppercase;">
                             <p:watermark for="clave" value="USUARIO" />  
                         </p:inputText>
                         <p:message for="clave" display="icon" />
                         <p:outputLabel value="Password Actual" for="pasaporte" />
-                        <p:password id="pasaporte" value="#{accesoC.pasaportec}" maxlength="10" size="10" required="true" style="text-transform: uppercase;" >
+                        <p:password id="pasaporte" value="#{accesoC.pasaportec}" size="13" maxlength="13" required="true" style="text-transform: uppercase;" >
                             <p:watermark for="pasaporte" value="PASSWORD" />  
                         </p:password>
                         <p:commandLink id="eye2" immediate="true" title="Password oculto - Click para mostrar" style="background: transparent !important; border: transparent !important;" onclick="mostrarContrasena2();">

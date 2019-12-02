@@ -1,0 +1,518 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="SIBIM_Subreport1" language="groovy" pageWidth="957" pageHeight="612" orientation="Landscape" columnWidth="957" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="3.000000000000004"/>
+	<property name="ireport.x" value="1519"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+	<parameter name="IDDEPARTAMENTO" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT ROWNUM Registro,
+ LPAD(mo.IME,6,0) IME,
+  LPAD(pa.NumDependencia,3,0) NumDependencia,
+  LPAD(ur.ClaveUR,4,'0') ClaveUR,
+  LPAD(DE.CLAVE_SUBUR,3,'0') CLAVE_SUBUR,
+  cl.Descripcion,
+  NVL2 (MO.MARCA,MO.MARCA,'NO DISPONIBLE') MARCA,
+  mo.Color,
+  mo.Material,
+  NVL2 (MO.SERIE,MO.SERIE,'NO DISPONIBLE') SERIE,
+  SUBSTR(ke.EstadoDelBien,1,1) EstadoDelBien,
+  mo.NumCheque,
+  NVL(MO.NOTALON, 'NO DISPONIBLE') NOTALON,
+  NVL2 (MO.NUMFACTURA,MO.NUMFACTURA,'NO DISPONIBLE') NUMFACTURA,
+  pr.Nombre NombreProveedor,
+  mo.CostoTotal,
+  LPAD(CL.CLASIFICADOROG,4,'0') CLASIFICADOROG,
+  ko.Descripcion OrigenRecurso,
+  mo.Observaciones
+FROM UR,
+  kEstadoDelBien KE,
+  Clasificador CL,
+  MOBILIARIO       MO
+LEFT OUTER JOIN KPROVEEDOR       PR ON PR.IDPROVEEDOR = MO.IDPROVEEDOR
+AND PR.IDESTATUS = 1
+left outer join KORIGENRECURSO   KO on KO.IDORIGENRECURSO = MO.IDORIGENRECURSO
+AND KO.IDESTATUS = 1,
+  Parametros PA
+LEFT OUTER JOIN Personal PE
+ON pe.NoPersonalBM = pa.NoPersonalBM
+AND pe.IdEstatus   = 1,
+  Departamento DE
+LEFT OUTER JOIN Personal PE1
+ON pe1.NoPersonalBM = de.NoPersonalBM
+AND pe1.IdEstatus   = 1
+LEFT OUTER JOIN Usuarios US
+ON us.No_Usuario = de.NoUsuarioEnlace
+AND us.IdEstatus = 1
+LEFT OUTER JOIN Personal PE2
+ON pe2.NoPersonalBM    = us.NoPersonalBM
+AND pe2.IdEstatus      = 1
+WHERE mo.IdEstatus    IN (1,3)
+AND de.IdDepartamento  = mo.IdDepartamento
+AND ur.IdUR            = de.IdUR
+AND cl.IdClasificador  = mo.IdClasificador
+AND ke.IdEstadodelBien = mo.IdEstadoDelBien
+and PA.IDPARAMETRO     = 1
+and MO.IDDEPARTAMENTO   = $P{IDDEPARTAMENTO}
+ORDER BY UR.CLAVEUR,
+    MO.IDDEPARTAMENTO,
+    CL.DESCRIPCION]]>
+	</queryString>
+	<field name="REGISTRO" class="java.math.BigDecimal"/>
+	<field name="IME" class="java.lang.String"/>
+	<field name="NUMDEPENDENCIA" class="java.lang.String"/>
+	<field name="CLAVEUR" class="java.lang.String"/>
+	<field name="CLAVE_SUBUR" class="java.lang.String"/>
+	<field name="DESCRIPCION" class="java.lang.String"/>
+	<field name="MARCA" class="java.lang.String"/>
+	<field name="COLOR" class="java.lang.String"/>
+	<field name="MATERIAL" class="java.lang.String"/>
+	<field name="SERIE" class="java.lang.String"/>
+	<field name="ESTADODELBIEN" class="java.lang.String"/>
+	<field name="NUMCHEQUE" class="java.lang.String"/>
+	<field name="NOTALON" class="java.lang.String"/>
+	<field name="NUMFACTURA" class="java.lang.String"/>
+	<field name="NOMBREPROVEEDOR" class="java.lang.String"/>
+	<field name="COSTOTOTAL" class="java.math.BigDecimal"/>
+	<field name="CLASIFICADOROG" class="java.lang.String"/>
+	<field name="ORIGENRECURSO" class="java.lang.String"/>
+	<field name="OBSERVACIONES" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="15">
+			<staticText>
+				<reportElement mode="Opaque" x="754" y="0" width="32" height="15" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[COSTO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="22" y="0" width="57" height="15" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[IME]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="544" y="0" width="33" height="15" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CHEQUE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="439" y="0" width="81" height="15" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[SERIE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="153" y="0" width="136" height="15" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[DESCRIPCIÓN DEL BIEN]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="79" y="0" width="25" height="15" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[DEP.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="354" y="0" width="41" height="15" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[COLOR]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="0" width="22" height="15" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CONS]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="659" y="0" width="95" height="15" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[NOM PROVEEDOR]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="289" y="0" width="65" height="15" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[MARCA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="520" y="0" width="24" height="15" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[E. FIS]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="395" y="0" width="44" height="15" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[MATERIAL]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="618" y="0" width="41" height="15" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[FACTURA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="104" y="0" width="25" height="15" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[U. R]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="786" y="0" width="34" height="15" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[COG]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="820" y="0" width="46" height="15" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TIPO REC.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="866" y="0" width="91" height="15" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[OBSERVACIONES]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="129" y="0" width="24" height="15" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[S.U. R]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="577" y="0" width="41" height="15" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TALON]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<textField>
+				<reportElement x="104" y="0" width="25" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CLAVEUR}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="153" y="0" width="136" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DESCRIPCION}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="289" y="0" width="65" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MARCA}.equals(null)?' ':$F{MARCA}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="354" y="0" width="41" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COLOR}.equals(null)?' ':$F{COLOR}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="395" y="0" width="44" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MATERIAL}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="439" y="0" width="81" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SERIE}.equals(null)?' ':$F{SERIE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="754" y="0" width="32" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COSTOTOTAL}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="79" y="0" width="25" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NUMDEPENDENCIA}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="520" y="0" width="24" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ESTADODELBIEN}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="544" y="0" width="33" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NUMCHEQUE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="618" y="0" width="41" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NUMFACTURA}.equals(null)?' ':$F{NUMFACTURA}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="786" y="0" width="34" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CLASIFICADOROG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="820" y="0" width="46" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ORIGENRECURSO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="866" y="0" width="91" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{OBSERVACIONES}.equals(null)?' ':$F{OBSERVACIONES}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="35" y="0" width="22" height="13"/>
+				<textElement textAlignment="Justified" verticalAlignment="Middle">
+					<font size="5" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{IME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="659" y="0" width="95" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NOMBREPROVEEDOR}.equals(null)?' ':$F{NOMBREPROVEEDOR}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="22" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="22" y="0" width="13" height="13"/>
+				<textElement textAlignment="Justified" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CLASIFICADOROG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="55" y="0" width="13" height="13"/>
+				<textElement verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CLAVEUR}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="68" y="0" width="11" height="13"/>
+				<textElement verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NUMDEPENDENCIA}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="129" y="0" width="24" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CLAVE_SUBUR}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="577" y="0" width="41" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NOTALON}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="1"/>
+	</summary>
+</jasperReport>

@@ -1,0 +1,282 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package mobiliario;
+
+/**
+ *
+ * @author usuario
+ */
+public class Mobiliario {
+    private int idBien;
+    private Integer ime;
+    private String marca;
+    private String serie;
+    private String modelo;
+    private String color;
+    private String material;
+    private Integer costoTotal;
+    private String numFactura;
+    private String fechaFactura;
+    private String numCheque;
+    private String fechaAlta;
+    private int noUsuarioAlta;
+    private int idProveedor;
+    private int idFormaAdquisicion;
+    private int idOrigenRecurso;
+    private int idEstadoDelBien;
+    private String observaciones;
+    private int idClasificador;
+    private int idDepartamento;
+    private String fechaBaja;
+    private int noUsuarioBaja;
+    private String fechaUltimaModif;
+    private int noUsuarioUltimaModif;
+    private Integer cantidad;
+    private int idEstatus;
+
+    public Mobiliario() {
+    }
+
+    public Mobiliario(int idBien, Integer ime, String marca, String serie, String modelo, String color, String material, Integer costoTotal, String numFactura, String fechaFactura, String numCheque, String fechaAlta, int noUsuarioAlta, int idProveedor, int idFormaAdquisicion, int idOrigenRecurso, int idEstadoDelBien, String observaciones, int idClasificador, int idDepartamento, String fechaBaja, int noUsuarioBaja, String fechaUltimaModif, int noUsuarioUltimaModif, Integer cantidad, int idEstatus) {
+        this.idBien = idBien;
+        this.ime = ime;
+        this.marca = marca;
+        this.serie = serie;
+        this.modelo = modelo;
+        this.color = color;
+        this.material = material;
+        this.costoTotal = costoTotal;
+        this.numFactura = numFactura;
+        this.fechaFactura = fechaFactura;
+        this.numCheque = numCheque;
+        this.fechaAlta = fechaAlta;
+        this.noUsuarioAlta = noUsuarioAlta;
+        this.idProveedor = idProveedor;
+        this.idFormaAdquisicion = idFormaAdquisicion;
+        this.idOrigenRecurso = idOrigenRecurso;
+        this.idEstadoDelBien = idEstadoDelBien;
+        this.observaciones = observaciones;
+        this.idClasificador = idClasificador;
+        this.idDepartamento = idDepartamento;
+        this.fechaBaja = fechaBaja;
+        this.noUsuarioBaja = noUsuarioBaja;
+        this.fechaUltimaModif = fechaUltimaModif;
+        this.noUsuarioUltimaModif = noUsuarioUltimaModif;
+        this.cantidad = cantidad;
+        this.idEstatus = idEstatus;
+    }
+
+    public int getIdBien() {
+        return idBien;
+    }
+
+    public void setIdBien(int idBien) {
+        this.idBien = idBien;
+    }
+
+    public Integer getIme() {
+        return ime;
+    }
+
+    public void setIme(Integer ime) {
+        this.ime = ime;
+    }
+
+    public String getMarca() {
+        return marca;
+    }
+
+    public void setMarca(String marca) {
+        this.marca = marca;
+    }
+
+    public String getSerie() {
+        return serie;
+    }
+
+    public void setSerie(String serie) {
+        this.serie = serie;
+    }
+
+    public String getModelo() {
+        return modelo;
+    }
+
+    public void setModelo(String modelo) {
+        this.modelo = modelo;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public String getMaterial() {
+        return material;
+    }
+
+    public void setMaterial(String material) {
+        this.material = material;
+    }
+
+    public Integer getCostoTotal() {
+        return costoTotal;
+    }
+
+    public void setCostoTotal(Integer costoTotal) {
+        this.costoTotal = costoTotal;
+    }
+
+    public String getNumFactura() {
+        return numFactura;
+    }
+
+    public void setNumFactura(String numFactura) {
+        this.numFactura = numFactura;
+    }
+
+    public String getFechaFactura() {
+        return fechaFactura;
+    }
+
+    public void setFechaFactura(String fechaFactura) {
+        this.fechaFactura = fechaFactura;
+    }
+
+    public String getNumCheque() {
+        return numCheque;
+    }
+
+    public void setNumCheque(String numCheque) {
+        this.numCheque = numCheque;
+    }
+
+    public String getFechaAlta() {
+        return fechaAlta;
+    }
+
+    public void setFechaAlta(String fechaAlta) {
+        this.fechaAlta = fechaAlta;
+    }
+
+    public int getNoUsuarioAlta() {
+        return noUsuarioAlta;
+    }
+
+    public void setNoUsuarioAlta(int noUsuarioAlta) {
+        this.noUsuarioAlta = noUsuarioAlta;
+    }
+
+    public int getIdProveedor() {
+        return idProveedor;
+    }
+
+    public void setIdProveedor(int idProveedor) {
+        this.idProveedor = idProveedor;
+    }
+
+    public int getIdFormaAdquisicion() {
+        return idFormaAdquisicion;
+    }
+
+    public void setIdFormaAdquisicion(int idFormaAdquisicion) {
+        this.idFormaAdquisicion = idFormaAdquisicion;
+    }
+
+    public int getIdOrigenRecurso() {
+        return idOrigenRecurso;
+    }
+
+    public void setIdOrigenRecurso(int idOrigenRecurso) {
+        this.idOrigenRecurso = idOrigenRecurso;
+    }
+
+    public int getIdEstadoDelBien() {
+        return idEstadoDelBien;
+    }
+
+    public void setIdEstadoDelBien(int idEstadoDelBien) {
+        this.idEstadoDelBien = idEstadoDelBien;
+    }
+
+    public String getObservaciones() {
+        return observaciones;
+    }
+
+    public void setObservaciones(String observaciones) {
+        this.observaciones = observaciones;
+    }
+
+    public int getIdClasificador() {
+        return idClasificador;
+    }
+
+    public void setIdClasificador(int idClasificador) {
+        this.idClasificador = idClasificador;
+    }
+
+    public int getIdDepartamento() {
+        return idDepartamento;
+    }
+
+    public void setIdDepartamento(int idDepartamento) {
+        this.idDepartamento = idDepartamento;
+    }
+
+    public String getFechaBaja() {
+        return fechaBaja;
+    }
+
+    public void setFechaBaja(String fechaBaja) {
+        this.fechaBaja = fechaBaja;
+    }
+
+    public int getNoUsuarioBaja() {
+        return noUsuarioBaja;
+    }
+
+    public void setNoUsuarioBaja(int noUsuarioBaja) {
+        this.noUsuarioBaja = noUsuarioBaja;
+    }
+
+    public String getFechaUltimaModif() {
+        return fechaUltimaModif;
+    }
+
+    public void setFechaUltimaModif(String fechaUltimaModif) {
+        this.fechaUltimaModif = fechaUltimaModif;
+    }
+
+    public int getNoUsuarioUltimaModif() {
+        return noUsuarioUltimaModif;
+    }
+
+    public void setNoUsuarioUltimaModif(int noUsuarioUltimaModif) {
+        this.noUsuarioUltimaModif = noUsuarioUltimaModif;
+    }
+
+    public Integer getCantidad() {
+        return cantidad;
+    }
+
+    public void setCantidad(Integer cantidad) {
+        this.cantidad = cantidad;
+    }
+
+    public int getIdEstatus() {
+        return idEstatus;
+    }
+
+    public void setIdEstatus(int idEstatus) {
+        this.idEstatus = idEstatus;
+    }
+    
+    
+    
+}

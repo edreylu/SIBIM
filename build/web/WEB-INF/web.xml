@@ -6,7 +6,7 @@
     </context-param>
     <!--LOCALES-->
      
-     <!--CAPTCHA BITVE-->
+     <!--CAPTCHA SIBIEM-->
     <context-param>
         <param-name>primefaces.PUBLIC_CAPTCHA_KEY</param-name>
         <param-value>6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI</param-value>

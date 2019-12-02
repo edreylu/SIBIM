@@ -1,0 +1,249 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package clasificador;
+
+import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ *
+ *
+ */
+public class ClasificadorDAO extends conexion.ConexionOracle implements Serializable {
+
+    public int insertaClasificador(Clasificador evento) {
+        System.out.println("Entro a insertar ");
+        int valor = 0;
+        ResultSet rs = null;
+        final String query = "INSERT INTO CLASIFICADOR(IDCLASIFICADOR, \n"
+                + "                         DESCRIPCION, \n"
+                + "                         CLASIFICADOROG, \n"
+                + "                         FECHAREGISTRO, \n"
+                + "                         OBSERVACIONES, \n"
+                + "                         IDFAMILIA, \n"
+                + "                         IDSUBFAMILIA, \n"
+                + "                         IDESTATUS) \n"
+                + "                  VALUES (?,?,?,SYSDATE,?,?,?,1)";
+        try {
+            super.abrirConexion();
+            valor = super.getPreparedStatement(query, new Object[]{evento.getIdClasificador(), evento.getDescripcion(),
+                evento.getClasificadorOg(),
+                evento.getObservaciones(),
+                evento.getSubfamilia().getIdFamilia(),
+                evento.getSubfamilia().getIdSubFamilia()}
+            ).executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println("Error en insertaClasificador() " + e.getMessage());
+
+        } finally {
+            try {
+                if (null != rs) {
+                   rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en insertaClasificador() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        System.out.println("valor: " + valor);
+        return valor;
+    }
+
+    public int actualizaClasificador(Clasificador evento) {
+        int valor = 0;
+        ResultSet rs = null;
+        final String query = "UPDATE CLASIFICADOR SET DESCRIPCION = ?, \n"
+                + "                        CLASIFICADOROG = ?, \n"
+                + "                        OBSERVACIONES = ?, \n"
+                + "                        IDFAMILIA = ?, \n"
+                + "                        IDSUBFAMILIA = ?\n"
+                + "                  WHERE IDCLASIFICADOR = ?";
+
+        try {
+            super.abrirConexion();
+            valor = super.getPreparedStatement(query, new Object[]{evento.getDescripcion(),
+                                                                evento.getClasificadorOg(),
+                                                                evento.getObservaciones(),
+                                                                evento.getSubfamilia().getIdFamilia(),
+                                                                evento.getSubfamilia().getIdSubFamilia(),
+                                                                evento.getIdClasificador()}).executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println("Error en actualizaClasificador() " + e.getMessage() + "\n " + evento.getIdFamilia()+ "\n " +evento.getIdSubFamilia());
+        } finally {
+            try {
+                if (null != rs) {
+                   rs.close();
+                }
+
+            } catch (SQLException e) {
+                System.out.println("Error en actualizaClasificador() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        return valor;
+    }
+
+    public int eliminaClasificador(Clasificador clasificador, int opcion) {
+        int valor = 0;
+        ResultSet rs = null;
+        final String query = "UPDATE CLASIFICADOR set IDESTATUS = ? WHERE IDCLASIFICADOR = ? ";
+        try {
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query, new Object[]{opcion,clasificador.getIdClasificador()}).executeQuery();
+
+        } catch (SQLException e) {
+            System.out.println("Error en eliminaClasificador() " + e.getMessage());
+        } finally {
+            try {
+                if (null != rs) {
+                    valor = 1;
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en eliminaClasificador() " + e.getMessage());
+
+            }
+            super.cerrarConexion();
+        }
+        return valor;
+    }
+
+    public int getNumeroSiguiente() {
+        int id = 0;
+        ResultSet rs = null;
+        final String query = "select nvl(max(IDCLASIFICADOR),0)+ 1 from CLASIFICADOR ";
+        try {
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query).executeQuery();
+            if (rs.next()) {
+                id = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error en getNumeroSiguiente() " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en getNumeroSiguiente() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        return id;
+    }
+
+    public List<Clasificador> traeRegistros(int valor) {
+        List<Clasificador> listaClasificador;
+        System.out.println("Entro a cargar listaClasificador");
+        Clasificador clasificador = null;
+        ResultSet rs = null;
+        String query = null;
+        String continuacion = valor == 1 ? " WHERE IDESTATUS = 1" : "";
+        query = "select CL.IDCLASIFICADOR, \n"
+                + "       CL.DESCRIPCION, \n"
+                + "       CL.CLASIFICADOROG, \n"
+                + "       CL.FECHAREGISTRO, \n"
+                + "       CL.OBSERVACIONES, \n"
+                + "       CL.IDFAMILIA,\n"
+                + "       CL.IDSUBFAMILIA, \n"
+                + "       CL.IDESTATUS,\n"
+                + "       SF.SUBFAMILIA,\n"
+                + "       FA.FAMILIA\n"
+                + "  from CLASIFICADOR CL,\n"
+                + "       SUBFAMILIA SF,\n"
+                + "       FAMILIA FA\n"
+                + " WHERE CL.IDSUBFAMILIA = SF.IDSUBFAMILIA\n"
+                + "   AND CL.IDFAMILIA = FA.IDFAMILIA\n"
+                + continuacion
+                + " ORDER BY 1";
+
+        try {
+            listaClasificador = new ArrayList<>();
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query).executeQuery();
+
+            while (rs.next()) {
+                clasificador = new Clasificador();
+                clasificador.setIdClasificador(rs.getInt("IDCLASIFICADOR"));
+                clasificador.setDescripcion(rs.getString("DESCRIPCION"));
+                clasificador.setClasificadorOg(rs.getString("CLASIFICADOROG"));
+                clasificador.setFechaRegistro(rs.getString("FECHAREGISTRO"));
+                clasificador.setObservaciones(rs.getString("OBSERVACIONES"));
+                clasificador.setIdFamilia(rs.getInt("IDFAMILIA"));
+                clasificador.setIdSubFamilia(rs.getInt("IDSUBFAMILIA"));
+                clasificador.getSubfamilia().setSubFamilia(rs.getString("SUBFAMILIA"));
+                clasificador.getSubfamilia().setFamilia(rs.getString("FAMILIA"));
+                clasificador.setIdEstatus(rs.getInt("IDESTATUS"));
+                listaClasificador.add(clasificador);
+            }
+            System.out.println("listaClasificador.size() = " + listaClasificador.size());
+        } catch (SQLException e) {
+            System.out.println("Error en listaClasificador() " + e.getMessage());
+            listaClasificador = null;
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en listaClasificador() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        return listaClasificador;
+    }
+
+    public List<Subfamilia> traeSubfamilias() {
+        List<Subfamilia> listaSub = new ArrayList<>();
+        ResultSet rs = null;
+        String query = null;
+        Subfamilia subfamilia = null;
+        query = "SELECT SUB.IDSUBFAMILIA,\n"
+                + "       SUB.SUBFAMILIA,\n"
+                + "       SUB.IDFAMILIA,\n"
+                + "       FAM.FAMILIA\n"
+                + "  FROM SUBFAMILIA SUB, \n"
+                + "       FAMILIA FAM\n"
+                + " WHERE SUB.IDFAMILIA = FAM.IDFAMILIA\n";
+
+        try {
+
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query).executeQuery();
+
+            while (rs.next()) {
+                subfamilia = new Subfamilia();
+                subfamilia.setIdSubFamilia(rs.getInt("IDSUBFAMILIA"));
+                subfamilia.setSubFamilia(rs.getString("SUBFAMILIA"));
+                subfamilia.setIdFamilia(rs.getInt("IDFAMILIA"));
+                subfamilia.setFamilia(rs.getString("FAMILIA"));
+
+                listaSub.add(subfamilia);
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error en traeFamilias() " + e.getMessage());
+
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en traeFamilias() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        return listaSub;
+    }
+
+}

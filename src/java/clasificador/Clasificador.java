@@ -1,0 +1,141 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package clasificador;
+
+import java.io.Serializable;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ *
+ * @author usuario
+ */
+public class Clasificador implements Serializable {
+
+    private int idClasificador;
+    private String descripcion;
+    private String clasificadorOg;
+    private String fechaRegistro;
+    private String observaciones;
+    private int idFamilia;
+    private int idSubFamilia;
+    private int idEstatus;
+
+    private Subfamilia subfamilia;
+
+    public Clasificador() {
+        subfamilia = new Subfamilia();
+    }
+
+    public Clasificador(int idClasificador, String descripcion, String clasificadorOg, String fechaRegistro, String observaciones, int idFamilia, int idSubFamilia, int idEstatus) {
+        this.idClasificador = idClasificador;
+        this.descripcion = descripcion;
+        this.clasificadorOg = clasificadorOg;
+        this.fechaRegistro = fechaRegistro;
+        this.observaciones = observaciones;
+        this.idFamilia = idFamilia;
+        this.idSubFamilia = idSubFamilia;
+        this.idEstatus = idEstatus;
+    }
+    
+    public Clasificador(Clasificador clasificador) {
+        this.idClasificador = clasificador.idClasificador;
+        this.descripcion = clasificador.descripcion;
+        this.clasificadorOg = clasificador.clasificadorOg;
+        this.fechaRegistro = clasificador.fechaRegistro;
+        this.observaciones = clasificador.observaciones;
+        this.idFamilia = clasificador.idFamilia;
+        this.idSubFamilia = clasificador.idSubFamilia;
+        this.idEstatus = clasificador.idEstatus;
+        this.subfamilia = clasificador.getSubfamilia();
+    }
+
+    public int getIdClasificador() {
+        return idClasificador;
+    }
+
+    public void setIdClasificador(int idClasificador) {
+        this.idClasificador = idClasificador;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion!=null?descripcion.toUpperCase():null;
+    }
+
+    public String getClasificadorOg() {
+        return clasificadorOg;
+    }
+
+    public void setClasificadorOg(String clasificadorOg) {
+        this.clasificadorOg = clasificadorOg!=null?clasificadorOg.toUpperCase():null;
+    }
+
+    public String getFechaRegistro() {
+        return fechaRegistro;
+    }
+
+    public void setFechaRegistro(String fechaRegistro) {
+        this.fechaRegistro = fechaRegistro;
+    }
+
+    public String getObservaciones() {
+        return observaciones;
+    }
+
+    public void setObservaciones(String observaciones) {
+        this.observaciones = observaciones!=null?observaciones.toUpperCase():null;
+    }
+
+    public int getIdFamilia() {
+        return idFamilia;
+    }
+
+    public void setIdFamilia(int idFamilia) {
+        this.idFamilia = idFamilia;
+    }
+
+    public int getIdSubFamilia() {
+        return idSubFamilia;
+    }
+
+    public void setIdSubFamilia(int idSubFamilia) {
+        this.idSubFamilia = idSubFamilia;
+    }
+
+    public int getIdEstatus() {
+        return idEstatus;
+    }
+
+    public void setIdEstatus(int idEstatus) {
+        this.idEstatus = idEstatus;
+    }
+
+    public Subfamilia getSubfamilia() {
+        return subfamilia;
+    }
+
+    public void setSubfamilia(Subfamilia subfamilia) {
+        this.subfamilia = subfamilia;
+    }
+
+    public Subfamilia buscarFamilia(int idFamilia, List<Subfamilia> listSubFamilia) {
+
+        for (Subfamilia sub : listSubFamilia) {
+            if (Objects.equals(sub.getIdSubFamilia(), idFamilia)) {
+                return sub;
+
+            }
+        }
+
+        return null;
+
+    }
+
+}

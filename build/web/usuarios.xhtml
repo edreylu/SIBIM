@@ -27,10 +27,10 @@
                                  style="width:100%;" rows="10" rowsPerPageTemplate="5,8,10" 
                                  emptyMessage ="No hay usuarios disponibles"
                                  paginator="true" paginatorPosition="bottom"
-                                 paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
                                  filteredValue="#{usuariosControl.filteredUsuarios}" widgetVar="usuariosTabla"
                                  selection="#{usuariosControl.usuarioSeleccionado}" selectionMode="single" 
-                                 rowKey="#{pe.noUsuario}">
+                                 rowKey="#{pe.noUsuario}" currentPageReportTemplate="[ {endRecord} de {totalRecords} Usuarios ]">
                         <p:ajax event="rowSelect" update="panelBotones" global="false"/>
                         <f:facet name="header">
                             <p:commandButton id="insus" value="Insertar" icon="fa fa-plus" update=":formInsertar" actionListener="#{usuariosControl.CargaVentanaInserta('')}" style="float: left;" rendered="#{accesoC.rolbotones.ins}" >
@@ -101,16 +101,16 @@
                 <h:form id="formInsertar" class="dialogC">
                     <p:messages id="messages" closable="true"/>
                     <p:growl id="mg" showSummary="true" showDetail="true"/>
-                    <p:panelGrid columns="3">
+                    <p:panelGrid columns="3" styleClass="sinBorde" style="width: 100%">
 
 
                         <p:outputLabel value="Usuario" for="clave" />
-                        <p:inputText id="clave" value="#{usuariosControl.usuario.clave}" requiredMessage="Se requiere Usuario" required="true" style="text-transform: uppercase;" >
+                        <p:inputText id="clave" value="#{usuariosControl.usuario.clave}" size="13" maxlength="13" requiredMessage="Se requiere Usuario" required="true" style="text-transform: uppercase;" >
                             <p:watermark for="clave" value="USUARIO" />  
                         </p:inputText>
                         <p:message for="clave" display="icon" />
                         <p:outputLabel value="Password" for="pasaporte" />
-                        <p:inputText id="pasaporte" value="#{usuariosControl.usuario.pasaporte}" requiredMessage="Se requiere Password" required="true" style="text-transform: uppercase;" >
+                        <p:inputText id="pasaporte" value="#{usuariosControl.usuario.pasaporte}" size="13" maxlength="13" requiredMessage="Se requiere Password" required="true" style="text-transform: uppercase;" >
                             <p:watermark for="pasaporte" value="PASSWORD" />  
                         </p:inputText>
                         <p:message for="pasaporte" display="icon" />
@@ -130,7 +130,7 @@
                         <p:inputMask id="itTelefono" value="#{usuariosControl.usuario.telefono}" mask="(999) 999-9999" required="true" requiredMessage="El telefono es requerido" placeholder="(999) 999-9999"/>
                         <p:message for="itTelefono" display="icon" />
                         <p:outputLabel for="itTelefono2" value="Telefono 2:" />
-                        <p:inputMask id="itTelefono2" value="#{usuariosControl.usuario.telefono2}" mask="(999) 999-9999" required="true" requiredMessage="El telefono 2 es requerido" placeholder="(999) 999-9999"/>
+                        <p:inputMask id="itTelefono2" value="#{usuariosControl.usuario.telefono2}" mask="(999) 999-9999" required="false" requiredMessage="El telefono 2 es requerido" placeholder="(999) 999-9999"/>
                         <p:message for="itTelefono2" display="icon" />
                         <p:outputLabel value="Rol: " for="rol"/>
                         <p:selectOneMenu id="rol" value="#{usuariosControl.usuario.noRol}" style="width: 90%;" required="true" requiredMessage="El rol es requerido" >
@@ -139,14 +139,24 @@
                         </p:selectOneMenu>
                         <p:message for="rol" display="icon" />
                         <p:outputLabel value="No PersonalBm: " for="noper"/>
-                        <p:inputText id="noper" value="#{usuariosControl.usuario.noPersonalBm}" style="width: 90%;" required="true" requiredMessage="El numero de personal es requerido"/>
-                        <p:commandButton icon="fa fa-search" immediate="true" update=":formAsignarPer" actionListener="#{usuariosControl.asignapersonalBusqueda('')}" oncomplete="PF('dlgasignarper').show()" />
+                        <p:row>
+                        <p:column>
+                            <p:inputText id="noper" value="#{usuariosControl.usuario.noPersonalBm}" size="5" required="true" requiredMessage="El numero de personal es requerido"/>
+                            <p:outputLabel id="nomper" value=" #{usuariosControl.usuario.nomPersonal} " style="font-weight: bold;"/>
+                            </p:column>
+                            <p:column>
+                            <p:commandButton icon="fa fa-search" immediate="true" update=":formAsignarPer" actionListener="#{usuariosControl.asignapersonalBusqueda('')}" oncomplete="PF('dlgasignarper').show()" />
+                            </p:column>
+                        </p:row>
                         <p:message for="noper" display="icon" />
                     </p:panelGrid>
+                    <p:separator/>
+                    <center>
                     <p:commandButton value="Guardar" update="mg :formInsertar :formMostrar"
                                      actionListener="#{usuariosControl.insertar()}" 
                                      oncomplete="actualizaListUsuarios();"
                                      />
+                    </center>
                 </h:form>
             </p:dialog>
 
@@ -157,19 +167,22 @@
                 <h:form id="formModificar" class="dialogC">
                     <p:messages id="messages" closable="true"/>
                     <p:growl id="mg" showSummary="true" showDetail="true"/>
-                    <p:panelGrid columns="3" >
+                    <p:panelGrid columns="3" styleClass="sinBorde" style="width: 100%">
+
 
                         <p:outputLabel value="Usuario" for="clave" />
-                        <p:inputText id="clave" value="#{usuariosControl.usuario.clave}" required="true" requiredMessage="El usuario es requerido" />
+                        <p:inputText id="clave" value="#{usuariosControl.usuario.clave}" size="13" maxlength="13" requiredMessage="Se requiere Usuario" required="true" style="text-transform: uppercase;" >
+                            <p:watermark for="clave" value="USUARIO" />  
+                        </p:inputText>
                         <p:message for="clave" display="icon" />
                         <p:outputLabel value="Apellido Paterno" styleClass=""/>
-                        <p:inputText id="itApPaterno" value="#{usuariosControl.usuario.apellidoPaterno}" required="true" requiredMessage="El apellido paterno es requerido"   />
+                        <p:inputText id="itApPaterno" value="#{usuariosControl.usuario.apellidoPaterno}" size="13" maxlength="13" required="true" requiredMessage="Se rerquiere apellido paterno"   />
                         <p:message for="itApPaterno" display="icon" />
                         <p:outputLabel value="Apellido Materno" styleClass=""/>
                         <p:inputText id="itApMaterno" value="#{usuariosControl.usuario.apellidoMaterno}"   />
                         <p:message for="itApMaterno" display="icon" />
                         <p:outputLabel value="Nombre" styleClass=""/>
-                        <p:inputText id="itNombre" value="#{usuariosControl.usuario.nombre}" required="true" requiredMessage="El nombre es requerido"   />
+                        <p:inputText id="itNombre" value="#{usuariosControl.usuario.nombre}" required="true" requiredMessage="Se requiere Nombre"   />
                         <p:message for="itNombre" display="icon" />
                         <p:outputLabel value="Email" styleClass=""/>
                         <p:inputText id="itEmail" value="#{usuariosControl.usuario.correo}" required="true" requiredMessage="El email es requerido" placeholder="Formato algo@algo.com"/>
@@ -177,6 +190,9 @@
                         <p:outputLabel for="itTelefono" value="Telefono :" />
                         <p:inputMask id="itTelefono" value="#{usuariosControl.usuario.telefono}" mask="(999) 999-9999" required="true" requiredMessage="El telefono es requerido" placeholder="(999) 999-9999"/>
                         <p:message for="itTelefono" display="icon" />
+                        <p:outputLabel for="itTelefono2" value="Telefono 2:" />
+                        <p:inputMask id="itTelefono2" value="#{usuariosControl.usuario.telefono2}" mask="(999) 999-9999" required="false" requiredMessage="El telefono 2 es requerido" placeholder="(999) 999-9999"/>
+                        <p:message for="itTelefono2" display="icon" />
                         <p:outputLabel value="Rol: " for="rol"/>
                         <p:selectOneMenu id="rol" value="#{usuariosControl.usuario.noRol}" style="width: 90%;" required="true" requiredMessage="El rol es requerido" >
                             <f:selectItem itemLabel="Seleccione...." itemValue="" />
@@ -184,13 +200,22 @@
                         </p:selectOneMenu>
                         <p:message for="rol" display="icon" />
                         <p:outputLabel value="No PersonalBm: " for="noper"/>
-                        <p:inputText id="noper" value="#{usuariosControl.usuario.noPersonalBm}" style="width: 90%;" required="true" requiredMessage="El numero de personal es requerido"/>
-                        <p:commandButton icon="fa fa-search" immediate="true" update=":formAsignarPer" actionListener="#{usuariosControl.asignapersonalBusqueda('')}" oncomplete="PF('dlgasignarper').show()" />
-                        <p:message for="noper" display="icon" />
+                        <p:row>
+                        <p:column>
+                            <p:inputText id="noper" value="#{usuariosControl.usuario.noPersonalBm}" size="5" required="true" requiredMessage="El numero de personal es requerido"/>
+                            <p:outputLabel id="nomper" value=" #{usuariosControl.usuario.nomPersonal} " style="font-weight: bold;"/>
+                            </p:column>
+                            <p:column>
+                            <p:commandButton icon="fa fa-search" immediate="true" update=":formAsignarPer" actionListener="#{usuariosControl.asignapersonalBusqueda('')}" oncomplete="PF('dlgasignarper').show()" />
+                            </p:column>
+                        </p:row><p:message for="noper" display="icon" />
                     </p:panelGrid>
+                    <p:separator/>
+                    <center>
                     <p:commandButton value="Modificar" update="mg :formModificar :formMostrar"
                                      actionListener="#{usuariosControl.modificar()}" oncomplete="actualizaListUsuarios();"
                                      />
+                    </center>
 
 
                 </h:form>
@@ -207,7 +232,7 @@
                     <p:growl id="mg" showSummary="true" showDetail="true"/>
 
 
-
+                    <center>
                     <h:outputText value="¿Desea Inactivar? #{usuariosControl.usuario.clave} " />    
 
                     <p:commandButton value="Si" update="mg :formMostrar" actionListener="#{usuariosControl.eliminar()}" 
@@ -217,7 +242,7 @@
                     </p:commandButton>
 
                     <p:commandButton value="No" actionListener="#{usuariosControl.cancelarEliminar()}" />
-
+                    </center>
                 </h:form>
             </p:dialog>
 
@@ -262,11 +287,6 @@
                                     <p:ajax listener="#{usuariosControl.selecUno(dep)}" />
                                 </p:selectBooleanButton>
                             </p:column>
-                            <p:column headerText="ES ENLACE" style="text-align: center" width="10%">
-                                <p:selectBooleanButton value="#{dep.departamentoSeleccionadoEnlace}" onLabel="SI" offLabel="NO" style="width:60px" >
-                                    <p:ajax listener="#{usuariosControl.selecUnoEsEnlace(dep)}" />
-                                </p:selectBooleanButton>
-                            </p:column>
                         </p:dataTable>
                         <p:separator></p:separator>
                         <br/>
@@ -290,17 +310,17 @@
                     <p:growl id="mg" showSummary="true" showDetail="true"/> 
 
                     <center>
-                        <p:panelGrid columns="3" layout="grid">
+                        <p:panelGrid columns="3" styleClass="sinBorde" style="width: 100%">
                             <p:outputLabel value="USUARIO: " for="clave" />
-                            <p:inputText id="clave" value="#{usuariosControl.usuario.clave}" maxlength="10" size="10" readonly="true" />
+                            <p:inputText id="clave" value="#{usuariosControl.usuario.clave}" size="13" maxlength="13" readonly="true" />
                             <p:message for="clave" display="icon" />
                             <p:outputLabel value="PASSWORD: " for="pasaporte" />
-                            <p:inputText id="pasaporte" value="#{usuariosControl.usuario.pasaporte}" maxlength="10" size="10" required="true" requiredMessage="Se requiere password" style="text-transform: uppercase;" >
+                            <p:inputText id="pasaporte" value="#{usuariosControl.usuario.pasaporte}" size="13" maxlength="13" required="true" requiredMessage="Se requiere password" style="text-transform: uppercase;" >
                                 <p:watermark for="pasaporte" value="PASSWORD" />  
                             </p:inputText>
                             <p:message for="pasaporte" display="icon" />
                             <p:outputLabel value=""/>
-                            <p:commandButton value="Asignar" update="mg :formPasaporte :formMostrar"
+                            <p:commandButton value="Aceptar" update="mg :formPasaporte :formMostrar"
                                              actionListener="#{usuariosControl.modificarPasaporte()}"  
                                              oncomplete="actualizaListUsuarios();" />
                             <p:outputLabel value=""/>
@@ -350,7 +370,8 @@
                                 <h:outputText value="#{per.nombre} #{per.ap1} #{per.ap2}"  />
                             </p:column>
                             <p:column headerText="ASIGNAR" style="text-align: center" width="10%">
-                                <p:commandButton value="Asignar" update=":formInsertar, :formModificar" actionListener="#{usuariosControl.asignaNoPersonal(per)}" />
+                                <p:commandButton value="Asignar" update=":formInsertar:noper,:formInsertar:nomper, :formModificar:noper, :formModificar:nomper"
+                                                 actionListener="#{usuariosControl.asignaNoPersonal(per)}" />
                             </p:column>
                         </p:dataTable>
                         <p:separator></p:separator>

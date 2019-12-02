@@ -1,0 +1,354 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition template="menu.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <ui:define name="contenido">
+        <h:head>
+            <title>Departamento</title>
+
+        </h:head>
+        <f:metadata>
+            <f:viewAction action="#{departamentoControl.init()}" />   
+        </f:metadata>       
+        <h:body>
+            <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"/>
+            <f:event type="preRenderView" rendered="#{facesContext.postBack}" listener="#{accesoC.validaSesion('departamento.xhtml')}"/>  
+            <center>
+                <h:outputText value="Departamento" class="tituloPantalla" />
+                <p:separator/>
+                <h:form id="formMostrar">
+
+                    <p:dataTable id="tablacat" var="dep" value="#{departamentoControl.departamentos}"
+                                 style="width:100%;" rows="10" rowsPerPageTemplate="5,8,10" 
+                                 emptyMessage ="No hay Departamentos disponibles" 
+                                 paginator="true" paginatorPosition="bottom"
+                                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+                                 filteredValue="#{departamentoControl.filteredDepartamento}" widgetVar="catTabla"
+                                 selection="#{departamentoControl.departamentoSeleccionado}" selectionMode="single" 
+                                 rowKey="#{dep.idDepartamento}" currentPageReportTemplate="[ {endRecord} de {totalRecords} Departamentos ]">
+                        <p:ajax event="rowSelect" update="panelBotones" global="false"/>
+                        <f:facet name="header">
+                            <p:commandButton id="inscat" value="Insertar" icon="fa fa-plus" update=":formInsertar" actionListener="#{departamentoControl.CargaVentanaInserta('')}" style="float: left;" rendered="#{accesoC.rolbotones.ins}" >
+                            </p:commandButton>
+                            <p:tooltip for="inscat" value="Insertar Departamento" showEffect="clip" hideEffect="clip" position="top"/>
+                            <p:outputPanel>
+                                <h:outputText value="Buscar: " />
+                                <p:inputText id="globalFilter" onkeypress="if (event.keyCode === 13) {return false;}" style="width:150px" placeholder="Escribe para buscar"/>
+                                <p:commandButton id="bsearch" icon="fa fa-search" onclick="PF('catTabla').filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+
+                        <p:column headerText="#" width="3%" filterBy="#{dep.idDepartamento}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{dep.idDepartamento}" />
+                        </p:column>
+
+                        <p:column headerText="NOM DEPARTAMENTO" width="25%" filterBy="#{dep.nomDepto}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{dep.nomDepto}" />
+                        </p:column>
+                        <p:column headerText="CLAVE UR" width="5%" filterBy="#{dep.claveUr}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{dep.claveUr}" />
+                        </p:column>
+                        <p:column headerText="RESPONSABLE" width="30%" filterBy="#{dep.nomPersonal}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{dep.nomPersonal}" />
+                        </p:column>
+                        <p:column headerText="ENLACE" width="30%" filterBy="#{dep.nomEnlace}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{dep.nomEnlace}" />
+                        </p:column>
+                        <p:column headerText="IDESTATUS" width="7%">
+                            <h:outputText value="#{dep.idEstatus == '1' ? 'ACTIVO' : 'INACTIVO'}" />
+                        </p:column>
+                        <f:facet name="footer">
+                            <h:panelGroup id="panelBotones" >
+                                <p:commandButton id="actcat" value="Editar" icon="fa fa-pencil" disabled="#{departamentoControl.departamentoSeleccionado == null}" 
+                                                 rendered="#{accesoC.rolbotones.act}" actionListener="#{departamentoControl.CargaVentanaModifica()}" 
+                                                 update=":formModificar">
+                                    <f:setPropertyActionListener target="#{departamentoControl.departamento}" value="#{departamentoControl.departamentoSeleccionado}" />
+                                </p:commandButton>
+                                <p:tooltip for="actcat" value="Editar Departamento" showEffect="clip" hideEffect="clip" position="top"/>
+
+                                <p:commandButton id="elicat" value="#{departamentoControl.departamentoSeleccionado.idEstatus eq '1' ? 'Inactivar' : 'Activar'}" 
+                                                 icon="fa fa-trash" disabled="#{departamentoControl.departamentoSeleccionado == null}" 
+                                                 rendered="#{accesoC.rolbotones.eli}" oncomplete="PF('dlgeliminar').show()" update=":formEliminar" >
+                                    <f:setPropertyActionListener target="#{departamentoControl.departamento}" value="#{departamentoControl.departamentoSeleccionado}" />
+                                </p:commandButton>
+                                <p:tooltip for="elicat" value="#{departamentoControl.departamentoSeleccionado.idEstatus eq '1' ? 'Inactivar' : 'Activar'} Departamento" 
+                                           showEffect="clip" hideEffect="clip" position="top"/>    
+                            </h:panelGroup>
+                        </f:facet>
+                    </p:dataTable>
+
+
+                </h:form>
+
+            </center>
+
+            <p:dialog id="dlg1" header="Insertar Departamento" showEffect="explode" hideEffect="explode" widgetVar="dlginsertar" 
+                      resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+                <h:form id="formInsertar" class="dialogC">
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>
+                    <p:panelGrid columns="3" styleClass="sinBorde" style="width: 100%">
+                        <p:outputLabel value="UR: " for="ur"/>
+                        <p:selectOneMenu id="ur" filter="true" filterMatchMode="contains" value="#{departamentoControl.departamento.idUr}" style="width: 100%;" required="true" requiredMessage="El ur es requerido" >
+                            <f:selectItem itemLabel="Seleccione...." itemValue="" />
+                            <f:selectItems var="ur" value="#{departamentoControl.urs}" itemLabel="#{ur.ur}" itemValue="#{ur.idUr}" />
+                        </p:selectOneMenu>
+                        <p:message for="ur" display="icon" />
+                        <p:outputLabel value="NOMBRE DEPTO:" for="nombre" />
+                        <p:inputText id="nombre" value="#{departamentoControl.departamento.nomDepto}" size="70" style="text-transform: uppercase;" requiredMessage="Se requiere nombre depto" required="true" />
+                        <p:message for="nombre" display="icon" />
+                        <p:outputLabel value="DOMICILIO:" for="domicilio" />
+                        <p:inputText id="domicilio" value="#{departamentoControl.departamento.domicilio}" size="70" style="text-transform: uppercase;" requiredMessage="Se requiere domicilio" required="true" />
+                        <p:message for="domicilio" display="icon" />
+                        <p:outputLabel value="BLOQUE SIERE:" for="siere" />
+                        <p:inputText id="siere" value="#{departamentoControl.departamento.noBloque}" size="1" maxlength="1" style="text-transform: uppercase;" requiredMessage="Se requiere bloque siere" required="true" />
+                        <p:message for="siere" display="icon" />
+                        <p:outputLabel value="NIVEL AREA: " for="nivelarea"/>
+                        <p:selectOneMenu id="nivelarea" filter="true" filterMatchMode="contains" value="#{departamentoControl.departamento.idNivelArea}" style="width: 100%;" required="true" requiredMessage="El nivel area es requerido" >
+                            <f:selectItem itemLabel="Seleccione...." itemValue="" />
+                            <f:selectItems var="nivel" value="#{departamentoControl.nivelesArea}" itemLabel="#{nivel.descripcion}" itemValue="#{nivel.idNivelArea}" />
+                        </p:selectOneMenu>
+                        <p:message for="nivelarea" display="icon" />
+                        <p:outputLabel value="Responsable: " for="noper"/>
+                            <p:row>
+                            <p:column>
+                            <p:inputText id="noper" value="#{departamentoControl.departamento.noPersonalBm}" size="5" required="true" requiredMessage="El numero de personal es requerido"/>
+                            <p:outputLabel id="nomper" value=" #{departamentoControl.departamento.nomPersonal} " style="font-weight: bold;"/>
+                            </p:column>
+                            <p:column>
+                            <p:commandButton icon="fa fa-search" immediate="true" update=":formAsignarPer" actionListener="#{departamentoControl.asignapersonalBusqueda('')}" oncomplete="PF('dlgasignarper').show()" />
+                            </p:column>
+                            </p:row>
+                            <p:message for="noper" display="icon" />
+                            <p:outputLabel value="Enlace: " for="noenla"/>
+                            <p:row>
+                            <p:column>
+                                <p:inputText id="noenla" value="#{departamentoControl.departamento.noPersonalBmEnlace}" size="5" required="true" requiredMessage="El numero de Enlace es requerido"/>
+                                <p:outputLabel id="nomenla" value=" #{departamentoControl.departamento.nomEnlace} " style="font-weight: bold;"/>
+                            </p:column>
+                            <p:column>
+                            <p:commandButton icon="fa fa-search" immediate="true" update=":formAsignarEnla" actionListener="#{departamentoControl.asignaenlaceBusqueda('')}" oncomplete="PF('dlgasignarenla').show()" />
+                            </p:column>
+                            </p:row>
+                            <p:message for="noenla" display="icon" />
+                        <p:outputLabel value="OBSERVACIONES" for="observa" />
+                        <p:inputTextarea id="observa" cols="70" value="#{departamentoControl.departamento.observaciones}" />
+                        <p:message for="observa" display="icon" />
+
+                    </p:panelGrid>
+                    <p:separator/>
+                    <center>
+                    <p:commandButton value="Guardar" update="mg :formInsertar :formMostrar"
+                                     actionListener="#{departamentoControl.insertar()}" oncomplete="actualizaList();"/>
+                    </center>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog id="dlg2" header="Modificar Departamento" showEffect="explode" hideEffect="explode" widgetVar="dlgmodificar" 
+                      resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+
+                <h:form id="formModificar" class="dialogC">
+
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>  
+                    <p:panelGrid columns="3" styleClass="sinBorde" style="width: 100%">
+                        <p:outputLabel value="UR: " for="ur"/>
+                        <p:selectOneMenu id="ur" filter="true" filterMatchMode="contains" value="#{departamentoControl.departamento.idUr}" style="width: 100%;" required="true" requiredMessage="El ur es requerido" >
+                            <f:selectItem itemLabel="Seleccione...." itemValue="" />
+                            <f:selectItems var="ur" value="#{departamentoControl.urs}" itemLabel="#{ur.ur}" itemValue="#{ur.idUr}" />
+                        </p:selectOneMenu>
+                        <p:message for="ur" display="icon" />
+                        <p:outputLabel value="NOMBRE DEPTO:" for="nombre" />
+                        <p:inputText id="nombre" value="#{departamentoControl.departamento.nomDepto}" size="70" style="text-transform: uppercase;" requiredMessage="Se requiere nombre depto" required="true" />
+                        <p:message for="nombre" display="icon" />
+                        <p:outputLabel value="DOMICILIO:" for="domicilio" />
+                        <p:inputText id="domicilio" value="#{departamentoControl.departamento.domicilio}" size="70" style="text-transform: uppercase;" requiredMessage="Se requiere domicilio" required="true" />
+                        <p:message for="domicilio" display="icon" />
+                        <p:outputLabel value="BLOQUE SIERE:" for="siere" />
+                        <p:inputText id="siere" value="#{departamentoControl.departamento.noBloque}" size="1" maxlength="1" style="text-transform: uppercase;" requiredMessage="Se requiere bloque siere" required="true" />
+                        <p:message for="siere" display="icon" />
+                        <p:outputLabel value="NIVEL AREA: " for="nivelarea"/>
+                        <p:selectOneMenu id="nivelarea" filter="true" filterMatchMode="contains" value="#{departamentoControl.departamento.idNivelArea}" style="width: 100%;" required="true" requiredMessage="El nivel area es requerido" >
+                            <f:selectItem itemLabel="Seleccione...." itemValue="" />
+                            <f:selectItems var="nivel" value="#{departamentoControl.nivelesArea}" itemLabel="#{nivel.descripcion}" itemValue="#{nivel.idNivelArea}" />
+                        </p:selectOneMenu>
+                        <p:message for="nivelarea" display="icon" />
+                        <p:outputLabel value="Responsable: " for="noper"/>
+                            <p:row>
+                            <p:column>
+                            <p:inputText id="noper" value="#{departamentoControl.departamento.noPersonalBm}" size="5" required="true" requiredMessage="El numero de personal es requerido"/>
+                            <p:outputLabel id="nomper" value=" #{departamentoControl.departamento.nomPersonal} " style="font-weight: bold;"/>
+                            </p:column>
+                            <p:column>
+                            <p:commandButton icon="fa fa-search" immediate="true" update=":formAsignarPer" actionListener="#{departamentoControl.asignapersonalBusqueda('')}" oncomplete="PF('dlgasignarper').show()" />
+                            </p:column>
+                            </p:row>
+                            <p:message for="noper" display="icon" />
+                            <p:outputLabel value="Enlace: " for="noenla"/>
+                            <p:row>
+                            <p:column>
+                                <p:inputText id="noenla" value="#{departamentoControl.departamento.noPersonalBmEnlace}" size="5" required="true" requiredMessage="El numero de Enlace es requerido"/>
+                                <p:outputLabel id="nomenla" value=" #{departamentoControl.departamento.nomEnlace} " style="font-weight: bold;"/>
+                            </p:column>
+                            <p:column>
+                            <p:commandButton icon="fa fa-search" immediate="true" update=":formAsignarEnla" actionListener="#{departamentoControl.asignaenlaceBusqueda('')}" oncomplete="PF('dlgasignarenla').show()" />
+                            </p:column>
+                            </p:row>
+                            <p:message for="noenla" display="icon" />
+                        <p:outputLabel value="OBSERVACIONES" for="observa" />
+                        <p:inputTextarea id="observa" cols="70" value="#{departamentoControl.departamento.observaciones}" />
+                        <p:message for="observa" display="icon" />
+
+                    </p:panelGrid>
+                    <p:separator/>
+                    <center>
+                    <p:commandButton value="Modificar" update="mg :formMostrar"
+                                     actionListener="#{departamentoControl.modificar()}"
+                                     oncomplete="actualizaList();"
+                                     />
+
+                    <p:commandButton value="Cancelar" actionListener="#{departamentoControl.cancelarActualizar()}"/>
+                    </center>
+
+                </h:form>
+
+
+            </p:dialog>
+
+
+            <p:dialog id="dlg3" header="Estatus Departamento" showEffect="explode" hideEffect="explode" 
+                      widgetVar="dlgeliminar" resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+                <h:form id="formEliminar" class="dialogC">
+
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>
+
+                    <center>
+                    <h:outputText rendered="#{departamentoControl.departamento.idEstatus eq '1'}" value="¿Desea Inactivar #{departamentoControl.departamento.nomDepto} ?" />    
+                    <p:commandButton rendered="#{departamentoControl.departamento.idEstatus eq '1'}" value="Si" update="mg :formMostrar" actionListener="#{departamentoControl.ActivarInactivar(2)}" 
+                                     oncomplete="actualizaList();" > </p:commandButton>
+                    <h:outputText rendered="#{departamentoControl.departamento.idEstatus eq '2'}" value="¿Desea Activar #{departamentoControl.departamento.nomDepto} ?" />    
+                    <p:commandButton rendered="#{departamentoControl.departamento.idEstatus eq '2'}" value="Si" update="mg :formMostrar" actionListener="#{departamentoControl.ActivarInactivar(1)}" 
+                                     oncomplete="actualizaList();" > </p:commandButton>
+                    <p:commandButton value="No" actionListener="#{departamentoControl.cancelarEliminar()}" />
+                    </center>
+                </h:form>
+            </p:dialog>
+            
+            <p:dialog id="dlg4" header="Asignar Responsable a Departamento" showEffect="explode" hideEffect="explode" widgetVar="dlgasignarper" appendTo="@(body)" modal="true"
+                        resizable="false" width="80%" position="top center" onHide="actualizaList();" closeOnEscape="true" >
+
+                <h:form id="formAsignarPer" class="dialogC">
+                    <p:messages id="messages" closable="true"/>
+                    <p:growl id="mg" showSummary="true" showDetail="true"/> 
+
+                    <center>
+                        <p:dataTable id="usper" var="per" value="#{departamentoControl.personal}"
+                                     paginator="true" paginatorPosition="bottom" emptyMessage="No hay personal disponible"
+                                     paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rows="10" style=" width: 100%;"
+                                     currentPageReportTemplate="({endRecord} de {totalRecords} Personal)">
+                            <f:facet name="header">
+                                <p:outputPanel>
+                                    <h:outputText value="Buscar: " />
+                                    <p:inputText value="#{departamentoControl.valorBuscado}" id="globalFilter" style="width:150px; text-transform: uppercase;" placeholder="Escribe para buscar" />
+                                    <p:commandButton actionListener="#{departamentoControl.asignapersonalBusqueda(departamentoControl.valorBuscado)}" value="Buscar" update="usper" />
+                                </p:outputPanel>
+
+                            </f:facet>
+                            <p:column headerText="NO PERSONALBM" width="10%" >
+                                <h:outputText value="#{per.noPersonalBm}"  />
+                            </p:column>
+                            <p:column headerText="NO PERSONAL" width="10%" >
+                                <h:outputText value="#{per.noPersonal}"  />
+                            </p:column>
+                            <p:column headerText="RFC" width="20%" >
+                                <h:outputText value="#{per.rfc}"  />
+                            </p:column>
+                            <p:column headerText="CURP" width="20%" >
+                                <h:outputText value="#{per.curp}"  />
+                            </p:column>
+                            <p:column headerText="NOMBRE" width="30%" >
+                                <h:outputText value="#{per.nombre} #{per.ap1} #{per.ap2}"  />
+                            </p:column>
+                            <p:column headerText="ASIGNAR" style="text-align: center" width="10%">
+                                <p:commandButton value="Asignar" update=":formInsertar:noper,:formInsertar:nomper, :formModificar:noper, :formModificar:nomper" 
+                                                 actionListener="#{departamentoControl.asignaNoPersonal(per)}" />
+                            </p:column>
+                        </p:dataTable>
+                        <p:separator></p:separator>
+                        <br/>
+                        <p:commandButton value="Cancelar" actionListener="#{departamentoControl.cancelarAsignarPersonal()}" />
+                    </center>
+
+                </h:form>
+
+
+            </p:dialog>
+            
+            <p:dialog id="dlg5" header="Asignar Enlace a Departamento" showEffect="explode" hideEffect="explode" widgetVar="dlgasignarenla" appendTo="@(body)" modal="true"
+                        resizable="false" width="80%" position="top center" onHide="actualizaList();" closeOnEscape="true" >
+
+                <h:form id="formAsignarEnla" class="dialogC">
+                    <p:messages id="messages" closable="true"/>
+                    <p:growl id="mg" showSummary="true" showDetail="true"/> 
+
+                    <center>
+                        <p:dataTable id="usper" var="per" value="#{departamentoControl.personalEnlace}"
+                                     paginator="true" paginatorPosition="bottom" emptyMessage="No hay personal disponible"
+                                     paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rows="10" style=" width: 100%;"
+                                     currentPageReportTemplate="({endRecord} de {totalRecords} Personal)">
+                            <f:facet name="header">
+                                <p:outputPanel>
+                                    <h:outputText value="Buscar: " />
+                                    <p:inputText value="#{departamentoControl.valorBuscado}" id="globalFilter" style="width:150px; text-transform: uppercase;" placeholder="Escribe para buscar" />
+                                    <p:commandButton actionListener="#{departamentoControl.asignaenlaceBusqueda(departamentoControl.valorBuscado)}" value="Buscar" update="usper" />
+                                </p:outputPanel>
+
+                            </f:facet>
+                            <p:column headerText="NO PERSONALBM" width="10%" >
+                                <h:outputText value="#{per.noPersonalBm}"  />
+                            </p:column>
+                            <p:column headerText="NO PERSONAL" width="10%" >
+                                <h:outputText value="#{per.noPersonal}"  />
+                            </p:column>
+                            <p:column headerText="RFC" width="20%" >
+                                <h:outputText value="#{per.rfc}"  />
+                            </p:column>
+                            <p:column headerText="CURP" width="20%" >
+                                <h:outputText value="#{per.curp}"  />
+                            </p:column>
+                            <p:column headerText="NOMBRE" width="30%" >
+                                <h:outputText value="#{per.nombre} #{per.ap1} #{per.ap2}"  />
+                            </p:column>
+                            <p:column headerText="ASIGNAR" style="text-align: center" width="10%">
+                                <p:commandButton value="Asignar" update=":formInsertar:noenla,:formInsertar:nomenla, :formModificar:noenla, :formModificar:nomenla" 
+                                                 actionListener="#{departamentoControl.asignaEnlace(per)}" />
+                            </p:column>
+                        </p:dataTable>
+                        <p:separator></p:separator>
+                        <br/>
+                        <p:commandButton value="Cancelar" actionListener="#{departamentoControl.cancelarAsignarEnlace()}" />
+                    </center>
+
+                </h:form>
+
+
+            </p:dialog>
+
+            <h:form>
+                <p:remoteCommand name="actualizaList" update=":formMostrar" actionListener="#{departamentoControl.init()}" /> 
+            </h:form>
+            <p:dialog widgetVar="statusDialog" appendTo="@(body)" modal="true" draggable="false" closable="false" resizable="false" showHeader="false">
+                <p:graphicImage value="resources/img/imagenes/loading.gif" />
+            </p:dialog>
+        </h:body>
+    </ui:define>
+</ui:composition>
+

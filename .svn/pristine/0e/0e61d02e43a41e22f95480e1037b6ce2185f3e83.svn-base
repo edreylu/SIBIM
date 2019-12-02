@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<ui:composition template="menu.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <ui:define name="contenido">
+        <h:head>
+            <title>Personal</title>
+        </h:head>
+        <f:metadata>
+            <f:viewAction action="#{personalControl.init()}" />
+        </f:metadata>
+        <h:body>
+            <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
+            <f:event type="preRenderView" rendered="#{facesContext.postBack}" listener="#{accesoC.validaSesion('personal.xhtml')}"/>  
+            <center>
+
+                <h:outputText value="Personal" class="tituloPantalla"/>
+                <p:separator/>
+                <h:form id="formMostrar">
+
+                    <p:dataTable id="tablauser" var="persona" value="#{personalControl.listPersonal}"
+                                 style="width:100%;" rows="10" rowsPerPageTemplate="5,8,10"
+                                 emptyMessage ="No hay usuarios disponibles"
+                                 paginator="true" paginatorPosition="bottom"
+                                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+                                 filteredValue="#{personalControl.listPersonalFiltrado}" widgetVar="personaTabla"
+                                 selection="#{personalControl.personalSeleccionado}" selectionMode="single"
+                                 rowKey="#{persona.noPersonalBm}" currentPageReportTemplate="[ {endRecord} de {totalRecords} Personas ]">
+                        <p:ajax event="rowSelect" update="panelBotones" global="false"/>
+                        <f:facet name="header">
+                            <p:commandButton id="insus" value="Insertar" icon="fa fa-plus" update=":formInsertar" actionListener="#{personalControl.cargaVentanaInserta('')}" style="float: left;" rendered="#{accesoC.rolbotones.ins}" >
+                            </p:commandButton>
+                            <p:tooltip for="insus" value="Insertar Usuario" showEffect="clip" hideEffect="clip" position="top"/>
+                            <p:outputPanel>
+                                <h:outputText value="Buscar: " />
+                                <p:inputText id="globalFilter" style="width:150px" onkeypress="if (event.keyCode === 13) {return false;}" placeholder="Escribe para buscar"/>
+                                <p:commandButton id="bsearch" icon="fa fa-search" onclick="PF('personaTabla').filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+                        <p:column headerText="#" width="4%" filterBy="#{persona.noPersonalBm}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{persona.noPersonalBm}" />
+                        </p:column>
+
+                        <p:column headerText="NO PERSONAL" width="10%" filterBy="#{persona.noPersonal}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{persona.noPersonal}" />
+                        </p:column>
+                        <p:column headerText="RFC" width="20%" filterBy="#{persona.rfc}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{persona.rfc}" />
+                        </p:column>
+                        <p:column headerText="CURP" width="22%" filterBy="#{persona.curp}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{persona.curp}" />
+                        </p:column>
+                        <p:column headerText="AP1" width="12%" filterBy="#{persona.ap1}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{persona.ap1}" />
+                        </p:column>
+                        <p:column headerText="AP2" width="12%" filterBy="#{persona.ap2}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{persona.ap2}" />
+                        </p:column>
+                        <p:column headerText="NOMBRE" width="12%" filterBy="#{persona.nombre}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{persona.nombre}" />
+                        </p:column>
+                        <p:column headerText="FUNCIÓN" width="12%" filterBy="#{persona.funcion}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{persona.funcion}" />
+                        </p:column>
+                        <p:column headerText="ID ESTATUS" width="12%" filterBy="#{persona.idEstatus}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{persona.idEstatus==1?'ACTIVO':'INACTIVO'}" />
+                        </p:column>
+                        <f:facet name="footer">
+                            <h:panelGroup id="panelBotones" >
+                                <p:commandButton id="actper" value="Editar" icon="fa fa-pencil"
+                                                 disabled="#{personalControl.personalSeleccionado == null}"
+                                                 oncomplete="PF('dlgmodificar').show()" rendered="#{accesoC.rolbotones.act}"
+                                                 actionListener="#{personalControl.preparaEdicion()}"
+                                                 update=":formModificar">
+
+                                </p:commandButton>
+                                <p:tooltip for="actper" value="Editar Usuario" showEffect="clip" hideEffect="clip" position="top"/>
+                                <p:commandButton id="eliper" value="#{personalControl.personalSeleccionado.idEstatus eq '1' ? 'Inactivar' : 'Activar'}" 
+                                                 icon="fa fa-trash" disabled="#{personalControl.personalSeleccionado == null}" 
+                                                 rendered="#{accesoC.rolbotones.eli}" oncomplete="PF('dlgeliminar').show()" update=":formEliminar" >
+                                    <f:setPropertyActionListener target="#{personalControl.personal}" value="#{personalControl.personalSeleccionado}" />
+                                </p:commandButton>
+                                <p:tooltip for="eliper" value="#{personalControl.personalSeleccionado.idEstatus eq '1' ? 'Inactivar' : 'Activar'} Personal" 
+                                           showEffect="clip" hideEffect="clip" position="top"/>  
+                            </h:panelGroup>
+                        </f:facet>
+                    </p:dataTable>
+
+
+                </h:form>
+
+            </center>
+            <p:dialog id="dlg1" header="Insertar Persona" widgetVar="dlginsertar" showEffect="explode" hideEffect="explode"
+                      resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+
+                <h:form id="formInsertar" class="dialogC">
+                    <p:messages id="messages1" closable="true"/>
+                    <p:growl id="mg1" showSummary="true" showDetail="true"/>
+                    <p:panelGrid columns="2" styleClass="sinBorde" style="width: 100%">
+                        <p:outputLabel value="Apellido Paterno" style="float: right"/>
+                        <p:inputText id="itApPaterno" value="#{personalControl.personal.ap1}" required="true"
+                                     requiredMessage="Se requiere apellido paterno" maxlength="50" style="text-transform: uppercase"/>
+                        <p:outputLabel value="Apellido Materno" style="float: right"/>
+                        <p:inputText id="itApMaterno" value="#{personalControl.personal.ap2}"
+                                     requiredMessage="Se requiere apellido paterno" maxlength="50" style="text-transform: uppercase"/>
+                        <p:outputLabel value="Nombre" style="float: right"/>
+                        <p:inputText id="itNombre" value="#{personalControl.personal.nombre}" required="true"
+                                     requiredMessage="Se requiere Nombre" maxlength="50" style="text-transform: uppercase"
+                                     validatorMessage="Ingrese un CURP válido">
+                            <f:validateRegex pattern="(^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$)?"  />
+                        </p:inputText>
+                        <p:outputLabel value="CURP" style="float: right"/>
+                        <p:inputText id="itCurp" value="#{personalControl.personal.curp}" required="true"
+                                     requiredMessage="El CURP es requerido" maxlength="18" style="text-transform: uppercase"/>
+                        <p:outputLabel value="RFC" style="float: right"/>
+                        <p:inputText id="itRfc" value="#{personalControl.personal.rfc}" required="true"
+                                     requiredMessage="El RFC es requerido" maxlength="13" style="text-transform: uppercase"/>
+                        <p:outputLabel value="Función" style="float: right"/>
+                        <p:inputText id="itFuncion" value="#{personalControl.personal.funcion}" required="true"
+                                     requiredMessage="La función es requerida"  maxlength="70" style="text-transform: uppercase"/>
+                    </p:panelGrid>
+                    <p:separator/>
+                    <center>
+                    <p:commandButton value="Guardar" update="mg1 :formInsertar :formMostrar"
+                                     actionListener="#{personalControl.insertar()}"
+                                     oncomplete="actualizaListPersonal();"
+                                     />
+                    </center>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog id="dlg2" header="Editar persona" widgetVar="dlgmodificar" showEffect="explode" hideEffect="explode"
+                      resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+                <p:growl id="mg2" showSummary="true" showDetail="true"/>
+
+                <h:form id="formModificar" class="dialogC">
+                    <p:messages id="messages2" closable="true"/>
+                    <p:panelGrid columns="2" styleClass="sinBorde">
+                        <p:outputLabel value="Apellido Paterno" style="float: right"/>
+                        <p:inputText id="itApPaternoEdit" value="#{personalControl.personalEditar.ap1}" style="text-transform: uppercase" required="true" requiredMessage="El apellido paterno es requerido"   />
+                        <p:outputLabel value="Apellido Materno" style="float: right"/>
+                        <p:inputText id="itApMaternoEdit" value="#{personalControl.personalEditar.ap2}" style="text-transform: uppercase"  />
+                        <p:outputLabel value="Nombre" style="float: right"/>
+                        <p:inputText id="itNombreEdit" value="#{personalControl.personalEditar.nombre}" style="text-transform: uppercase" required="true" requiredMessage="El nombre es requerido"   />
+                        <p:outputLabel value="Función: " for="noper" style="float: right"/>
+                        <p:inputText id="noper" value="#{personalControl.personalEditar.funcion}" style="text-transform: uppercase"/>
+                    </p:panelGrid>
+                    <p:separator/>
+                    <center>
+                    <p:commandButton value="Modificar" update="mg2 :formModificar"
+                                     actionListener="#{personalControl.editar()}" oncomplete="actualizaListPersonal();"
+                                     />
+                    </center>
+                </h:form>
+            </p:dialog>
+
+           <p:dialog id="dlg3" header="Estatus Personal" showEffect="explode" hideEffect="explode" 
+                      widgetVar="dlgeliminar" resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+                <h:form id="formEliminar" class="dialogC">
+
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>
+
+                    <center>
+                        <h:outputText rendered="#{personalControl.personal.idEstatus eq '1'}" value="¿Desea Inactivar a #{personalControl.personal.nombre} ?" />    
+                    <p:commandButton rendered="#{personalControl.personal.idEstatus eq '1'}" value="Si" update="mg :formMostrar" actionListener="#{personalControl.ActivarInactivar(2)}" 
+                                     oncomplete="actualizaListPersonal();" > </p:commandButton>
+                        <h:outputText rendered="#{personalControl.personal.idEstatus eq '2'}" value="¿Desea Activar a #{personalControl.personal.nombre} ?" />    
+                    <p:commandButton rendered="#{personalControl.personal.idEstatus eq '2'}" value="Si" update="mg :formMostrar" actionListener="#{personalControl.ActivarInactivar(1)}" 
+                                     oncomplete="actualizaListPersonal();" > </p:commandButton>
+                    <p:commandButton value="No" actionListener="#{personalControl.cancelarEliminar()}" />
+                    </center>
+                </h:form>
+            </p:dialog>
+
+            <h:form>
+                <p:remoteCommand name="actualizaListPersonal" update=":formMostrar" actionListener="#{personalControl.init()}" />
+
+            </h:form>
+            <p:dialog widgetVar="statusDialog" appendTo="@(body)" modal="true" draggable="false" closable="false" resizable="false" showHeader="false">
+                <p:graphicImage cache="false" value="resources/img/imagenes/loading.gif" />
+            </p:dialog>
+        </h:body>
+    </ui:define>
+</ui:composition>

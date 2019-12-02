@@ -1,0 +1,398 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package bitacora;
+
+import java.io.Serializable;
+import java.sql.CallableStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
+import mobiliario.Mobiliario;
+import utilerias.Procedimiento;
+
+/**
+ *
+ *
+ */
+public class BitacoraDAO extends conexion.ConexionOracle implements Serializable {
+
+   public Procedimiento operacionesMobiliario(OperacionesMobiliario om,int operacion, int numeroCarga) throws SQLException {
+        System.out.println("Entro a operacionesMobiliario: "+operacion);
+        Procedimiento pro=new Procedimiento();
+        CallableStatement cs = null;
+        Integer error=null;
+        String mensaje="";
+        try {
+            super.abrirConexion();
+        cs = super.getConn().prepareCall("{call pdbModificaMobiliario(?, ?, ?, ?, ?, ?, ?)}");
+        cs.registerOutParameter( 1, Types.INTEGER ); // parametro de salida error
+        cs.registerOutParameter( 2, Types.VARCHAR ); // parametro de salida mensaje
+        cs.setInt(3, numeroCarga); //numero carga
+        cs.setInt(4, operacion); //operacion
+        cs.setInt(5, om.getNoUsuarioOperacion()); //tabla
+        cs.setInt(6, om.getNoPersonalBm()); //tabla
+        cs.setInt(7, om.getIdDepartamento()); //tabla
+        cs.execute();
+        error = cs.getInt(1);
+        mensaje = cs.getString(2);
+        pro.setError(error);
+        pro.setMensaje(mensaje);
+        } catch (Exception e) {
+            //System.out.println("Error en operacionesMobiliario() " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            try {
+                
+            } catch (Exception e) {
+                //System.out.println("Error en operacionesMobiliario() " + e.getMessage());
+                e.printStackTrace();
+            }
+            super.cerrarConexion();
+        }
+        return pro;
+    }
+   
+public Procedimiento consultaMobiliario(OperacionesMobiliario om,int operacion) throws SQLException {
+        System.out.println("Entro a consultaMobiliario: "+operacion);
+        Procedimiento pro=new Procedimiento();
+        CallableStatement cs = null;
+        Integer error=null;
+        String mensaje="";
+        try {
+            super.abrirConexion();
+        cs = super.getConn().prepareCall("{call pdbConsultaMobiliario(?, ?, ?, ?, ?, ?, ?)}");
+        cs.registerOutParameter( 1, Types.INTEGER ); // parametro de salida error
+        cs.registerOutParameter( 2, Types.VARCHAR ); // parametro de salida mensaje
+        cs.setInt(3, om.getNumeroCarga()); //numero carga
+        cs.setInt(4, operacion); //operacion
+        cs.setInt(5, om.getNoUsuarioOperacion()); //operacion
+        cs.setInt(6, om.getNoPersonalBm()); //tabla
+        cs.setInt(7, om.getIdDepartamento()); //tabla
+        cs.execute();
+        error = cs.getInt(1);
+        mensaje = cs.getString(2);
+        pro.setError(error);
+        pro.setMensaje(mensaje);
+        } catch (Exception e) {
+            //System.out.println("Error en consultaMobiliario() " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            try {
+                
+            } catch (Exception e) {
+                //System.out.println("Error en consultaMobiliario() " + e.getMessage());
+                e.printStackTrace();
+            }
+            super.cerrarConexion();
+        }
+        return pro;
+    }
+
+
+public Procedimiento modificaMobiliario(OperacionesMobiliario om,int operacion) throws SQLException {
+        System.out.println("Entro a modificaMobiliario: "+operacion);
+        Procedimiento pro=new Procedimiento();
+        CallableStatement cs = null;
+        Integer error=null;
+        String mensaje="";
+        try {
+            super.abrirConexion();
+        cs = super.getConn().prepareCall("{call pdbModificaMobiliario(?, ?, ?, ?, ?, ?, ?)}");
+        cs.registerOutParameter( 1, Types.INTEGER ); // parametro de salida error
+        cs.registerOutParameter( 2, Types.VARCHAR ); // parametro de salida mensaje
+        cs.setInt(3, om.getNumeroCarga()); //numero carga
+        cs.setInt(4, operacion); //operacion
+        cs.setInt(5, om.getNoUsuarioOperacion()); //operacion
+        cs.setInt(6, om.getNoPersonalBm()); //tabla
+        cs.setInt(7, om.getIdDepartamento()); //tabla
+        cs.execute();
+        error = cs.getInt(1);
+        mensaje = cs.getString(2);
+        pro.setError(error);
+        pro.setMensaje(mensaje);
+        } catch (Exception e) {
+            //System.out.println("Error en modificaMobiliario() " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            try {
+                
+            } catch (Exception e) {
+                //System.out.println("Error en modificaMobiliario() " + e.getMessage());
+                e.printStackTrace();
+            }
+            super.cerrarConexion();
+        }
+        return pro;
+    }
+
+public int asignaMobUsuario(List<Mobiliario> mobs) {
+        System.out.println("Entro a Asignar Mobiliario a personal ");
+        ResultSet rs = null;
+        int valor = 0;
+        String query = "";
+        try {
+            super.abrirConexion();
+            for (Mobiliario x : mobs) {
+                    query = "UPDATE TempMovtoMobiliario SET MovtoAplicar = 1 WHERE NumeroCarga = ? AND Registro = ? ";
+                    super.getPreparedStatement(query, new Object[]{x.getNumeroCarga(), x.getRegistro()}).executeQuery();
+                valor=valor+1;  
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error en asignaMobUsuario() " + e.getMessage());
+            valor = -1;
+        } finally {
+            try {
+                if (null != rs) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en asignaMobUsuario() " + e.getMessage());
+                valor = -1;
+            }
+            super.cerrarConexion();
+        }
+        return valor;
+    }
+
+public int getSeqNumCarga() {
+        int id=0;
+        ResultSet rs = null;
+        final String query = "SELECT seqNumCarga.NextVal FROM DUAL";
+        try {
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query).executeQuery();
+            if (rs.next()) {
+                id = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error en getSeqNumCarga() " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en getSeqNumCarga() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        return id;
+    }
+
+public List<Mobiliario> traeRegistrosTempMobiliario(int numCarga) {
+        List<Mobiliario> listaMobiliario;
+        System.out.println("Entro a cargar traeRegistrosTempMobiliario "+numCarga);
+        Mobiliario mobiliario = null;
+        ResultSet rs = null;
+        String query = null;
+        query = "SELECT IDBIEN,\n" +
+                        "  IME,\n" +
+                        "  MARCA,\n" +
+                        "  SERIE,\n" +
+                        "  MODELO,\n" +
+                        "  COLOR,\n" +
+                        "  MATERIAL,\n" +
+                        "  OBSERVACIONES,\n" +
+                        "  IDCLASIFICADOR,\n" +
+                        "  IDDEPARTAMENTO,\n" +
+                        "  NOMDEPTO,\n" +
+                        "  FECHABAJA,\n" +
+                        "  NOUSUARIOBAJA,\n" +
+                        "  FECHAULTIMAMODIF,\n" +
+                        "  NOUSUARIOULTIMAMODIF,\n" +
+                        "  IDESTATUS,\n" +
+                        "  DESCRIPCLASIF,\n" +
+                        "  DESCRIPESTATUS, REGISTRO, NUMEROCARGA \n" +
+                        "FROM TempMovtoMobiliario "+
+                        " WHERE NumeroCarga = "+numCarga+" ORDER BY 1";
+                
+        try {
+            listaMobiliario = new ArrayList<>();
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query).executeQuery();
+
+            while (rs.next()) {
+                mobiliario = new Mobiliario();
+                mobiliario.setIdBien(rs.getInt("IDBIEN"));
+                mobiliario.setIme(rs.getInt("IME"));
+                mobiliario.setMarca(rs.getString("MARCA"));
+                mobiliario.setSerie(rs.getString("SERIE"));
+                mobiliario.setModelo(rs.getString("MODELO"));
+                mobiliario.setColor(rs.getString("COLOR"));
+                mobiliario.setMaterial(rs.getString("MATERIAL"));
+                mobiliario.setObservaciones(rs.getString("OBSERVACIONES"));
+                mobiliario.setIdClasificador(rs.getInt("IDCLASIFICADOR"));
+                mobiliario.setIdDepartamento(rs.getInt("IDDEPARTAMENTO"));
+                mobiliario.setDepartamento(rs.getString("NOMDEPTO"));
+                mobiliario.setFechaBaja(rs.getString("FECHABAJA"));
+                mobiliario.setNoUsuarioBaja(rs.getInt("NOUSUARIOBAJA"));
+                mobiliario.setFechaUltimaModif(rs.getString("FECHAULTIMAMODIF"));
+                mobiliario.setNoUsuarioUltimaModif(rs.getInt("NOUSUARIOULTIMAMODIF"));
+                mobiliario.setIdEstatus(rs.getInt("IDESTATUS"));
+                mobiliario.setClasificador(rs.getString("DESCRIPCLASIF"));
+                mobiliario.setEstatus(rs.getString("DESCRIPESTATUS"));
+                mobiliario.setRegistro(rs.getInt("REGISTRO"));
+                mobiliario.setNumeroCarga(rs.getInt("NUMEROCARGA"));
+                listaMobiliario.add(mobiliario);
+
+            }
+            System.out.println("traeRegistrosTempMobiliario.size() = " + listaMobiliario.size());
+        } catch (SQLException e) {
+            System.out.println("Error en traeRegistrosTempMobiliario() " + e.getMessage());
+            listaMobiliario = null;
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en traeRegistrosTempMobiliario() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        return listaMobiliario;
+    }
+
+    public List<Bitacora> traeRegistros(int valor) {
+        List<Bitacora> listaBitacora;
+        System.out.println("Entro a cargar listaDepartamento");
+        Bitacora bitacora = null;
+        ResultSet rs = null;
+        String query = null;
+        query = "select BI.IDBITACORA,\n" +
+                        "  BI.IDBIEN,\n" +
+                        "  BI.DESCRIPCION,\n" +
+                        "  BI.FECHA,\n" +
+                        "  BI.IDEVENTO,\n" +
+                        "  (select KE.evento from KEVENTO KE where KE.IDEVENTO=BI.IDEVENTO) EVENTO,\n" +
+                        "  BI.NOPERSONALBM,\n" +
+                        "  BI.FUNCION,\n" +
+                        "  BI.OBSERVACIONES,\n" +
+                        "  BI.IDDEPARTAMENTO,\n" +
+                        "  BI.IDESTADODELBIEN,\n" +
+                        "  BI.IDMOTIVOBAJA,\n" +
+                        "  BI.OTROMOTIVOBAJA,\n" +
+                        "  BI.NOUSUARIOALTA,\n" +
+                        "  BI.FECHAALTA,\n" +
+                        "  BI.IDESTATUS \n" +
+                        "from BITACORA BI,\n" +
+                        "     MOBILIARIO MO\n" +
+                        "where BI.IDBIEN = MO.IDBIEN\n" +
+                        "and MO.IDESTATUS in (1,3)\n" +
+                        "and MO.IDESTATUS = BI.IDESTATUS\n" +
+                        "AND BI.IDDEPARTAMENTO="+valor;
+                
+        try {
+            listaBitacora = new ArrayList<>();
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query).executeQuery();
+
+            while (rs.next()) {
+                bitacora = new Bitacora();
+                bitacora.setIdBitacora(rs.getInt("IDBITACORA"));
+                bitacora.setIdBien(rs.getInt("IDBIEN"));
+                bitacora.setDescripcion(rs.getString("DESCRIPCION"));
+                bitacora.setFecha(rs.getString("FECHA"));
+                bitacora.setIdEvento(rs.getInt("IDEVENTO"));
+                bitacora.setEvento(rs.getString("EVENTO"));
+                bitacora.setNoPersonalBm(rs.getInt("NOPERSONALBM"));
+                bitacora.setFuncion(rs.getString("FUNCION"));
+                bitacora.setObservaciones(rs.getString("OBSERVACIONES"));
+                bitacora.setIdDepartamento(rs.getInt("IDDEPARTAMENTO"));
+                bitacora.setIdEstadoDelBien(rs.getInt("IDESTADODELBIEN"));
+                bitacora.setIdMotivoBaja(rs.getInt("IDMOTIVOBAJA"));
+                bitacora.setOtroMotivoBaja(rs.getString("OTROMOTIVOBAJA"));
+                bitacora.setNoUsuarioAlta(rs.getInt("NOUSUARIOALTA"));
+                bitacora.setFechaAlta(rs.getString("FECHAALTA"));
+                bitacora.setIdEstatus(rs.getInt("IDESTATUS"));
+                listaBitacora.add(bitacora);
+
+            }
+            System.out.println("listaBitacora.size() = " + listaBitacora.size());
+        } catch (SQLException e) {
+            System.out.println("Error en listaBitacora() " + e.getMessage());
+            listaBitacora = null;
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en listaBitacora() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        return listaBitacora;
+    }
+/*
+    public List<Bitacora> traeRegistrosLista(int valor) {
+        List<Bitacora> listaDepartamento;
+        System.out.println("Entro a cargar listaDepartamento");
+        Bitacora departamento = null;
+        ResultSet rs = null;
+        String query = null;
+        String continuacion = valor == 1 ? " WHERE IDESTATUS = 1" : "";
+        query = "select DE.IDDEPARTAMENTO, \n" +
+                "       DE.NOMDEPTO, \n" +
+                "       DE.NOPERSONALBM, \n" +
+                "       DE.DOMICILIO, \n" +
+                "       DE.CLAVECT, \n" +
+                "       DE.IDUR,\n" +
+                "       (select UR.CLAVEUR from UR UR where UR.IDUR = DE.IDUR) CLAVEUR,\n" +
+                "       (select UR.UR from UR UR where UR.IDUR = DE.IDUR) NOMUR,\n" +
+                "       (select PE.NOMBRE||' '||PE.AP1||' '||PE.AP2 from PERSONAL PE where PE.NOPERSONALBM = DE.NOPERSONALBM) RESPONSABLE,\n" +
+                "       (select PE.NOMBRE||' '||PE.AP1||' '||PE.AP2 from PERSONAL PE where PE.NOPERSONALBM = DE.NOPERSONALBM_ENLACE) ENLACE,\n" +
+                "       DE.NOPERSONALBM_ENLACE, \n" +
+                "       DE.OBSERVACIONES, \n" +
+                "       DE.IDESTATUS, DE.NOBLOQUE, DE.IDNIVELAREA from DEPARTAMENTO DE "
+                        +continuacion+" ORDER BY 1";
+                
+        try {
+            listaDepartamento = new ArrayList<>();
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query).executeQuery();
+
+            while (rs.next()) {
+                departamento = new Bitacora();
+                departamento.setIdDepartamento(rs.getInt("IDDEPARTAMENTO"));
+                departamento.setNomDepto(rs.getString("NOMDEPTO"));
+                departamento.setNoPersonalBm(rs.getInt("NOPERSONALBM")==0?null:rs.getInt("NOPERSONALBM"));
+                departamento.setDomicilio(rs.getString("DOMICILIO"));
+                departamento.setClaveCt(rs.getString("CLAVECT"));
+                departamento.setIdUr(rs.getInt("IDUR"));
+                departamento.setClaveUr(rs.getString("CLAVEUR"));
+                departamento.setNomUr(rs.getString("NOMUR"));
+                departamento.setNomPersonal(rs.getString("RESPONSABLE")==null?"NO TIENE RESPONSABLE":rs.getString("RESPONSABLE"));
+                departamento.setNomEnlace(rs.getString("ENLACE")==null?"NO TIENE ENLACE":rs.getString("ENLACE"));
+                departamento.setNoPersonalBmEnlace(rs.getInt("NOPERSONALBM_ENLACE")==0?null:rs.getInt("NOPERSONALBM_ENLACE"));
+                departamento.setObservaciones(rs.getString("OBSERVACIONES"));
+                departamento.setNoBloque(rs.getInt("NOBLOQUE"));
+                departamento.setIdNivelArea(rs.getInt("IDNIVELAREA"));
+                departamento.setIdEstatus(rs.getInt("IDESTATUS"));
+                listaDepartamento.add(departamento);
+
+            }
+            System.out.println("traeRegistrosLista.size() = " + listaDepartamento.size());
+        } catch (SQLException e) {
+            System.out.println("Error en traeRegistrosLista() " + e.getMessage());
+            listaDepartamento = null;
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en traeRegistrosLista() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        return listaDepartamento;
+    }
+*/
+}

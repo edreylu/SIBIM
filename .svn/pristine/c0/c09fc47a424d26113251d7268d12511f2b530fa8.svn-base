@@ -1,0 +1,241 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition template="menu.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <ui:define name="contenido">
+        <h:head>
+            <title>Unidades Responsables</title>
+
+        </h:head>
+        <f:metadata>
+            <f:viewAction action="#{urControl.init()}" />   
+        </f:metadata>       
+        <h:body>
+            <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
+            <f:event type="preRenderView" rendered="#{facesContext.postBack}" listener="#{accesoC.validaSesion('ur.xhtml')}"/>  
+            <center>
+                <h:outputText value="Unidades Responsables" class="tituloPantalla" />
+                <p:separator/>
+                <h:form id="formMostrar">
+
+                    <p:dataTable id="tablacat" var="ur" value="#{urControl.urs}"
+                                 style="width:100%;" rows="10" rowsPerPageTemplate="5,8,10" 
+                                 emptyMessage ="No hay Unidades Responsables disponibles" 
+                                 paginator="true" paginatorPosition="bottom"
+                                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+                                 filteredValue="#{urControl.filteredUr}" widgetVar="catTabla"
+                                 selection="#{urControl.urSeleccionada}" selectionMode="single" 
+                                 rowKey="#{ur.idUr}" currentPageReportTemplate="[ {endRecord} de {totalRecords} URs]">
+                        <p:ajax event="rowSelect" update="panelBotones" global="false"/>
+                        <f:facet name="header">
+                            <p:commandButton id="inscat" value="Insertar" icon="fa fa-plus" update=":formInsertar" actionListener="#{urControl.CargaVentanaInserta('')}" style="float: left;" rendered="#{accesoC.rolbotones.ins}" >
+                            </p:commandButton>
+                            <p:tooltip for="inscat" value="Insertar Ur" showEffect="clip" hideEffect="clip" position="top"/>
+                            <p:outputPanel>
+                                <h:outputText value="Buscar: " />
+                                <p:inputText id="globalFilter" onkeypress="if (event.keyCode === 13){return false;}" style="width:150px" placeholder="Escribe para buscar"/>
+                                <p:commandButton id="bsearch" icon="fa fa-search" onclick="PF('catTabla').filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+
+                        <p:column headerText="#" width="10%" filterBy="#{ur.idUr}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{ur.idUr}" />
+                        </p:column>
+
+                        <p:column headerText="UR" width="40%" filterBy="#{ur.ur}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{ur.ur}" />
+                        </p:column> 
+
+                        <p:column headerText="RESPONSABLE" width="40%" filterBy="#{ur.nomPersonal}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{ur.nomPersonal}" />
+                        </p:column>
+                        <p:column headerText="IDESTATUS" width="10%">
+                            <h:outputText value="#{ur.idEstatus == '1' ? 'ACTIVO' : 'INACTIVO'}" />
+                        </p:column>
+                        <f:facet name="footer">
+                            <h:panelGroup id="panelBotones" >
+                                <p:commandButton id="actcat" value="Editar" icon="fa fa-pencil" disabled="#{urControl.urSeleccionada == null}" 
+                                                 rendered="#{accesoC.rolbotones.act}" actionListener="#{urControl.CargaVentanaModifica()}" 
+                                                 update=":formModificar">
+                                    <f:setPropertyActionListener target="#{urControl.ur}" value="#{urControl.urSeleccionada}" />
+                                </p:commandButton>
+                                <p:tooltip for="actcat" value="Editar Ur" showEffect="clip" hideEffect="clip" position="top"/>
+
+                                <p:commandButton id="elicat" value="#{urControl.urSeleccionada.idEstatus eq '1' ? 'Inactivar' : 'Activar'}" 
+                                                 icon="fa fa-trash" disabled="#{urControl.urSeleccionada == null}" 
+                                                 rendered="#{accesoC.rolbotones.eli}" oncomplete="PF('dlgeliminar').show()" update=":formEliminar" >
+                                    <f:setPropertyActionListener target="#{urControl.ur}" value="#{urControl.urSeleccionada}" />
+                                </p:commandButton>
+                                <p:tooltip for="elicat" value="#{urControl.urSeleccionada.idEstatus eq '1' ? 'Inactivar' : 'Activar'} Ur" 
+                                           showEffect="clip" hideEffect="clip" position="top"/>    
+                            </h:panelGroup>
+                        </f:facet>
+                    </p:dataTable>
+
+
+                </h:form>
+
+            </center>
+
+            <p:dialog id="dlg1" header="Insertar Unidad Responsable" showEffect="explode" hideEffect="explode" widgetVar="dlginsertar" 
+                      resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+                <h:form id="formInsertar" class="dialogC">
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>
+                    <p:panelGrid columns="3" styleClass="sinBorde" style="width: 100%">
+
+                         <p:outputLabel value="CLAVE UR" for="cur" />
+                            <p:inputText id="cur" value="#{urControl.ur.claveUr}" size="10" requiredMessage="Se requiere Clave Ur" required="true" />
+                            <p:message for="cur" display="icon" />
+                            <p:outputLabel value="UR" for="descripcion" />
+                            <p:inputText id="descripcion" value="#{urControl.ur.ur}" style="text-transform: uppercase;" size="50" requiredMessage="Se requiere Ur" required="true" />
+                            <p:message for="descripcion" display="icon" />
+                            <p:outputLabel value="Responsable: " for="noper"/>
+                            <p:row>
+                            <p:column>
+                            <p:inputText id="noper" value="#{urControl.ur.noPersonalBm}" size="5" required="true" requiredMessage="El numero de personal es requerido"/>
+                            <p:outputLabel id="nomper" value=" #{urControl.ur.nomPersonal} " style="font-weight: bold;"/>
+                            </p:column>
+                            <p:column>
+                            <p:commandButton icon="fa fa-search" immediate="true" update=":formAsignarPer" actionListener="#{urControl.asignapersonalBusqueda('')}" oncomplete="PF('dlgasignarper').show()" />
+                            </p:column>
+                            </p:row>
+                            <p:message for="noper" display="icon" />
+                    </p:panelGrid>
+                    <p:separator/>
+                    <center>
+                    <p:commandButton value="Guardar" update="mg :formInsertar :formMostrar"
+                                     actionListener="#{urControl.insertar()}" oncomplete="actualizaList();"/>
+                    </center>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog id="dlg2" header="Modificar Unidad Responsable" showEffect="explode" hideEffect="explode" widgetVar="dlgmodificar" 
+                      resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+
+                <h:form id="formModificar" class="dialogC">
+
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>  
+                    <p:panelGrid columns="3" styleClass="sinBorde" style="width: 100%">
+
+                         <p:outputLabel value="CLAVE UR" for="cur" />
+                            <p:inputText id="cur" value="#{urControl.ur.claveUr}" size="10" requiredMessage="Se requiere Clave Ur" required="true" />
+                            <p:message for="cur" display="icon" />
+                            <p:outputLabel value="UR" for="descripcion" />
+                            <p:inputText id="descripcion" value="#{urControl.ur.ur}" style="text-transform: uppercase;" size="50" requiredMessage="Se requiere Ur" required="true" />
+                            <p:message for="descripcion" display="icon" />
+                            <p:outputLabel value="Responsable: " for="noper"/>
+                            <p:row>
+                            <p:column>
+                            <p:inputText id="noper" value="#{urControl.ur.noPersonalBm}" size="5" required="true" requiredMessage="El numero de personal es requerido"/>
+                            <p:outputLabel id="nomper" value=" #{urControl.ur.nomPersonal} " style="font-weight: bold;"/>
+                            </p:column>
+                            <p:column>
+                            <p:commandButton icon="fa fa-search" immediate="true" update=":formAsignarPer" actionListener="#{urControl.asignapersonalBusqueda('')}" oncomplete="PF('dlgasignarper').show()" />
+                            </p:column>
+                            </p:row>
+                            <p:message for="noper" display="icon" />
+                    </p:panelGrid>
+                    <p:separator/>
+                    <center>
+                    <p:commandButton value="Modificar" update="mg :formMostrar :formModificar"
+                                     actionListener="#{urControl.modificar()}"
+                                     oncomplete="actualizaList();"
+                                     />
+
+                    <p:commandButton value="Cancelar" actionListener="#{urControl.cancelarActualizar()}"/>
+                    </center>
+
+                </h:form>
+
+
+            </p:dialog>
+
+
+            <p:dialog id="dlg3" header="Estatus Unidad Responsable" showEffect="explode" hideEffect="explode" 
+                      widgetVar="dlgeliminar" resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+                <h:form id="formEliminar" class="dialogC">
+
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>
+
+                    <center>
+                    <h:outputText rendered="#{urControl.ur.idEstatus eq '1'}" value="¿Desea Inactivar #{urControl.ur.ur} ?" />    
+                    <p:commandButton rendered="#{urControl.ur.idEstatus eq '1'}" value="Si" update="mg :formMostrar" actionListener="#{urControl.ActivarInactivar(2)}" 
+                                     oncomplete="actualizaList();" > </p:commandButton>
+                    <h:outputText rendered="#{urControl.ur.idEstatus eq '2'}" value="¿Desea Activar #{urControl.ur.ur} ?" />    
+                    <p:commandButton rendered="#{urControl.ur.idEstatus eq '2'}" value="Si" update="mg :formMostrar" actionListener="#{urControl.ActivarInactivar(1)}" 
+                                     oncomplete="actualizaList();" > </p:commandButton>
+                    <p:commandButton value="No" actionListener="#{urControl.cancelarEliminar()}" />
+                    </center>
+                </h:form>
+            </p:dialog>
+            
+            <p:dialog id="dlg4" header="Asignar Responsable a Ur" showEffect="explode" hideEffect="explode" widgetVar="dlgasignarper" appendTo="@(body)" modal="true"
+                        resizable="false" width="80%" position="top center" onHide="actualizaList();" closeOnEscape="true" >
+
+                <h:form id="formAsignarPer" class="dialogC">
+                    <p:messages id="messages" closable="true"/>
+                    <p:growl id="mg" showSummary="true" showDetail="true"/> 
+
+                    <center>
+                        <p:dataTable id="usper" var="per" value="#{urControl.personal}"
+                                     paginator="true" paginatorPosition="bottom" emptyMessage="No hay personal disponible"
+                                     paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rows="10" style=" width: 100%;"
+                                     currentPageReportTemplate="({endRecord} de {totalRecords} 
+                                     Personal)">
+                            <f:facet name="header">
+                                <p:outputPanel>
+                                    <h:outputText value="Buscar: " />
+                                    <p:inputText value="#{urControl.valorBuscado}" id="globalFilter" style="width:150px; text-transform: uppercase;" placeholder="Escribe para buscar" />
+                                    <p:commandButton actionListener="#{urControl.asignapersonalBusqueda(urControl.valorBuscado)}" value="Buscar" update="usper" />
+                                </p:outputPanel>
+
+                            </f:facet>
+                            <p:column headerText="NO PERSONALBM" width="10%" >
+                                <h:outputText value="#{per.noPersonalBm}"  />
+                            </p:column>
+                            <p:column headerText="NO PERSONAL" width="10%" >
+                                <h:outputText value="#{per.noPersonal}"  />
+                            </p:column>
+                            <p:column headerText="RFC" width="20%" >
+                                <h:outputText value="#{per.rfc}"  />
+                            </p:column>
+                            <p:column headerText="CURP" width="20%" >
+                                <h:outputText value="#{per.curp}"  />
+                            </p:column>
+                            <p:column headerText="NOMBRE" width="30%" >
+                                <h:outputText value="#{per.nombre} #{per.ap1} #{per.ap2}"  />
+                            </p:column>
+                            <p:column headerText="ASIGNAR" style="text-align: center" width="10%">
+                                <p:commandButton value="Asignar" update=":formInsertar:noper,:formInsertar:nomper, :formModificar:noper, :formModificar:nomper" 
+                                                 actionListener="#{urControl.asignaNoPersonal(per)}" />
+                            </p:column>
+                        </p:dataTable>
+                        <p:separator></p:separator>
+                        <br/>
+                        <p:commandButton value="Cancelar" actionListener="#{urControl.cancelarAsignarPersonal()}" />
+                    </center>
+
+                </h:form>
+
+
+            </p:dialog>
+
+            <h:form>
+                <p:remoteCommand name="actualizaList" update=":formMostrar" actionListener="#{urControl.init()}" /> 
+            </h:form>
+            <p:dialog widgetVar="statusDialog" appendTo="@(body)" modal="true" draggable="false" closable="false" resizable="false" showHeader="false">
+                <p:graphicImage value="resources/img/imagenes/loading.gif" />
+            </p:dialog>
+        </h:body>
+    </ui:define>
+</ui:composition>
+

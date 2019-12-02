@@ -1,0 +1,195 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition template="menu.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <ui:define name="contenido">
+        <h:head>
+            <title>MOBILIARIO</title>
+
+        </h:head>
+        <f:metadata>
+            <f:viewAction action="#{menuControl.init()}" />   
+        </f:metadata>       
+        <h:body>
+            <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"/>
+            <f:event type="preRenderView" rendered="#{facesContext.postBack}" listener="#{accesoC.validaSesion('mobiliario.xhtml')}"/>  
+            <center>
+                <h:outputText value="Mobiliario" class="tituloPantalla" />
+                <p:separator/>
+                <h:form id="formMostrar">
+
+                    <p:dataTable id="tablaper" var="me" value="#{menuControl.menus}"
+                                 style="width:100%;" rows="10" rowsPerPageTemplate="5,8,10" 
+                                 emptyMessage ="No hay mobiliarios disponibles" 
+                                 paginator="true" paginatorPosition="bottom"
+                                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+                                 filteredValue="#{menuControl.filteredFormasMenu}" widgetVar="menuTabla"
+                                 selection="#{menuControl.menuSeleccionado}" selectionMode="single" 
+                                 rowKey="#{me.noFormaMenu}" currentPageReportTemplate="[ {endRecord} de {totalRecords} mobiliarios ]">
+                        <p:ajax event="rowSelect" update="panelBotones" global="false"/>
+                        <f:facet name="header">
+                            <p:commandButton id="insfun" value="Insertar" icon="fa fa-plus" update=":formInsertar" actionListener="#{menuControl.CargaVentanaInserta('')}" style="float: left;" rendered="#{accesoC.rolbotones.ins}" >
+                            </p:commandButton>
+                            <p:tooltip for="insfun" value="Insertar Funcion" showEffect="clip" hideEffect="clip" position="top"/>
+                            <p:outputPanel>
+                                <h:outputText value="Buscar: " />
+                                <p:inputText id="globalFilter" onkeypress="if(event.keyCode === 13){return false;}" style="width:150px" placeholder="Escribe para buscar"/>
+                               <p:commandButton id="bsearch" icon="fa fa-search" onclick="PF('menuTabla').filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+
+                        <p:column headerText="#" width="10%" filterBy="#{me.noFormaMenu}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{me.noFormaMenu}" />
+                        </p:column>
+
+                        <p:column headerText="NOMBRE" width="20%" filterBy="#{me.titulo}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{me.titulo}" />
+                        </p:column> 
+
+                        <p:column headerText="ENLACE" width="20%" filterBy="#{me.url}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{me.url}" />
+                        </p:column>
+
+                        <p:column headerText="ICONO" width="15%" filterBy="#{me.icono}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{me.icono}" />
+                        </p:column>
+
+                        <p:column headerText="FORMA PADRE" width="15%" filterBy="#{me.nombrePapa}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{me.nombrePapa}" />
+                        </p:column>
+                        <f:facet name="footer">
+                            <h:panelGroup id="panelBotones" >
+                                <p:commandButton id="actfun" value="Editar" icon="fa fa-pencil" disabled="#{menuControl.menuSeleccionado == null}" 
+                                                 rendered="#{accesoC.rolbotones.act}" actionListener="#{menuControl.CargaVentanaModifica()}" 
+                                                 update=":formModificar">
+                                    <f:setPropertyActionListener target="#{menuControl.menu}" value="#{menuControl.menuSeleccionado}" />
+                                </p:commandButton>
+                                <p:tooltip for="actfun" value="Editar Forma" showEffect="clip" hideEffect="clip" position="top"/>
+
+                                <p:commandButton id="elifun" value="Eliminar" icon="fa fa-trash" disabled="#{menuControl.menuSeleccionado == null}" 
+                                                 rendered="#{accesoC.rolbotones.eli}" 
+                                                 oncomplete="PF('dlgeliminar').show()" update=":formEliminar" >
+                                    <f:setPropertyActionListener target="#{menuControl.menu}" value="#{menuControl.menuSeleccionado}" />
+                                </p:commandButton>
+                                <p:tooltip for="elifun" value="Eliminar Forma" showEffect="clip" hideEffect="clip" position="top"/>    
+                            </h:panelGroup>
+                        </f:facet>
+                    </p:dataTable>
+
+
+                </h:form>
+
+            </center>
+
+            <p:dialog id="dlg1" header="Insertar Forma" showEffect="explode" hideEffect="explode" widgetVar="dlginsertar" 
+                      resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+                <h:form id="formInsertar" class="dialogC">
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>
+                    <p:panelGrid columns="3" styleClass="sinBorde" style="width: 100%">
+
+                        <p:outputLabel value="NOMBRE FORMA:" for="nombre" />
+                        <p:inputText id="nombre" value="#{menuControl.menu.titulo}" requiredMessage="Se requiere Funcion" required="true" />
+                        <p:message for="nombre" display="icon" />
+                        <p:outputLabel value="URL" for="enlace" />
+                        <p:inputText id="enlace" value="#{menuControl.menu.url}" />
+                        <p:message for="enlace" display="icon" />
+                        <p:outputLabel value="ICONO" for="icono" />
+                        <p:inputText id="icono" value="#{menuControl.menu.icono}"  />
+                        <p:message for="icono" display="icon" />
+                        <p:outputLabel value="FORMA PADRE:" for="menup" />
+                        <p:selectOneMenu id="menup"  value="#{menuControl.menu.noFormaPadre}" >
+                            <f:selectItem itemValue="#{null}" itemLabel="PADRE" />
+                            <f:selectItems value="#{menuControl.menusp}" var="men" itemValue="#{men.noFormaMenu}" itemLabel="#{men.titulo}" />
+                        </p:selectOneMenu>
+                        <p:message for="menup" display="icon" />
+
+                    </p:panelGrid>
+                    <p:separator/>
+                    <center>
+                    <p:commandButton value="Guardar" update="mg :formInsertar :formMostrar"
+                                     actionListener="#{menuControl.insertar()}" oncomplete="actualizaListForma();"/>
+                    </center>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog id="dlg2" header="Modificar Forma" showEffect="explode" hideEffect="explode" widgetVar="dlgmodificar" 
+                      resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+
+                <h:form id="formModificar" class="dialogC">
+
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>  
+                    <p:panelGrid columns="3" styleClass="sinBorde" style="width: 100%">
+
+                        <p:outputLabel value="NOMBRE FORMA:" for="nombre" />
+                        <p:inputText id="nombre" value="#{menuControl.menu.titulo}" requiredMessage="Se requiere Funcion" required="true" />
+                        <p:message for="nombre" display="icon" />
+                        <p:outputLabel value="ENLACE" for="enlace" />
+                        <p:inputText id="enlace" value="#{menuControl.menu.url}"  />
+                        <p:message for="enlace" display="icon" />
+                        <p:outputLabel value="ICONO" for="icono" />
+                        <p:inputText id="icono" value="#{menuControl.menu.icono}"  />
+                        <p:message for="icono" display="icon" />
+                        <p:outputLabel value="FORMA PADRE:" for="menup" />
+                        <p:selectOneMenu id="menup"  value="#{menuControl.menu.noFormaPadre}" >
+                            <f:selectItem itemValue="#{null}" itemLabel="PADRE" />
+                            <f:selectItems value="#{menuControl.menusp}" var="men" itemValue="#{men.noFormaMenu}" itemLabel="#{men.titulo}" />
+                        </p:selectOneMenu>
+                        <p:message for="menup" display="icon" />
+
+                    </p:panelGrid>
+                    <p:separator/>
+                    <center>
+                    <p:commandButton value="Modificar" update="mg :formMostrar"
+                                     actionListener="#{menuControl.modificar()}"
+                                     oncomplete="actualizaListForma();"
+                                     />
+
+                    <p:commandButton value="Cancelar" actionListener="#{menuControl.cancelarActualizar()}"/>
+                    </center>
+
+
+                </h:form>
+
+
+            </p:dialog>
+
+
+            <p:dialog id="dlg3" header="Eliminar Forma" showEffect="explode" hideEffect="explode" 
+                      widgetVar="dlgeliminar" resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+                <h:form id="formEliminar" class="dialogC">
+
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>
+
+                    <center>
+                    <h:outputText value="¿Desea eliminar? #{menuControl.menu.titulo} " />    
+                    <p:commandButton value="Si" update="mg :formMostrar" actionListener="#{menuControl.eliminar()}" 
+                                     oncomplete="actualizaListForma();" > </p:commandButton>
+
+                    <p:commandButton value="No" actionListener="#{menuControl.cancelarEliminar()}" />
+                    </center>
+
+                </h:form>
+            </p:dialog>
+
+
+
+
+
+            <h:form>
+                <p:remoteCommand name="actualizaListForma" update=":formMostrar" actionListener="#{menuControl.init()}" /> 
+            </h:form>
+            <p:dialog widgetVar="statusDialog" appendTo="@(body)" modal="true" draggable="false" closable="false" resizable="false" showHeader="false">
+                <p:graphicImage value="resources/img/imagenes/loading.gif" />
+            </p:dialog>
+        </h:body>
+    </ui:define>
+</ui:composition>
+

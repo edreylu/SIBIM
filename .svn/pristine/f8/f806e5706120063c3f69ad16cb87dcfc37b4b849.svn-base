@@ -1,0 +1,214 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition template="menu.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <ui:define name="contenido">
+        <h:head>
+            <title>Bitacora</title>
+
+        </h:head>
+        <f:metadata>
+            <f:viewAction action="#{bitacoraControl.init(bitacoraControl.dep)}" />   
+        </f:metadata>       
+        <h:body>
+            <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"/>
+            <f:event type="preRenderView" rendered="#{facesContext.postBack}" listener="#{accesoC.validaSesion('bitacora.xhtml')}"/>  
+            <center>
+                
+                <h:form id="formMostrar">
+                    <p:panelGrid id="datosTipoEvento" styleClass="sinBorde" style="width: 100%">
+                        <p:row>
+                            <center>
+                       <h:outputText value="Evento: " style="text-align: center; font-size: 1.2vw; font-weight: bolder"/>
+                       <p:selectOneMenu id="eve" filter="true" filterMatchMode="contains" value="#{bitacoraControl.radioSelect}" style="width: 35%; font-size: 1.0vw !important;" 
+                                 valueChangeListener="#{bitacoraControl.valueChange}">
+                           <f:selectItem itemLabel="SELECCIONA..." itemValue="#{0}" />
+                           <f:selectItem itemLabel="BAJA MOBILIARIO" itemValue="#{3}" />
+                           <f:selectItem itemLabel="ALTA MOBILIARIO" itemValue="#{4}" />
+                           <p:ajax update="datosBitacora" />
+                         </p:selectOneMenu>
+                       </center>
+                        </p:row>
+                    </p:panelGrid>
+                    <p:separator/>
+                    <br></br>
+                    <p:panelGrid id="datosBitacora" columns="3" styleClass="sinBorde" style="width: 100%">
+                        <p:row>
+                            <center>
+                     <p:column rendered="#{bitacoraControl.radioSelect != 0}">
+                    <h:outputText value="Personal: " style="text-align: center; font-size: 1.2vw; font-weight: bolder"/>
+                    <p:inputText id="noper" readonly="true" value="#{bitacoraControl.noPersonalBm}" size="5" required="true" requiredMessage="El numero de personal es requerido"/>
+                            <p:outputLabel id="nomper" value=" #{bitacoraControl.nomPersonal} " style="font-weight: bold;"/>
+                            <p:commandButton icon="fa fa-search" immediate="true" update=":formAsignarPer" actionListener="#{bitacoraControl.asignapersonalBusqueda('')}" oncomplete="PF('dlgasignarper').show()" />
+                    <h:outputText value="          " />
+                     </p:column>
+                  <p:column rendered="#{bitacoraControl.radioSelect == 4}">
+                  <h:outputText value="Departamento: " style="text-align: center; font-size: 1.2vw; font-weight: bolder"/>
+                <p:selectOneMenu id="dep" filter="true" filterMatchMode="contains" value="#{bitacoraControl.dep}" style="width: 35%; font-size: 1.0vw !important;">
+                    <f:selectItems var="dep" value="#{bitacoraControl.departamentos}" itemLabel="#{dep.idDepartamento} #{dep.nomDepto}" itemValue="#{dep.idDepartamento}" />
+                    </p:selectOneMenu>
+                  <h:outputText value="          " />
+                </p:column>
+                <p:column rendered="#{bitacoraControl.radioSelect != 0}">
+                <p:commandButton id="bsearch" value="Buscar" icon="fa fa-search" />
+                <p:tooltip for="bsearch" value="Buscar Mobiliario" showEffect="clip" hideEffect="clip" position="top"/>
+                </p:column>
+                           </center>
+                    </p:row>
+                    </p:panelGrid>
+                                <p:separator/>
+
+                    <p:dataTable id="tablaMob" var="mo" value="#{bitacoraControl.mobiliarios}"
+                                 style="width:100%;" rows="10"
+                                 emptyMessage ="No hay Mobiliario disponible" 
+                                 paginator="true" paginatorPosition="bottom"
+                                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+                                 widgetVar="mobiliarioTabla" filteredValue="#{bitacoraControl.filteredMobiliario}"
+                                 selection="#{bitacoraControl.mobiliariosSeleccionados}"
+                                 rowKey="#{mo.idBien}" currentPageReportTemplate="[ {endRecord} de {totalRecords} mobiliarios ]">
+                        <p:ajax event="rowSelect" update="panelBotones" global="false"/>
+                        <f:facet name="header">
+                            <p:commandButton id="insmo" value="Insertar" icon="fa fa-plus" process="tablaMob" update=":formParametros" actionListener="#{bitacoraControl.CargaVentanaInserta('')}" style="float: left;" rendered="#{accesoC.rolbotones.ins}" >
+                            </p:commandButton>
+                            <p:tooltip for="insmo" value="Insertar Mobiliario" showEffect="clip" hideEffect="clip" position="top"/>
+                            <p:commandButton id="pdfmo" value="REPORTE PDF" icon="fa fa-file-pdf-o" style="float: left;"
+                                                 rendered="#{accesoC.rolbotones.act}" oncomplete="PF('dlgparametros').show()" update=":formParametros"
+                                                 >
+                                </p:commandButton>
+                                <p:tooltip for="pdfmo" value="PDF Mobiliario" showEffect="clip" hideEffect="clip" position="top"/>
+                            <p:outputPanel>
+                                
+                            </p:outputPanel>
+                        </f:facet>
+                        <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+                        <p:column headerText="IME" width="5%">
+                            <h:outputText value="#{mo.ime}" />
+                        </p:column>
+
+                        <p:column headerText="COLOR" width="10%" >
+                            <h:outputText value="#{mo.color}" />
+                        </p:column>
+
+                        <p:column headerText="MARCA" width="15%"  >
+                            <h:outputText value="#{mo.marca}" />
+                        </p:column>
+
+                        <p:column headerText="SERIE" width="15%"  >
+                            <h:outputText value="#{mo.serie}" />
+                        </p:column>
+                        <p:column headerText="CLASIFICADOR" width="35%"  >
+                            <h:outputText value="#{mo.clasificador}" />
+                        </p:column>
+                        <p:column headerText="ESTADO DEL BIEN" width="10%" >
+                            <h:outputText value="#{mo.estadoDelBien}" />
+                        </p:column>
+                        <p:column headerText="ESTATUS" width="10%">
+                            <h:outputText value="#{mo.idEstatus == '1' ? 'ACTIVO' : 'INACTIVO'}" />
+                        </p:column>
+                        <f:facet name="footer">
+                            <h:panelGroup id="panelBotones" >
+                                <p:commandButton id="actmo" value="Editar" icon="fa fa-pencil" disabled="#{bitacoraControl.mobiliariosSeleccionados == null}" 
+                                                 rendered="#{accesoC.rolbotones.act}" actionListener="#{bitacoraControl.CargaVentanaModifica()}" 
+                                                 >
+                                </p:commandButton>
+                                <p:tooltip for="actmo" value="Editar Mobiliario" showEffect="clip" hideEffect="clip" position="top"/>
+                                 
+                            </h:panelGroup>
+                        </f:facet>
+                    </p:dataTable>
+
+
+                </h:form>
+
+            </center>
+             <p:dialog id="dlg" header="Asignar personal" showEffect="explode" hideEffect="explode" widgetVar="dlgasignarper" appendTo="@(body)" modal="true"
+                        resizable="false" width="80%" position="top center" closeOnEscape="true" >
+
+                <h:form id="formAsignarPer" class="dialogC">
+                    <p:messages id="messages" closable="true"/>
+                    <p:growl id="mg" showSummary="true" showDetail="true"/> 
+
+                    <center>
+                        <p:dataTable id="usper" var="per" value="#{bitacoraControl.personal}"
+                                     paginator="true" paginatorPosition="bottom" emptyMessage="No hay personal disponible"
+                                     paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rows="10" style=" width: 100%;"
+                                     currentPageReportTemplate="({endRecord} de {totalRecords} 
+                                     Personal)">
+                            <f:facet name="header">
+                                <p:outputPanel>
+                                    <h:outputText value="Buscar: " />
+                                    <p:inputText value="#{bitacoraControl.valorBuscado}" id="globalFilter" style="width:150px; text-transform: uppercase;" placeholder="Escribe para buscar" />
+                                    <p:commandButton actionListener="#{bitacoraControl.asignapersonalBusqueda(bitacoraControl.valorBuscado)}" value="Buscar" update="usper" />
+                                </p:outputPanel>
+
+                            </f:facet>
+                            <p:column headerText="NO PERSONALBM" width="10%" >
+                                <h:outputText value="#{per.noPersonalBm}"  />
+                            </p:column>
+                            <p:column headerText="NO PERSONAL" width="10%" >
+                                <h:outputText value="#{per.noPersonal}"  />
+                            </p:column>
+                            <p:column headerText="RFC" width="20%" >
+                                <h:outputText value="#{per.rfc}"  />
+                            </p:column>
+                            <p:column headerText="CURP" width="20%" >
+                                <h:outputText value="#{per.curp}"  />
+                            </p:column>
+                            <p:column headerText="NOMBRE" width="30%" >
+                                <h:outputText value="#{per.nombre} #{per.ap1} #{per.ap2}"  />
+                            </p:column>
+                            <p:column headerText="ASIGNAR" style="text-align: center" width="10%">
+                                <p:commandButton value="Asignar" update=":formMostrar:noper,:formMostrar:nomper"
+                                                 actionListener="#{bitacoraControl.asignaNoPersonal(per)}" />
+                            </p:column>
+                        </p:dataTable>
+                        <p:separator></p:separator>
+                        <br/>
+                    </center>
+
+                </h:form>
+
+
+            </p:dialog>
+
+            <p:dialog id="dlg4" header="Parametros de Reporte" showEffect="explode" hideEffect="explode" closeOnEscape="true"
+                      widgetVar="dlgparametros" resizable="false" width="400" height="130" position="center" appendTo="@(body)" modal="true">
+
+                <h:form id="formParametros" class="dialogC">
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>
+
+                    <center>
+                        <p:panelGrid columns="3" styleClass="sinBorde" style="width: 100%">
+                            <p:outputLabel value="FECHA: " for="fecha" />
+                            <p:calendar id="fecha" readonlyInput="true" showOn="button" locale="ed" pattern="dd/MM/yyyy" value="#{bitacoraControl.fecha}" />
+                            <p:message for="fecha" display="icon" />
+                        </p:panelGrid>
+                        <p:outputLabel value="* En caso de dejar vacio se generara con fecha actual." />
+                        <p:separator/>
+                        <p:commandButton value="Generar" update="mg :formMostrar" ajax="false" onclick="PrimeFaces.monitorDownload(start, stop);" 
+                                         actionListener="#{bitacoraControl.generarReporte()}" oncomplete="PF('dlgparametros').hide();">
+                            <p:fileDownload value="#{bitacoraControl.file}" />
+                        </p:commandButton>
+                        <ui:repeat value="#{bitacoraControl.mobiliariosSeleccionados}" var="mob">
+                                <h:outputText value="#{mob.idBien} - #{mob.ime}" style="display:block"/>
+                            </ui:repeat>
+                    </center>
+
+                </h:form>
+            </p:dialog>
+            <h:form>
+                <p:remoteCommand name="actualizaList" update=":formMostrar"/> 
+            </h:form>
+            <p:dialog widgetVar="statusDialog" appendTo="@(body)" modal="true" draggable="false" closable="false" resizable="false" showHeader="false">
+                <p:graphicImage value="resources/img/imagenes/loading.gif" />
+            </p:dialog>
+        </h:body>
+    </ui:define>
+</ui:composition>
+

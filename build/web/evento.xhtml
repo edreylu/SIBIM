@@ -1,0 +1,171 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition template="menu.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <ui:define name="contenido">
+        <h:head>
+            <title>Evento Bitacora</title>
+
+        </h:head>
+        <f:metadata>
+            <f:viewAction action="#{keventoControl.init()}" />   
+        </f:metadata>       
+        <h:body>
+            <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
+            <f:event type="preRenderView" rendered="#{facesContext.postBack}" listener="#{accesoC.validaSesion('evento.xhtml')}"/>  
+            <center>
+                <h:outputText value="Evento Bitacora" class="tituloPantalla" />
+                <p:separator/>
+                <h:form id="formMostrar">
+
+                    <p:dataTable id="tablacat" var="ke" value="#{keventoControl.eventos}"
+                                 style="width:100%;" rows="10" rowsPerPageTemplate="5,8,10" 
+                                 emptyMessage ="No hay Eventos Bitacora disponibles" 
+                                 paginator="true" paginatorPosition="bottom"
+                                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+                                 filteredValue="#{keventoControl.filteredEvento}" widgetVar="catTabla"
+                                 selection="#{keventoControl.eventoSeleccionado}" selectionMode="single" 
+                                 rowKey="#{ke.idEvento}" currentPageReportTemplate="[ {endRecord} de {totalRecords} Eventos ]">
+                        <p:ajax event="rowSelect" update="panelBotones" global="false"/>
+                        <f:facet name="header">
+                            <p:commandButton id="inscat" value="Insertar" icon="fa fa-plus" update=":formInsertar" actionListener="#{keventoControl.CargaVentanaInserta('')}" style="float: left;" rendered="#{accesoC.rolbotones.ins}" >
+                            </p:commandButton>
+                            <p:tooltip for="inscat" value="Insertar Evento" showEffect="clip" hideEffect="clip" position="top"/>
+                            <p:outputPanel>
+                                <h:outputText value="Buscar: " />
+                                <p:inputText id="globalFilter" onkeypress="if (event.keyCode === 13) {
+                                            return false;
+                                        }" style="width:150px" placeholder="Escribe para buscar"/>
+                                <p:commandButton id="bsearch" icon="fa fa-search" onclick="PF('catTabla').filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+
+                        <p:column headerText="#" width="20%" filterBy="#{ke.idEvento}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{ke.idEvento}" />
+                        </p:column>
+
+                        <p:column headerText="EVENTO" width="20%" filterBy="#{ke.evento}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{ke.evento}" />
+                        </p:column> 
+
+                        <p:column headerText="OBSERVACIONES" width="40%" filterBy="#{ke.observaciones}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{ke.observaciones}" />
+                        </p:column>
+                        <p:column headerText="IDESTATUS" width="20%">
+                            <h:outputText value="#{ke.idEstatus == '1' ? 'ACTIVO' : 'INACTIVO'}" />
+                        </p:column>
+                        <f:facet name="footer">
+                            <h:panelGroup id="panelBotones" >
+                                <p:commandButton id="actcat" value="Editar" icon="fa fa-pencil" disabled="#{keventoControl.eventoSeleccionado == null}" 
+                                                 rendered="#{accesoC.rolbotones.act}" actionListener="#{keventoControl.CargaVentanaModifica()}" 
+                                                 update=":formModificar">
+                                    <f:setPropertyActionListener target="#{keventoControl.evento}" value="#{keventoControl.eventoSeleccionado}" />
+                                </p:commandButton>
+                                <p:tooltip for="actcat" value="Editar Evento" showEffect="clip" hideEffect="clip" position="top"/>
+
+                                <p:commandButton id="elicat" value="#{keventoControl.eventoSeleccionado.idEstatus eq '1' ? 'Inactivar' : 'Activar'}" 
+                                                 icon="fa fa-trash" disabled="#{keventoControl.eventoSeleccionado == null}" 
+                                                 rendered="#{accesoC.rolbotones.eli}" oncomplete="PF('dlgeliminar').show()" update=":formEliminar" >
+                                    <f:setPropertyActionListener target="#{keventoControl.evento}" value="#{keventoControl.eventoSeleccionado}" />
+                                </p:commandButton>
+                                <p:tooltip for="elicat" value="#{keventoControl.eventoSeleccionado.idEstatus eq '1' ? 'Inactivar' : 'Activar'} Evento" 
+                                           showEffect="clip" hideEffect="clip" position="top"/>    
+                            </h:panelGroup>
+                        </f:facet>
+                    </p:dataTable>
+
+
+                </h:form>
+
+            </center>
+
+            <p:dialog id="dlg1" header="Insertar Evento bitacora" showEffect="explode" hideEffect="explode" widgetVar="dlginsertar" 
+                      resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+                <h:form id="formInsertar" class="dialogC">
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>
+                    <p:panelGrid columns="3" styleClass="sinBorde" style="width: 100%">
+
+                        <p:outputLabel value="EVENTO:" for="nombre" />
+                        <p:inputText id="nombre" value="#{keventoControl.evento.evento}" style="text-transform: uppercase;" requiredMessage="Se requiere evento" required="true" />
+                        <p:message for="nombre" display="icon" />
+                        <p:outputLabel value="OBSERVACIONES" for="observa" />
+                        <p:inputText id="observa" value="#{keventoControl.evento.observaciones}" />
+                        <p:message for="observa" display="icon" />
+
+                    </p:panelGrid>
+                    <p:separator/>
+                    <center>
+                    <p:commandButton value="Guardar" update="mg :formInsertar :formMostrar"
+                                     actionListener="#{keventoControl.insertar()}" oncomplete="actualizaList();"/>
+                </center>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog id="dlg2" header="Modificar Evento bitacora" showEffect="explode" hideEffect="explode" widgetVar="dlgmodificar" 
+                      resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+
+                <h:form id="formModificar" class="dialogC">
+
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>  
+                    <p:panelGrid columns="3" styleClass="sinBorde" style="width: 100%">
+
+                        <p:outputLabel value="EVENTO:" for="nombre" />
+                        <p:inputText id="nombre" value="#{keventoControl.evento.evento}" style="text-transform: uppercase;" requiredMessage="Se requiere evento" required="true" />
+                        <p:message for="nombre" display="icon" />
+                        <p:outputLabel value="OBSERVACIONES" for="observa" />
+                        <p:inputText id="observa" value="#{keventoControl.evento.observaciones}" />
+                        <p:message for="observa" display="icon" />
+
+                    </p:panelGrid>
+                    <p:separator/>
+                    <center>
+                    <p:commandButton value="Modificar" update="mg :formMostrar"
+                                     actionListener="#{keventoControl.modificar()}"
+                                     oncomplete="actualizaList();"
+                                     />
+
+                    <p:commandButton value="Cancelar" immediate="true" actionListener="#{keventoControl.cancelarActualizar()}"/>
+                    </center>
+
+                </h:form>
+
+
+            </p:dialog>
+
+
+            <p:dialog id="dlg3" header="Estatus Evento bitacora" showEffect="explode" hideEffect="explode" 
+                      widgetVar="dlgeliminar" resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+                <h:form id="formEliminar" class="dialogC">
+
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>
+
+                    <center>
+                    <h:outputText rendered="#{keventoControl.evento.idEstatus eq '1'}" value="¿Desea Inactivar #{keventoControl.evento.evento} ?" />    
+                    <p:commandButton rendered="#{keventoControl.evento.idEstatus eq '1'}" value="Si" update="mg :formMostrar" actionListener="#{keventoControl.ActivarInactivar(2)}" 
+                                     oncomplete="actualizaList();" > </p:commandButton>
+                    <h:outputText rendered="#{keventoControl.evento.idEstatus eq '2'}" value="¿Desea Activar #{keventoControl.evento.evento} ?" />    
+                    <p:commandButton rendered="#{keventoControl.evento.idEstatus eq '2'}" value="Si" update="mg :formMostrar" actionListener="#{keventoControl.ActivarInactivar(1)}" 
+                                     oncomplete="actualizaList();" > </p:commandButton>
+                    <p:commandButton value="No" actionListener="#{keventoControl.cancelarEliminar()}" />
+                    </center>
+                </h:form>
+            </p:dialog>
+
+            <h:form>
+                <p:remoteCommand name="actualizaList" update=":formMostrar" actionListener="#{keventoControl.init()}" /> 
+            </h:form>
+            <p:dialog widgetVar="statusDialog" appendTo="@(body)" modal="true" draggable="false" closable="false" resizable="false" showHeader="false">
+                <p:graphicImage value="resources/img/imagenes/loading.gif" />
+            </p:dialog>
+        </h:body>
+    </ui:define>
+</ui:composition>
+

@@ -1,0 +1,138 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition template="menu.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <ui:define name="contenido">
+        <h:head>
+            <title>Reportes</title>
+        </h:head>
+        <f:metadata>
+            <f:viewAction action="#{reportesUsuarioControl.init(accesoC.noUsuario)}" />   
+        </f:metadata>
+        <h:body>
+            <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"/>
+            <f:event type="preRenderView" rendered="#{facesContext.postBack}" listener="#{accesoC.validaSesion('reportesUsuario.xhtml')}"/>  
+            <center>
+                <h:outputText value="Reportes" class="tituloPantalla" />
+                <p:separator/>
+                <h:form id="formMostrar">
+
+                    <p:dataTable id="tablacat" var="rep" value="#{reportesUsuarioControl.reportes}"
+                                 style="width:100%;" rows="10" rowsPerPageTemplate="5,8,10" 
+                                 emptyMessage ="No hay Formas Adquisicion disponibles" 
+                                 paginator="true" paginatorPosition="bottom"
+                                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+                                 filteredValue="#{reportesUsuarioControl.filteredReporte}" widgetVar="catTabla"
+                                 selection="#{reportesUsuarioControl.reporteSeleccionado}" selectionMode="single" 
+                                 rowKey="#{rep.idReporte}" currentPageReportTemplate="[ {endRecord} de {totalRecords} Reportes ]">
+                        <p:ajax event="rowSelect" update="panelBotones" global="false"/>
+                        <f:facet name="header">
+                           <p:outputPanel>
+                                <h:outputText value="Buscar: " />
+                                <p:inputText id="globalFilter" onkeypress="if (event.keyCode === 13) {return false;}" style="width:150px" placeholder="Escribe para buscar"/>
+                                <p:commandButton id="bsearch" icon="fa fa-search" onclick="PF('catTabla').filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+                        <p:column headerText="#" width="20%" filterBy="#{rep.idReporte}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{rep.idReporte}" />
+                        </p:column>
+
+                        <p:column headerText="REPORTE" width="20%" filterBy="#{rep.reporte}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{rep.reporte}" />
+                        </p:column> 
+
+                        <p:column headerText="OBSERVACIONES" width="40%" filterBy="#{rep.observaciones}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{rep.observaciones}" />
+                        </p:column>
+                        <p:column headerText="IDESTATUS" width="20%">
+                            <h:outputText value="#{rep.idEstatus == '1' ? 'ACTIVO' : 'INACTIVO'}" />
+                        </p:column>
+                        <f:facet name="footer">
+                            <h:panelGroup id="panelBotones" >
+                                <p:commandButton id="descat" value="Descargar" icon="fa fa-file-excel-o" disabled="#{reportesUsuarioControl.reporteSeleccionado == null || reportesUsuarioControl.reporteSeleccionado.query == null}" 
+                                                 rendered="#{accesoC.rolbotones.des}" oncomplete="PF('dlgparametros').show()">
+                                    <f:setPropertyActionListener target="#{reportesUsuarioControl.reporte}" value="#{reportesUsuarioControl.reporteSeleccionado}" />
+                                </p:commandButton>
+                            <p:tooltip for="descat" value="Descargar Reporte XLS" showEffect="clip" hideEffect="clip" position="top"/>
+                            
+                            <p:commandButton id="jascat" value="Descargar" icon="fa fa-file-pdf-o" disabled="#{reportesUsuarioControl.reporteSeleccionado == null || reportesUsuarioControl.reporteSeleccionado.idReporte !=1}" 
+                                             rendered="#{accesoC.rolbotones.des}" actionListener="#{reportesUsuarioControl.CargaVentanaJasper()}" update=":formParametros2">
+                            <f:setPropertyActionListener target="#{reportesUsuarioControl.reporte}" value="#{reportesUsuarioControl.reporteSeleccionado}" />
+                            </p:commandButton>
+                            <p:tooltip for="jascat" value="Reporte PDF" showEffect="clip" hideEffect="clip" position="top"/>
+                            </h:panelGroup>
+                        </f:facet>
+                    </p:dataTable>
+
+
+                </h:form>
+
+            </center>
+            <p:dialog id="dlg3" header="Parametros de Reporte" showEffect="explode" hideEffect="explode" closeOnEscape="true"
+                      widgetVar="dlgparametros" resizable="false" width="400" height="120" position="center" appendTo="@(body)" modal="true">
+
+                <h:form id="formParametros" class="dialogC">
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>
+
+                    <center>
+                        <p:panelGrid columns="3" styleClass="sinBorde" style="width: 100%">
+                            <p:outputLabel value="FECHA: " for="fecha" />
+                            <p:calendar id="fecha" readonlyInput="true" showOn="button" locale="ed" pattern="dd/MM/yyyy" value="#{reportesUsuarioControl.fecha}" />
+                            <p:message for="fecha" display="icon" />
+                        </p:panelGrid>
+                        
+                        <p:outputLabel value="* En caso de dejar vacio se generara con fecha actual." />
+                        <p:separator/>
+                        <p:commandButton value="Generar" update="mg :formMostrar" ajax="false" onclick="PrimeFaces.monitorDownload(start, stop);" 
+                                         actionListener="#{reportesUsuarioControl.generar(1)}" oncomplete="PF('dlgparametros').hide();">
+                            <p:fileDownload value="#{reportesUsuarioControl.file}" />
+                        </p:commandButton>
+                    </center>
+
+                </h:form>
+            </p:dialog>
+            <p:dialog id="dlg4" header="Parametros de Reporte" showEffect="explode" hideEffect="explode" closeOnEscape="true"
+                      widgetVar="dlgparametros2" resizable="false" width="600" height="180" position="center" appendTo="@(body)" modal="true">
+
+                <h:form id="formParametros2" class="dialogC">
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>
+
+                    <center>
+                        <p:panelGrid columns="3" styleClass="sinBorde" style="width: 100%">
+                            <p:outputLabel value="FECHA: " for="fecha" />
+                            <p:calendar id="fecha" readonlyInput="true" showOn="button" locale="ed" pattern="dd/MM/yyyy" value="#{reportesUsuarioControl.fecha}" />
+                            <p:message for="fecha" display="icon" />
+                            <p:outputLabel value="DEPARTAMENTO: " for="depa"/>
+                            <p:selectOneMenu id="depa" filter="true" filterMatchMode="contains" style="text-align: center; font-size: 1.4vw; font-weight: bolder; width: 80%;" 
+                                             value="#{reportesUsuarioControl.dep}">
+                        <f:selectItems var="dep" value="#{reportesUsuarioControl.departamentos}" itemLabel="#{dep.idDepartamento} #{dep.nomDepto}" itemValue="#{dep.idDepartamento}" />
+                        </p:selectOneMenu>
+                            <p:message for="depa" display="icon"/>
+                        </p:panelGrid>
+                        
+                        <p:outputLabel value="* En caso de dejar vacio se generara con fecha actual." />
+                        <p:separator/>
+                        <p:commandButton value="Generar" update="mg :formMostrar" ajax="false" onclick="PrimeFaces.monitorDownload(start, stop);" 
+                                         actionListener="#{reportesUsuarioControl.generar(2)}" oncomplete="PF('dlgparametros2').hide();">
+                            <p:fileDownload value="#{reportesUsuarioControl.file}" />
+                        </p:commandButton>
+                    </center>
+
+                </h:form>
+            </p:dialog>
+
+            <h:form>
+                <p:remoteCommand name="actualizaList" update=":formMostrar" actionListener="#{reportesUsuarioControl.init(accesoC.noUsuario)}" /> 
+            </h:form>
+            <p:dialog widgetVar="statusDialog" appendTo="@(body)" modal="true" draggable="false" closable="false" resizable="false" showHeader="false">
+                <p:graphicImage value="resources/img/imagenes/loading.gif" />
+            </p:dialog>
+        </h:body>
+    </ui:define>
+</ui:composition>
+

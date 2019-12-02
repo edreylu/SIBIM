@@ -9,7 +9,7 @@
                 xmlns:f="http://xmlns.jcp.org/jsf/core">
     <ui:define name="contenido">
         <h:head>
-            <title>FUNCIONES</title>
+            <title>FORMAS</title>
 
         </h:head>
         <f:metadata>
@@ -25,12 +25,12 @@
 
                     <p:dataTable id="tablaper" var="me" value="#{menuControl.menus}"
                                  style="width:100%;" rows="10" rowsPerPageTemplate="5,8,10" 
-                                 emptyMessage ="No hay funciones disponibles" 
+                                 emptyMessage ="No hay formas disponibles" 
                                  paginator="true" paginatorPosition="bottom"
-                                 paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
                                  filteredValue="#{menuControl.filteredFormasMenu}" widgetVar="menuTabla"
                                  selection="#{menuControl.menuSeleccionado}" selectionMode="single" 
-                                 rowKey="#{me.noFormaMenu}">
+                                 rowKey="#{me.noFormaMenu}" currentPageReportTemplate="[ {endRecord} de {totalRecords} Formas ]">
                         <p:ajax event="rowSelect" update="panelBotones" global="false"/>
                         <f:facet name="header">
                             <p:commandButton id="insfun" value="Insertar" icon="fa fa-plus" update=":formInsertar" actionListener="#{menuControl.CargaVentanaInserta('')}" style="float: left;" rendered="#{accesoC.rolbotones.ins}" >
@@ -91,7 +91,7 @@
 
                 <h:form id="formInsertar" class="dialogC">
                     <p:growl id="mg" showSummary="true" showDetail="true"/>
-                    <p:panelGrid columns="3">
+                    <p:panelGrid columns="3" styleClass="sinBorde" style="width: 100%">
 
                         <p:outputLabel value="NOMBRE FORMA:" for="nombre" />
                         <p:inputText id="nombre" value="#{menuControl.menu.titulo}" requiredMessage="Se requiere Funcion" required="true" />
@@ -110,8 +110,11 @@
                         <p:message for="menup" display="icon" />
 
                     </p:panelGrid>
+                    <p:separator/>
+                    <center>
                     <p:commandButton value="Guardar" update="mg :formInsertar :formMostrar"
                                      actionListener="#{menuControl.insertar()}" oncomplete="actualizaListForma();"/>
+                    </center>
                 </h:form>
             </p:dialog>
 
@@ -122,7 +125,7 @@
                 <h:form id="formModificar" class="dialogC">
 
                     <p:growl id="mg" showSummary="true" showDetail="true"/>  
-                    <p:panelGrid columns="3">
+                    <p:panelGrid columns="3" styleClass="sinBorde" style="width: 100%">
 
                         <p:outputLabel value="NOMBRE FORMA:" for="nombre" />
                         <p:inputText id="nombre" value="#{menuControl.menu.titulo}" requiredMessage="Se requiere Funcion" required="true" />
@@ -141,12 +144,15 @@
                         <p:message for="menup" display="icon" />
 
                     </p:panelGrid>
+                    <p:separator/>
+                    <center>
                     <p:commandButton value="Modificar" update="mg :formMostrar"
                                      actionListener="#{menuControl.modificar()}"
                                      oncomplete="actualizaListForma();"
                                      />
 
-                    <p:commandButton value="Cancelar" actionListener="#{menuControl.cancelarActualizar()}"/>
+                    <p:commandButton value="Cancelar" immediate="true" actionListener="#{menuControl.cancelarActualizar()}"/>
+                    </center>
 
 
                 </h:form>
@@ -161,6 +167,7 @@
                 <h:form id="formEliminar" class="dialogC">
 
                     <p:growl id="mg" showSummary="true" showDetail="true"/>
+                    <center>
 
 
                     <h:outputText value="¿Desea eliminar? #{menuControl.menu.titulo} " />    
@@ -168,6 +175,7 @@
                                      oncomplete="actualizaListForma();" > </p:commandButton>
 
                     <p:commandButton value="No" actionListener="#{menuControl.cancelarEliminar()}" />
+                    </center>
 
                 </h:form>
             </p:dialog>

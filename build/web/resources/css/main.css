@@ -41,10 +41,10 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 .ui-selectonemenu-filter-container{
      width: 90% !important;
 }
-
 .ui-selectonemenu-panel{
      width: 45% !important;
 }
+
 .ui-menu .ui-menu-list .ui-widget-header {
 
     font-family: sans-serif;
@@ -80,7 +80,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
     .ui-selectcheckboxmenu-panel .ui-selectcheckboxmenu-header .ui-chkbox {
         display: none;
     }
-
+    
 .ui-state-default {
 background: rgb(181,189,200)!important; 
 background: -moz-linear-gradient(top,  rgba(181,189,200,1) 0%, rgba(130,140,149,1) 10%, rgba(130,140,149,1) 10%, rgba(40,52,59,1) 96%)!important; /* FF3.6-15 */
@@ -99,11 +99,12 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#b5bdc8', end
     font-style: normal;
 }
 
-.ui-widget-content .ui-inputfield, .ui-widget-header .ui-inputfield {
-    font-family: initial;
+.ui-widget-content .ui-inputfield, .ui-widget-header .ui-inputfield{
+    font-family: sans-serif !important;
     font-size: 1.0em !important;
     background: #ffffff !important;
     color: #000000 !important;
+    text-shadow: none !important;
 }
 .panelEvento {
 
@@ -275,6 +276,11 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
     border-style: none;
     
 }
+.panelgridBuscarPersonal{
+background-color: blue !important;
+font-weight: bold;
+}
+
 .tituloPantalla{
  text-align: center; 
  font-size: 1.7vw; 
@@ -287,9 +293,60 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
     border-radius: 10px !important;
     border: 1px solid #d8e0de !important; 
   }
-  
-  
-  @font-face {
+  .ui-paginator-current{
+    color: #000000;
+    text-shadow: #87adde 0.1em 0.1em 0.2em;
+    font-weight: bold; 
+  }
+  .ui-paginator.ui-paginator-top.ui-widget-header.ui-corner-top,
+.ui-paginator.ui-paginator-bottom.ui-widget-header.ui-corner-bottom,
+.ui-paginator a,
+.ui-paginator a:hover {
+    background: none;
+    background-image: none;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    text-shadow: none;
+}
+.ui-paginator a,
+.ui-sortable-column-icon:before {
+    font-family: FontAwesome;
+}
+
+.ui-paginator span span, 
+.ui-paginator a span { 
+    display: none; 
+}
+.ui-paginator > a {
+    width: 15px;
+    height: 10px; 
+}
+.ui-paginator-first:before{ 
+    content: "\f048";
+}
+
+.ui-paginator-prev:before{ 
+    content: "\f04a";
+}
+
+.ui-paginator-next:before{ 
+    content: "\f04e";
+}
+
+.ui-paginator-last:before{ 
+    content: "\f051";
+}
+
+.ui-messages{
+width: 98%;   
+}
+.sinBorde.ui-panelgrid>*>tr,
+.sinBorde.ui-panelgrid .ui-panelgrid-cell {
+    border: none;
+}
+
+@font-face {
     font-family: 'Raleway';
     font-style: normal;
     font-weight: 400;

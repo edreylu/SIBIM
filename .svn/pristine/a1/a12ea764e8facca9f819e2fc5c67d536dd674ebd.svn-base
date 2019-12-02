@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+<Context path="/SIBIEM">
+    <Resource auth="Container" 
+              driverClassName="oracle.jdbc.OracleDriver" 
+              factory="oracle.jdbc.pool.OracleDataSourceFactory" 
+              name="jdbc/MOBILIAR" 
+              password="MOBILIAR" 
+              type="oracle.jdbc.pool.OracleDataSource" 
+              url="jdbc:oracle:thin:@172.29.1.61:1521/MOBILIAR" 
+              user="MOBILIAR"/>
+</Context>
+-->
+<Context path="/SIBIEM">
+    <Resource auth="Container" 
+              driverClassName="oracle.jdbc.OracleDriver" 
+              factory="oracle.jdbc.pool.OracleDataSourceFactory" 
+              name="jdbc/MOBILIAR" 
+              password="DevB13nMu319" 
+              type="oracle.jdbc.pool.OracleDataSource" 
+              url="jdbc:oracle:thin:@dsrvdb02.sep.puebla.local:1551/oradev.sep.puebla.local" 
+              user="devbienmueble"/>
+</Context>

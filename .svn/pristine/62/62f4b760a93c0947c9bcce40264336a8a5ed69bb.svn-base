@@ -1,0 +1,292 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package reportes;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ *
+ * @author usuario
+ */
+public class ReportesDAO extends conexion.ConexionOracle implements java.io.Serializable{
+    
+    public int insertaReporte(Reporte reporte) {
+        System.out.println("Entro a insertar ");
+        int valor = 0;
+        ResultSet rs = null;
+        final String query = "INSERT INTO REPORTE (IDREPORTE,\n" +
+                                            "       REPORTE,\n" +
+                                            "       QUERY,\n" +
+                                            "       OBSERVACIONES,\n" +
+                                            "       TITULO1,\n" +
+                                            "       TITULO2,\n" +
+                                            "       TITULO3,\n" +
+                                            "       TITULO4,\n" +
+                                            "       TITULO5,\n" +
+                                            "       IDESTATUS) "+
+                                     " VALUES (?,?,?,?,?,?,?,?,?,1)";
+        try {
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query, new Object[]{
+                reporte.getIdReporte(),
+                reporte.getReporte(),
+                reporte.getQuery(),
+                reporte.getObservaciones(),
+                reporte.getTitulo1(),
+                reporte.getTitulo2(),
+                reporte.getTitulo3(),
+                reporte.getTitulo4(),
+                reporte.getTitulo5()
+            }
+            ).executeQuery();
+
+        } catch (SQLException e) {
+            System.out.println("Error en insertaReporte() " + e.getMessage());
+
+        } finally {
+            try {
+                if (null != rs) {
+                    valor = 1;
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en insertaReporte() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        System.out.println("valor: " + valor);
+        return valor;
+    }
+
+    public int actualizaReporte(Reporte reporte) {
+        int valor = 0;
+        ResultSet rs = null;
+        final String query = "UPDATE REPORTE set REPORTE = ?,\n" +
+                                        "       QUERY = ?,\n" +
+                                        "       OBSERVACIONES = ?,\n" +
+                                        "       TITULO1 = ?,\n" +
+                                        "       TITULO2 = ?,\n" +
+                                        "       TITULO3 = ?,\n" +
+                                        "       TITULO4 = ?,\n" +
+                                        "       TITULO5 = ? \n" +
+                               " where IDREPORTE = ? ";
+
+        try {
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query, new Object[]{
+                reporte.getReporte(),
+                reporte.getQuery(),
+                reporte.getObservaciones(),
+                reporte.getTitulo1(),
+                reporte.getTitulo2(),
+                reporte.getTitulo3(),
+                reporte.getTitulo4(),
+                reporte.getTitulo5(),
+                reporte.getIdReporte()}).executeQuery();
+
+        } catch (SQLException e) {
+            System.out.println("Error en actualizaReporte() " + e.getMessage());
+        } finally {
+            try {
+                if (null != rs) {
+                    valor = 1;
+                    rs.close();
+                }
+
+            } catch (SQLException e) {
+                System.out.println("Error en actualizaReporte() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        return valor;
+    }
+
+    public int eliminaReporte(Reporte reporte, int opcion) {
+        int valor = 0;
+        ResultSet rs = null;
+        final String query = "UPDATE REPORTE set IDESTATUS = ? WHERE IDREPORTE = ? ";
+        try {
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query, new Object[]{opcion,reporte.getIdReporte()}).executeQuery();
+
+        } catch (SQLException e) {
+            System.out.println("Error en eliminaReporte() " + e.getMessage());
+        } finally {
+            try {
+                if (null != rs) {
+                    valor = 1;
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en eliminaReporte() " + e.getMessage());
+
+            }
+            super.cerrarConexion();
+        }
+        return valor;
+    }
+
+    public int getNumeroSiguiente() {
+        int id=0;
+        ResultSet rs = null;
+        final String query = "select nvl(max(IDREPORTE),0)+ 1 from REPORTE ";
+        try {
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query).executeQuery();
+            if (rs.next()) {
+                id = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error en getNumeroSiguiente() " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en getNumeroSiguiente() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        return id;
+    }
+
+    public List<Reporte> traeRegistros(int valor) {
+        List<Reporte> listaReporte;
+        System.out.println("Entro a cargar listaReporte");
+        Reporte reporte = null;
+        ResultSet rs = null;
+        String query = null;
+        String continuacion = valor == 1 ? " WHERE IDESTATUS = 1" : "";
+        query = "SELECT IDREPORTE,\n" +
+                "       REPORTE,\n" +
+                "       QUERY,\n" +
+                "       OBSERVACIONES,\n" +
+                "       TITULO1,\n" +
+                "       TITULO2,\n" +
+                "       TITULO3,\n" +
+                "       TITULO4,\n" +
+                "       TITULO5,\n" +
+                "       IDESTATUS\n" +
+                " FROM REPORTE "+continuacion+" ORDER BY 1";
+                
+        try {
+            listaReporte = new ArrayList<>();
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query).executeQuery();
+
+            while (rs.next()) {
+                reporte = new Reporte();
+                reporte.setIdReporte(rs.getInt("IDREPORTE"));
+                reporte.setReporte(rs.getString("REPORTE"));
+                reporte.setQuery(rs.getString("QUERY"));
+                reporte.setObservaciones(rs.getString("OBSERVACIONES"));
+                reporte.setTitulo1(rs.getString("TITULO1"));
+                reporte.setTitulo2(rs.getString("TITULO2"));
+                reporte.setTitulo3(rs.getString("TITULO3"));
+                reporte.setTitulo4(rs.getString("TITULO4"));
+                reporte.setTitulo5(rs.getString("TITULO5"));
+                reporte.setIdEstatus(rs.getInt("IDESTATUS"));
+                listaReporte.add(reporte);
+
+            }
+            System.out.println("listaReporte.size() = " + listaReporte.size());
+        } catch (SQLException e) {
+            System.out.println("Error en listaReporte() " + e.getMessage());
+            listaReporte = null;
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en listaReporte() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        return listaReporte;
+    }
+    
+    public List<Reporte> traeRegistrosConsulta(int noUsuario) {
+        List<Reporte> listaReporte;
+        System.out.println("Entro a cargar listaReporteConsulta");
+        Reporte reporte = null;
+        ResultSet rs = null;
+        String query = null;
+        query = "SELECT RE.IDREPORTE,\n" +
+                        "  RE.REPORTE,\n" +
+                        "  RE.QUERY,\n" +
+                        "       TITULO1,\n" +
+                        "       TITULO2,\n" +
+                        "       TITULO3,\n" +
+                        "       TITULO4,\n" +
+                        "       TITULO5,\n" +
+                        "  RE.OBSERVACIONES,\n" +
+                        "  RE.IDESTATUS\n" +
+                        "FROM REPORTE RE,\n" +
+                        "  ROL_REPORTE RR,\n" +
+                        "  ROLES_USUARIOS RU\n" +
+                        "WHERE RU.NO_ROL  = RR.NO_ROL\n" +
+                        "AND RR.IDREPORTE = RE.IDREPORTE\n" +
+                        "AND RE.IDESTATUS =1 \n" +
+                        "AND RU.IDESTATUS =1 \n" +
+                        "AND RU.NO_USUARIO="+noUsuario+" ORDER BY 1";
+                
+        try {
+            listaReporte = new ArrayList<>();
+            super.abrirConexion();
+            rs = super.getPreparedStatement(query).executeQuery();
+
+            while (rs.next()) {
+                reporte = new Reporte();
+                reporte.setIdReporte(rs.getInt("IDREPORTE"));
+                reporte.setReporte(rs.getString("REPORTE"));
+                reporte.setQuery(rs.getString("QUERY"));
+                reporte.setTitulo1(rs.getString("TITULO1"));
+                reporte.setTitulo2(rs.getString("TITULO2"));
+                reporte.setTitulo3(rs.getString("TITULO3"));
+                reporte.setTitulo4(rs.getString("TITULO4"));
+                reporte.setTitulo5(rs.getString("TITULO5"));
+                reporte.setObservaciones(rs.getString("OBSERVACIONES"));
+                reporte.setIdEstatus(rs.getInt("IDESTATUS"));
+                listaReporte.add(reporte);
+
+            }
+            System.out.println("listaReporteConsulta.size() = " + listaReporte.size());
+        } catch (SQLException e) {
+            System.out.println("Error en listaReporteConsulta() " + e.getMessage());
+            listaReporte = null;
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error en listaReporteConsulta() " + e.getMessage());
+            }
+            super.cerrarConexion();
+        }
+        return listaReporte;
+    }
+    
+    public ResultSet getConsulta(String query)
+	{
+		ResultSet cursor=null;
+                System.out.println(query);
+		try
+		{
+                    super.abrirConexion();
+			
+                        cursor = super.getPreparedStatement(query).executeQuery();
+		}
+		catch(Exception e)
+		{System.out.println("Error en getConsulta() " + e.getMessage());}
+		return cursor;
+	}
+}

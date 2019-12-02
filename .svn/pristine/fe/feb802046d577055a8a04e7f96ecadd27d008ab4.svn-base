@@ -1,0 +1,173 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition template="menu.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <ui:define name="contenido">
+        <h:head>
+            <title>Forma Adquisicion</title>
+
+        </h:head>
+        <f:metadata>
+            <f:viewAction action="#{kformaAdquisicionControl.init()}" />   
+        </f:metadata>       
+        <h:body>
+            <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"/>
+            <f:event type="preRenderView" rendered="#{facesContext.postBack}" listener="#{accesoC.validaSesion('formaadquisicion.xhtml')}"/>  
+            <center>
+                <h:outputText value="Forma Adquisicion" class="tituloPantalla" />
+                <p:separator/>
+                <h:form id="formMostrar">
+
+                    <p:dataTable id="tablacat" var="kfa" value="#{kformaAdquisicionControl.formasadquisicion}"
+                                 style="width:100%;" rows="10" rowsPerPageTemplate="5,8,10" 
+                                 emptyMessage ="No hay Formas Adquisicion disponibles" 
+                                 paginator="true" paginatorPosition="bottom"
+                                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+                                 filteredValue="#{kformaAdquisicionControl.filteredFormaAdquisicion}" widgetVar="catTabla"
+                                 selection="#{kformaAdquisicionControl.formaAdquisicionSeleccionado}" selectionMode="single" 
+                                 rowKey="#{kfa.idFormaAdquisicion}" currentPageReportTemplate="[ {endRecord} de {totalRecords} Formas de adquisicion ]">
+                        <p:ajax event="rowSelect" update="panelBotones" global="false"/>
+                        <f:facet name="header">
+                            <p:commandButton id="inscat" value="Insertar" icon="fa fa-plus" update=":formInsertar" actionListener="#{kformaAdquisicionControl.CargaVentanaInserta('')}" style="float: left;" rendered="#{accesoC.rolbotones.ins}" >
+                            </p:commandButton>
+                            <p:tooltip for="inscat" value="Insertar Forma Asquisicion" showEffect="clip" hideEffect="clip" position="top"/>
+                            <p:outputPanel>
+                                <h:outputText value="Buscar: " />
+                                <p:inputText id="globalFilter" onkeypress="if (event.keyCode === 13) {
+                                            return false;
+                                        }" style="width:150px" placeholder="Escribe para buscar"/>
+                                <p:commandButton id="bsearch" icon="fa fa-search" onclick="PF('catTabla').filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+
+                        <p:column headerText="#" width="20%" filterBy="#{kfa.idFormaAdquisicion}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{kfa.idFormaAdquisicion}" />
+                        </p:column>
+
+                        <p:column headerText="DESCRIPCION" width="20%" filterBy="#{kfa.formaadquisicion}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{kfa.formaadquisicion}" />
+                        </p:column> 
+
+                        <p:column headerText="OBSERVACIONES" width="40%" filterBy="#{kfa.observaciones}" filterStyle="width:90%;" filterMatchMode="contains">
+                            <h:outputText value="#{kfa.observaciones}" />
+                        </p:column>
+                        <p:column headerText="IDESTATUS" width="20%">
+                            <h:outputText value="#{kfa.idEstatus == '1' ? 'ACTIVO' : 'INACTIVO'}" />
+                        </p:column>
+                        <f:facet name="footer">
+                            <h:panelGroup id="panelBotones" >
+                                <p:commandButton id="actcat" value="Editar" icon="fa fa-pencil" disabled="#{kformaAdquisicionControl.formaAdquisicionSeleccionado == null}" 
+                                                 rendered="#{accesoC.rolbotones.act}" actionListener="#{kformaAdquisicionControl.CargaVentanaModifica()}" 
+                                                 update=":formModificar">
+                                    <f:setPropertyActionListener target="#{kformaAdquisicionControl.formaadquisicion}" value="#{kformaAdquisicionControl.formaAdquisicionSeleccionado}" />
+                                </p:commandButton>
+                                <p:tooltip for="actcat" value="Editar Forma Asquisicion" showEffect="clip" hideEffect="clip" position="top"/>
+
+                                <p:commandButton id="elicat" value="#{kformaAdquisicionControl.formaAdquisicionSeleccionado.idEstatus eq '1' ? 'Inactivar' : 'Activar'}" 
+                                                 icon="fa fa-trash" disabled="#{kformaAdquisicionControl.formaAdquisicionSeleccionado == null}" 
+                                                 rendered="#{accesoC.rolbotones.eli}" oncomplete="PF('dlgeliminar').show()" update=":formEliminar" >
+                                    <f:setPropertyActionListener target="#{kformaAdquisicionControl.formaadquisicion}" value="#{kformaAdquisicionControl.formaAdquisicionSeleccionado}" />
+                                </p:commandButton>
+                                <p:tooltip for="elicat" value="#{kformaAdquisicionControl.formaAdquisicionSeleccionado.idEstatus eq '1' ? 'Inactivar' : 'Activar'} Forma Asquisicion" 
+                                           showEffect="clip" hideEffect="clip" position="top"/>    
+                            </h:panelGroup>
+                        </f:facet>
+                    </p:dataTable>
+
+
+                </h:form>
+
+            </center>
+
+            <p:dialog id="dlg1" header="Insertar Forma de Adquisicion" showEffect="explode" hideEffect="explode" widgetVar="dlginsertar" 
+                      resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+                <h:form id="formInsertar" class="dialogC">
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>
+                    <p:panelGrid columns="3" styleClass="sinBorde" style="width: 100%">
+
+                        <p:outputLabel value="FORMA ADQUISICION:" for="nombre" />
+                        <p:inputText id="nombre" value="#{kformaAdquisicionControl.formaadquisicion.formaadquisicion}" style="text-transform: uppercase;" requiredMessage="Se requiere forma adquisicion" required="true" />
+                        <p:message for="nombre" display="icon" />
+                        <p:outputLabel value="OBSERVACIONES" for="observa" />
+                        <p:inputText id="observa" value="#{kformaAdquisicionControl.formaadquisicion.observaciones}" />
+                        <p:message for="observa" display="icon" />
+
+                    </p:panelGrid>
+                    <p:separator/>
+                    <center>
+                    <p:commandButton value="Guardar" update="mg :formInsertar :formMostrar"
+                                     actionListener="#{kformaAdquisicionControl.insertar()}" oncomplete="actualizaList();"/>
+                    </center>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog id="dlg2" header="Modificar Forma de Adquisicion" showEffect="explode" hideEffect="explode" widgetVar="dlgmodificar" 
+                      resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+
+                <h:form id="formModificar" class="dialogC">
+
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>  
+                    <p:panelGrid columns="3" styleClass="sinBorde" style="width: 100%">
+
+                        <p:outputLabel value="FORMA ADQUISICION:" for="nombre" />
+                        <p:inputText id="nombre" value="#{kformaAdquisicionControl.formaadquisicion.formaadquisicion}" style="text-transform: uppercase;" requiredMessage="Se requiere forma adquisicion" required="true" />
+                        <p:message for="nombre" display="icon" />
+                        <p:outputLabel value="OBSERVACIONES" for="observa" />
+                        <p:inputText id="observa" value="#{kformaAdquisicionControl.formaadquisicion.observaciones}" />
+                        <p:message for="observa" display="icon" />
+
+                    </p:panelGrid>
+                    <p:separator/>
+                    <center>
+                    <p:commandButton value="Modificar" update="mg :formMostrar"
+                                     actionListener="#{kformaAdquisicionControl.modificar()}"
+                                     oncomplete="actualizaList();"
+                                     />
+
+                    <p:commandButton value="Cancelar" actionListener="#{kformaAdquisicionControl.cancelarActualizar()}"/>
+                    </center>
+
+
+                </h:form>
+
+
+            </p:dialog>
+
+
+            <p:dialog id="dlg3" header="Estatus Forma de Adquisicion" showEffect="explode" hideEffect="explode" 
+                      widgetVar="dlgeliminar" resizable="false" minWidth="200" closeOnEscape="true" appendTo="@(body)" modal="true">
+
+                <h:form id="formEliminar" class="dialogC">
+
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>
+
+                     <center>
+                    <h:outputText rendered="#{kformaAdquisicionControl.formaadquisicion.idEstatus eq '1'}" value="¿Desea Inactivar #{kformaAdquisicionControl.formaadquisicion.formaadquisicion} ?" />    
+                    <p:commandButton rendered="#{kformaAdquisicionControl.formaadquisicion.idEstatus eq '1'}" value="Si" update="mg :formMostrar" actionListener="#{kformaAdquisicionControl.ActivarInactivar(2)}" 
+                                     oncomplete="actualizaList();" > </p:commandButton>
+                    <h:outputText rendered="#{kformaAdquisicionControl.formaadquisicion.idEstatus eq '2'}" value="¿Desea Activar #{kformaAdquisicionControl.formaadquisicion.formaadquisicion} ?" />    
+                    <p:commandButton rendered="#{kformaAdquisicionControl.formaadquisicion.idEstatus eq '2'}" value="Si" update="mg :formMostrar" actionListener="#{kformaAdquisicionControl.ActivarInactivar(1)}" 
+                                     oncomplete="actualizaList();" > </p:commandButton>
+                    <p:commandButton value="No" actionListener="#{kformaAdquisicionControl.cancelarEliminar()}" />
+                    </center>
+
+                </h:form>
+            </p:dialog>
+
+            <h:form>
+                <p:remoteCommand name="actualizaList" update=":formMostrar" actionListener="#{kformaAdquisicionControl.init()}" /> 
+            </h:form>
+            <p:dialog widgetVar="statusDialog" appendTo="@(body)" modal="true" draggable="false" closable="false" resizable="false" showHeader="false">
+                <p:graphicImage value="resources/img/imagenes/loading.gif" />
+            </p:dialog>
+        </h:body>
+    </ui:define>
+</ui:composition>
+

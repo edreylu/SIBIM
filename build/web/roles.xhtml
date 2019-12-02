@@ -27,10 +27,10 @@
                                  style="width:100%;" rows="10" rowsPerPageTemplate="5,8,10" 
                                  emptyMessage ="No hay roles disponibles"
                                  paginator="true" paginatorPosition="bottom"
-                                 paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
                                  filteredValue="#{rolesControl.filteredRoles}" widgetVar="rolesTabla"
                                  selection="#{rolesControl.rolSeleccionado}" selectionMode="single" 
-                                 rowKey="#{ro.noRol}">
+                                 rowKey="#{ro.noRol}" currentPageReportTemplate="[ {endRecord} de {totalRecords} Roles ]">
                         <p:ajax event="rowSelect" update="panelBotones" global="false"/>
                         <f:facet name="header">
                             <p:commandButton id="insrol" value="Insertar" icon="fa fa-plus" update=":formInsertar" actionListener="#{rolesControl.CargaVentanaInserta('')}" style="float: left;" rendered="#{accesoC.rolbotones.ins}" >
@@ -127,11 +127,11 @@
 
     <h:form id="formInsertar" class="dialogC">
                     <p:growl id="mg" showSummary="true" showDetail="true"/>
-                    <p:panelGrid columns="2" >
+                    <p:panelGrid columns="2" styleClass="sinBorde" style="width: 100%">
 
 
                         <p:outputLabel value="Nombre Rol" for="nombre" />
-                        <p:inputText id="nombre" value="#{rolesControl.rol.descripcion}" requiredMessage="Se requiere Nombre Rol" required="true" style="text-transform: uppercase;" >
+                        <p:inputText id="nombre" value="#{rolesControl.rol.descripcion}" size="20" requiredMessage="Se requiere Nombre Rol" required="true" style="text-transform: uppercase;" >
                             <p:watermark for="nombre" value="NOMBRE" />  
                         </p:inputText>
 
@@ -143,6 +143,7 @@
                        <p:selectBooleanCheckbox itemLabel="DESCARGAR"  value="#{rolesControl.rol.descargarSelI}"/> 
                         
                     </p:panelGrid>
+                    <p:separator/>
                     <center> <p:commandButton value="Guardar" update="mg :formInsertar :formMostrar"
                                      actionListener="#{rolesControl.insertar()}" oncomplete="actualizaListRoles();"/></center>
                 </h:form>
@@ -155,10 +156,10 @@
                 <h:form id="formModificar" class="dialogC">
 
                          <p:growl id="mg" showSummary="true" showDetail="true"/>  
-                        <p:panelGrid columns="2">
+                        <p:panelGrid columns="2" styleClass="sinBorde" style="width: 100%">
 
                             <p:outputLabel value="Nombre Rol" />
-                            <p:inputText value="#{rolesControl.rol.descripcion}" requiredMessage="Se requiere Nombre Rol" required="true" />
+                            <p:inputText value="#{rolesControl.rol.descripcion}" size="20" requiredMessage="Se requiere Nombre Rol" required="true" />
                             <p:selectBooleanCheckbox itemLabel="INSERTAR"  value="#{rolesControl.rol.insertarSel}" /> 
                             <p:selectBooleanCheckbox itemLabel="ACTUALIZAR"   value="#{rolesControl.rol.actualizarSel}"/> 
                             <p:selectBooleanCheckbox itemLabel="ELIMINAR"   value="#{rolesControl.rol.eliminarSel}"/> 
@@ -166,6 +167,7 @@
                             <p:selectBooleanCheckbox itemLabel="DESCARGAR"  value="#{rolesControl.rol.descargarSel}"/> 
 
                         </p:panelGrid>
+                         <p:separator/>
                          <center>
                         <p:commandButton value="Modificar" update="mg :formMostrar"
                                          actionListener="#{rolesControl.modificar()}"
@@ -187,12 +189,13 @@
 
                         <p:growl id="mg" showSummary="true" showDetail="true"/>
 
-
+                        <center>
                         <h:outputText value="¿Desea eliminar #{rolesControl.rol.descripcion}?" />    
                         <p:commandButton value="Si" update="mg :formMostrar" actionListener="#{rolesControl.eliminar()}" 
                                          oncomplete="actualizaListRoles();" />
 
                         <p:commandButton value="No" actionListener="#{rolesControl.cancelarEliminar()}" />
+                        </center>
                 
                 </h:form>
             </p:dialog>
@@ -215,9 +218,9 @@
                                             paginator="true" paginatorPosition="top" 
                                             paginatorTemplate=" {PreviousPageLink} {CurrentPageReport}  
                                                                 {NextPageLink}  {RowsPerPageDropdown}" 
-                                            rows="10" style=" width: 100%;"
+                                            rows="50" style=" width: 100%;"
                                             currentPageReportTemplate="({endRecord} de {totalRecords} 
-                                                                                Roles)" >
+                                                                                Formas)" >
                                     <p:column headerText="NO FORMA MENU" width="20%">
                                         <h:outputText value="#{men.noFormaMenu}"  />
                                     </p:column>
@@ -256,7 +259,7 @@
                                             paginator="true" paginatorPosition="top" 
                                             paginatorTemplate=" {PreviousPageLink} {CurrentPageReport}  
                                                                 {NextPageLink}  {RowsPerPageDropdown}" 
-                                            rows="10" style=" width: 100%;"
+                                            rows="50" style=" width: 100%;"
                                             currentPageReportTemplate="({endRecord} de {totalRecords} 
                                                                                 Roles)" >
                                     <p:column headerText="ID EVENTO" width="20%">
@@ -297,7 +300,7 @@
                                             paginator="true" paginatorPosition="top" 
                                             paginatorTemplate=" {PreviousPageLink} {CurrentPageReport}  
                                                                 {NextPageLink}  {RowsPerPageDropdown}" 
-                                            rows="10" style=" width: 100%;"
+                                            rows="50" style=" width: 100%;"
                                             currentPageReportTemplate="({endRecord} de {totalRecords} 
                                                                                 Roles)" >
                                     <p:column headerText="ID REPORTE" width="20%">

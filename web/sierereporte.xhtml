@@ -1,0 +1,191 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition template="menu.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <ui:define name="contenido">
+        <h:head>
+            <title>Clasificador mobiliario</title>
+
+        </h:head>
+        <f:metadata>
+            <f:viewAction action="#{reportesControl.init()}" />   
+        </f:metadata>       
+        <h:body>
+            <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"/>
+            <f:event type="preRenderView" rendered="#{facesContext.postBack}" listener="#{accesoC.validaSesion('sierereporte.xhtml')}"/>  
+            <h:form>
+                <div align="center">
+                    <h:outputText value="Reporte Siere" class="tituloPantalla" />
+                </div>
+                <p:separator/>
+                <p:panelGrid style="width: 50%; margin: auto auto;" styleClass="sinBorde">
+                    <p:row style="height: 80px">
+                        <p:column style="width: 45%; text-align: right">
+                            <p:outputLabel value="Generar por: " style="font-size: 15px"/>
+                        </p:column>
+                        <p:column>
+
+                            <p:selectOneMenu id="slcfiltro" value="#{reportesControl.filtroTipoSiere}"  style="width: 200px;">
+                                <f:selectItem itemLabel="Seleccione...." itemValue="" />
+                                <f:selectItem itemValue="1" itemLabel="DEPARTAMENTO"/>
+                                <f:selectItem itemValue="2" itemLabel="UNIDAD RESPONSABLE"/>
+                                <f:selectItem itemValue="3" itemLabel="BLOQUE"/>
+                                <p:ajax event="change" update="pnlFiltros" listener="#{reportesControl.cargaInfoporFiltro()}"/>
+                            </p:selectOneMenu>
+
+
+                        </p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column colspan="2">
+                            <h:panelGroup id="pnlFiltros" >
+                                <p:panel  rendered="#{reportesControl.filtroTipoSiere == '1'}" style="border: none">
+                                    <p:panelGrid style="margin: auto auto; width: 100%" styleClass="sinBorde">
+                                        <p:row>
+                                            <p:column style="width: 45%; text-align: right">
+                                                <p:outputLabel value="Seleccione departamento: " style="font-size: 15px"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:selectOneMenu id="slcdepartamentos" filter="true" filterMatchMode="contains" value="#{reportesControl.deptoSiere}" style="width: 200px;">
+                                                    <f:selectItem itemLabel="Seleccione...." itemValue="" />
+                                                    <f:selectItems value="#{reportesControl.mapDeptosSiere.entrySet()}" var="depto" itemValue="#{depto.key}" itemLabel="#{depto.value}"/>
+                                                    <p:ajax event="change" listener="#{reportesControl.cargaInfoSiere()}" update="pnlFiltros outDepto cmdDescargaDepto"/>
+                                                </p:selectOneMenu>
+                                            </p:column>
+                                        </p:row>
+                                        <p:row style="height: 300px">
+                                            <p:column colspan="2" style="text-align: center">
+                                                <p:panelGrid style="width: 100%" styleClass="sinBorde">
+                                                    <p:row>
+                                                        <p:column>
+                                                            <h:panelGroup id="outDepto">
+                                                                <p:outputLabel value="#{reportesControl.mapDeptosSiere[reportesControl.deptoSiere]}" 
+                                                                               rendered="#{reportesControl.deptoSiere!=0}" style="font-size: 18px"/>
+                                                            </h:panelGroup>
+                                                        </p:column>
+                                                    </p:row>
+                                                    <p:row>
+                                                        <p:column colspan="2">
+                                                            <h:panelGroup id="cmdDescargaDepto">
+                                                                <p:commandLink id="cmdLinkDepto" ajax="false" onclick="PrimeFaces.monitorDownload(start, stop);" actionListener="#{reportesControl.generaExcelSiere()}" rendered="#{reportesControl.deptoSiere!=0}">
+                                                                    <p:graphicImage value="resources/img/excelIcon.png" width="60px"/>
+                                                                    <p:fileDownload value="#{reportesControl.file}" />
+                                                                </p:commandLink>
+                                                                <p:tooltip for="cmdLinkDepto" value="Descargar" position="left"/>
+                                                            </h:panelGroup>
+                                                        </p:column>
+                                                    </p:row>
+
+
+                                                </p:panelGrid>
+
+                                            </p:column>
+                                        </p:row>
+
+                                    </p:panelGrid>
+                                </p:panel>
+                                <p:panel rendered="#{reportesControl.filtroTipoSiere == '2'}" style="border: none">
+                                    <p:panelGrid style="margin: auto auto; width: 100%" styleClass="sinBorde">
+                                        <p:row>
+                                            <p:column style="width: 45%; text-align: right">
+                                                <p:outputLabel value="Seleccione una U.R: " style="font-size: 15px"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:selectOneMenu id="slcUR" filter="true" filterMatchMode="contains" value="#{reportesControl.urSiere}" style="width: 200px;">
+                                                    <f:selectItem itemLabel="Seleccione...." itemValue="" />
+                                                    <f:selectItems value="#{reportesControl.mapURSiere.entrySet()}" var="ur" itemValue="#{ur.key}" itemLabel="#{ur.value}"/>
+                                                    <p:ajax event="change" listener="#{reportesControl.cargaInfoSiere()}" update="pnlFiltros outUr cmdDescargaUR"/>
+                                                </p:selectOneMenu>
+                                            </p:column>
+                                        </p:row>
+                                        <p:row style="height: 300px">
+                                            <p:column colspan="2">
+                                                <p:panelGrid style="width: 100%" styleClass="sinBorde">
+                                                    <p:row>
+                                                        <p:column colspan="2" style="text-align: center">
+                                                            <h:panelGroup id="outUr">
+                                                                <p:outputLabel value="#{reportesControl.mapURSiere[reportesControl.urSiere]}" 
+                                                                               rendered="#{reportesControl.urSiere !=0}" style="font-size: 18px"/>
+                                                            </h:panelGroup>
+
+                                                        </p:column>
+                                                    </p:row>
+                                                    <p:row>
+                                                        <p:column colspan="2" style="text-align: center">
+                                                            <h:panelGroup id="cmdDescargaUR">
+                                                                <p:commandLink id="cmdLinkUR" ajax="false" onclick="PrimeFaces.monitorDownload(start, stop);" actionListener="#{reportesControl.generaExcelSiere()}" rendered="#{reportesControl.urSiere!=0}">
+                                                                    <p:graphicImage value="resources/img/excelIcon.png" width="60px"/>
+                                                                    <p:fileDownload value="#{reportesControl.file}" />
+                                                                </p:commandLink>
+                                                                <p:tooltip for="cmdLinkUR" value="Descargar" position="left"/>
+                                                            </h:panelGroup>
+
+                                                        </p:column> 
+                                                    </p:row>
+                                                </p:panelGrid>
+                                            </p:column>
+
+                                        </p:row>
+                                    </p:panelGrid>
+                                </p:panel>
+                                <p:panel rendered="#{reportesControl.filtroTipoSiere == '3'}" style="border: none">
+                                    <p:panelGrid style="margin: auto auto; width: 100%" styleClass="sinBorde">
+                                        <p:row>
+                                            <p:column style="width: 45%; text-align: right">
+                                                <p:outputLabel value="Seleccione un bloque: " style="font-size: 15px"/>
+                                            </p:column>
+                                            <p:column>
+                                                <p:selectOneMenu id="slcBloque" filter="true" filterMatchMode="contains" value="#{reportesControl.bloque}" style="width: 200px;">
+                                                    <f:selectItem itemLabel="Seleccione...." itemValue="" />
+                                                    <f:selectItems value="#{reportesControl.listBloques}" var="ur" itemValue="#{ur}" itemLabel="#{ur}"/>
+                                                    <p:ajax event="change" listener="#{reportesControl.cargaInfoSiere()}" update="pnlFiltros outUr cmdDescargaUR"/>
+                                                </p:selectOneMenu>
+                                            </p:column>
+                                        </p:row>
+                                        <p:row style="height: 300px">
+                                            <p:column colspan="2">
+                                                <p:panelGrid style="width: 100%" styleClass="sinBorde">
+                                                    <p:row>
+                                                        <p:column colspan="2" style="text-align: center">
+                                                            <h:panelGroup id="outBloque">
+                                                                <p:outputLabel value="BLOQUE: #{reportesControl.bloque}" 
+                                                                               rendered="#{reportesControl.bloque !=0}" style="font-size: 18px"/>
+                                                            </h:panelGroup>
+
+                                                        </p:column>
+                                                    </p:row>
+                                                    <p:row>
+                                                        <p:column colspan="2" style="text-align: center">
+                                                            <h:panelGroup id="cmdDescargaBloque">
+                                                                <p:commandLink id="cmdLinkBloque" ajax="false" onclick="PrimeFaces.monitorDownload(start, stop);" actionListener="#{reportesControl.generaExcelSiere()}" rendered="#{reportesControl.bloque!=0}">
+                                                                    <p:graphicImage value="resources/img/excelIcon.png" width="60px"/>
+                                                                    <p:fileDownload value="#{reportesControl.file}" />
+                                                                </p:commandLink>
+                                                                <p:tooltip for="cmdLinkBloque" value="Descargar" position="left"/>
+                                                            </h:panelGroup>
+
+                                                        </p:column> 
+                                                    </p:row>
+                                                </p:panelGrid>
+                                            </p:column>
+
+                                        </p:row>
+                                    </p:panelGrid>
+                                </p:panel>
+                            </h:panelGroup>
+                        </p:column>
+                    </p:row>
+                </p:panelGrid>
+            </h:form>
+            <p:dialog widgetVar="statusDialog" appendTo="@(body)" modal="true" draggable="false" closable="false" resizable="false" showHeader="false">
+                <p:graphicImage value="resources/img/imagenes/loading.gif" />
+            </p:dialog>
+        </h:body>
+    </ui:define>
+</ui:composition>
+

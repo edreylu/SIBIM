@@ -1,0 +1,187 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition template="menu.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <ui:define name="contenido">
+        <h:head>
+            <title>PARAMETROS</title>
+             
+        </h:head>
+        <f:metadata>
+            <f:viewAction action="#{parametrosControl.init()}" />   
+        </f:metadata>       
+        <h:body>
+        <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
+        <f:event type="preRenderView" rendered="#{facesContext.postBack}" listener="#{accesoC.validaSesion('parametros.xhtml')}"/>  
+            <center>
+                <h:outputText value="Parametros" class="tituloPantalla" />
+                
+                <h:form id="formMostrar">
+                    
+                    <p:growl id="mg" showSummary="true" showDetail="true"/>
+                     
+                     <br/>
+                      
+                     <p:panel id="basic" header="PARAMETROS" style="text-align: center !important; width: 70%;">
+                         <center>
+                             <p:graphicImage cache="false" style="width: 25%; height: 55%;" value="resources/img/SEP.png" />
+                             <h:panelGrid cellpadding="10" style="width: 60%; height: 50%; text-align: center;">
+                                 <p:row>
+                                     <p:column>
+                                     <h:outputText value="Tiempo Maximo de Modificacion (horas): " />    
+                                     </p:column>
+                                     <p:column>
+                                     <p:inputText style="width:50px" value="#{parametrosControl.par.tiempoMaximoModif}" required="true" requiredMessage="Se requiere tiempo maximo de modificacion" />    
+                                     </p:column> 
+                                 </p:row>
+                                 <p:row>
+                                     <p:column>
+                                     <h:outputText value="Mostrar Inactivos: " />    
+                                     </p:column>
+                                     <p:column>
+                                     <p:selectOneMenu value="#{parametrosControl.par.mostrarInactivos}" required="true" requiredMessage="Se requiere mostrar inactivos">
+                                     <f:selectItem itemLabel="SI" itemValue="S" />
+                                     <f:selectItem itemLabel="NO" itemValue="N" />
+                                     </p:selectOneMenu>
+                                     </p:column>
+                                 </p:row>
+                                 <p:row>
+                                    <p:column>
+                                        <h:outputText value="Personal: " /> 
+                                        <p:inputText id="noper" value="#{parametrosControl.par.noPersonalBm}" size="5" required="true" requiredMessage="El numero de personal es requerido"/>
+                                        <p:outputLabel id="nomper" value=" #{parametrosControl.par.nomPersonal} " style="font-weight: bold;"/>
+                                        </p:column>
+                                        <p:column>
+                                        <p:commandButton icon="fa fa-search" immediate="true" update=":formAsignarPer" actionListener="#{parametrosControl.asignapersonalBusqueda('')}" oncomplete="PF('dlgasignarper').show()" />
+                                        </p:column>
+                                    </p:row>
+                                 <p:row>
+                                     <p:column>
+                                     <h:outputText value="FUNCION: " />    
+                                     </p:column>
+                                     <p:column>
+                                      <p:inputText style="width:200px" value="#{parametrosControl.par.funcion}" required="true" requiredMessage="Se requiere funcion" />    
+                                     </p:column> 
+                                 </p:row>
+                                 <p:row>
+                                     <p:column>
+                                     <h:outputText value="EVENTO: " />    
+                                     </p:column>
+                                     <p:column>
+                                         <p:selectOneMenu style="width:200px" value="#{parametrosControl.par.idEvento}" filterMatchMode="contains" required="true" requiredMessage="Se requiere evento" >
+                                        <f:selectItem itemLabel="Seleccione...." itemValue="" />
+                                        <f:selectItems var="ev" value="#{parametrosControl.eventos}" itemLabel="#{ev.evento}" itemValue="#{ev.idEvento}" />
+                                    </p:selectOneMenu>
+                                     </p:column>
+                                 </p:row>
+                                 <p:row>
+                                     <p:column>
+                                     <h:outputText value="NUM DEPENDENCIA: " />    
+                                     </p:column>
+                                     <p:column>
+                                     <p:inputText style="width:200px" value="#{parametrosControl.par.numDependencia}" required="true" requiredMessage="Se requiere numDependencia" />    
+                                     </p:column> 
+                                 </p:row>
+                                 <p:row>
+                                     <p:column>
+                                     <h:outputText value="DEPENDENCIA: " />    
+                                     </p:column>
+                                     <p:column>
+                                    <p:inputText style="width:200px" value="#{parametrosControl.par.dependencia}" required="true" requiredMessage="Se requiere dependencia" />    
+                                     </p:column> 
+                                 </p:row>
+                                 <f:facet name="footer">
+                                     <p:commandButton value="Guardar" actionListener="#{parametrosControl.modificar()}" title="Actualizar Parametros" rendered="#{accesoC.rolbotones.act}" update=":formMostrar">
+                                         </p:commandButton>
+                                 </f:facet>
+
+                             </h:panelGrid>
+                         </center>
+                     </p:panel>
+
+                        
+                     
+                                
+
+                </h:form>
+
+            </center>
+            
+<p:dialog id="dlg" header="Subir foto de reporte" showEffect="explode" hideEffect="explode" appendTo="@(body)" modal="true"
+                        widgetVar="dlgsubir" resizable="false" width="500" height="150" closeOnEscape="true">
+                  
+    <h:form id="formSubir" class="dialogC">
+                        <p:growl id="mg" showSummary="true" showDetail="true"/>
+                        
+                        <p:fileUpload label="Elegir" uploadLabel="Subir" 
+                                      cancelLabel="Cancelar" mode="advanced" dragDropSupport="false" oncomplete="actualizaParametros();" 
+                                      update="mg, formMostrar" process="@all" sizeLimit="1000000"  allowTypes="/(\.|\/)(jpe?g|png)$/" ></p:fileUpload>
+                    </h:form>
+                </p:dialog>
+        <p:dialog id="dlg2" header="Asignar personal a Parametros" showEffect="explode" hideEffect="explode" widgetVar="dlgasignarper" appendTo="@(body)" modal="true"
+                        resizable="false" width="80%" position="top center" closeOnEscape="true" >
+
+                <h:form id="formAsignarPer" class="dialogC">
+                    <p:messages id="messages" closable="true"/>
+                    <p:growl id="mg" showSummary="true" showDetail="true"/> 
+
+                    <center>
+                        <p:dataTable id="usper" var="per" value="#{parametrosControl.personal}"
+                                     paginator="true" paginatorPosition="bottom" emptyMessage="No hay personal disponible"
+                                     paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rows="10" style=" width: 100%;"
+                                     currentPageReportTemplate="({endRecord} de {totalRecords} 
+                                     Personal)">
+                            <f:facet name="header">
+                                <p:outputPanel>
+                                    <h:outputText value="Buscar: " />
+                                    <p:inputText value="#{parametrosControl.valorBuscado}" id="globalFilter" style="width:150px; text-transform: uppercase;" placeholder="Escribe para buscar" />
+                                    <p:commandButton actionListener="#{parametrosControl.asignapersonalBusqueda(parametrosControl.valorBuscado)}" value="Buscar" update="usper" />
+                                </p:outputPanel>
+
+                            </f:facet>
+                            <p:column headerText="NO PERSONALBM" width="10%" >
+                                <h:outputText value="#{per.noPersonalBm}"  />
+                            </p:column>
+                            <p:column headerText="NO PERSONAL" width="10%" >
+                                <h:outputText value="#{per.noPersonal}"  />
+                            </p:column>
+                            <p:column headerText="RFC" width="20%" >
+                                <h:outputText value="#{per.rfc}"  />
+                            </p:column>
+                            <p:column headerText="CURP" width="20%" >
+                                <h:outputText value="#{per.curp}"  />
+                            </p:column>
+                            <p:column headerText="NOMBRE" width="30%" >
+                                <h:outputText value="#{per.nombre} #{per.ap1} #{per.ap2}"  />
+                            </p:column>
+                            <p:column headerText="ASIGNAR" style="text-align: center" width="10%">
+                                <p:commandButton value="Asignar" update=":formMostrar:noper, :formMostrar:nomper"
+                                                 actionListener="#{parametrosControl.asignaNoPersonal(per)}" />
+                            </p:column>
+                        </p:dataTable>
+                        <p:separator></p:separator>
+                        <br/>
+                        <p:commandButton value="Cancelar" actionListener="#{parametrosControl.cancelarAsignarPersonal()}" />
+                    </center>
+
+                </h:form>
+
+
+            </p:dialog>
+
+         <h:form>
+          <p:remoteCommand name="actualizaParametros" update=":formMostrar" actionListener="#{parametrosControl.init()}" /> 
+         </h:form>
+        <p:dialog widgetVar="statusDialog" appendTo="@(body)" modal="true" draggable="false" closable="false" resizable="false" showHeader="false">
+        <p:graphicImage value="resources/img/imagenes/loading.gif" />
+       </p:dialog>
+        </h:body>
+    </ui:define>
+</ui:composition>
+

@@ -1,0 +1,225 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package clasificador;
+
+import java.util.List;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.SessionScoped;
+import org.primefaces.PrimeFaces;
+import org.primefaces.model.StreamedContent;
+import reportes.ReportesControl;
+import utilerias.Mensaje;
+
+@ManagedBean(name = "clasificadorControl")
+@SessionScoped
+public class ClasificadorControl implements java.io.Serializable {
+
+    private final ClasificadorDAO cladao;
+    private List<Clasificador> clasificadores;
+    private Clasificador clasificador;
+    private Clasificador clasificadorSeleccionado;
+    private List<Clasificador> filteredClasificador;
+    private final Mensaje msg = new Mensaje();
+    private List<Subfamilia> listSubfamilias;
+    private Clasificador clasificadorEditar;
+    private ReportesControl rc;
+    private StreamedContent file;
+    private Subfamilia subfamilia;
+
+    public ClasificadorControl() {
+        cladao = new ClasificadorDAO();
+        rc=new ReportesControl();
+        clasificador = new Clasificador();
+        clasificadorEditar = new Clasificador();
+
+    }
+
+    public void init() {
+        clasificadores = cladao.traeRegistros(2);
+        clasificadorSeleccionado = null;
+    }
+
+    public List<Clasificador> getClasificadores() {
+        return clasificadores;
+    }
+
+    public void setClasificadores(List<Clasificador> clasificadores) {
+        this.clasificadores = clasificadores;
+    }
+
+    public Clasificador getClasificador() {
+        return clasificador;
+    }
+
+    public void setClasificador(Clasificador clasificador) {
+        this.clasificador = clasificador;
+    }
+
+    public Clasificador getClasificadorSeleccionado() {
+        return clasificadorSeleccionado;
+    }
+
+    public void setClasificadorSeleccionado(Clasificador clasificadorSeleccionado) {
+        this.clasificadorSeleccionado = clasificadorSeleccionado;
+    }
+
+    public List<Clasificador> getFilteredClasificador() {
+        return filteredClasificador;
+    }
+
+    public void setFilteredClasificador(List<Clasificador> filteredClasificador) {
+        this.filteredClasificador = filteredClasificador;
+    }
+
+    public List<Subfamilia> getListSubfamilias() {
+        return listSubfamilias;
+    }
+
+    public void setListSubfamilias(List<Subfamilia> listSubfamilias) {
+        this.listSubfamilias = listSubfamilias;
+    }
+
+    public Subfamilia getSubfamilia() {
+        return subfamilia;
+    }
+
+    public void setSubfamilia(Subfamilia subfamilia) {
+        this.subfamilia = subfamilia;
+    }
+
+    public Clasificador getClasificadorEditar() {
+        return clasificadorEditar;
+    }
+
+    public void setClasificadorEditar(Clasificador clasificadorEditar) {
+        this.clasificadorEditar = clasificadorEditar;
+    }
+
+    public ReportesControl getRc() {
+        return rc;
+    }
+
+    public void setRc(ReportesControl rc) {
+        this.rc = rc;
+    }
+
+    public StreamedContent getFile() {
+        return file;
+    }
+
+    public void setFile(StreamedContent file) {
+        this.file = file;
+    }
+    
+    public void CargaVentanaInserta(String ob) {
+
+        listSubfamilias = cladao.traeSubfamilias();
+
+        filteredClasificador = null;
+        clasificador = new Clasificador();
+        PrimeFaces.current().ajax().update("formInsertar");
+        PrimeFaces.current().executeScript("PF('dlginsertar').show();");
+    }
+
+    public void CargaVentanaModifica(String ob) {
+        clasificadorEditar = new Clasificador(clasificadorSeleccionado);
+        listSubfamilias = cladao.traeSubfamilias();
+        filteredClasificador = null;
+        PrimeFaces.current().ajax().update("formModificar");
+        PrimeFaces.current().executeScript("PF('dlgmodificar').show();");
+    }
+
+    public void insertar() {
+ 
+        clasificador.setIdClasificador(cladao.getNumeroSiguiente());
+        int valor = cladao.insertaClasificador(clasificador);
+        if (valor == 1) {
+            msg.info("Procesado..", "Registro guardado");
+        } else {
+            msg.warn("Error..", "No se guardo la información");
+        }
+        PrimeFaces.current().executeScript("PF('dlginsertar').hide();");
+    }
+
+    public void modificar() {
+        int valor = 0;
+        valor = cladao.actualizaClasificador(clasificadorEditar);
+        if (valor == 1) {
+            msg.info("Procesado..", "Registro actualizado");
+        } else {
+            msg.warn("Error", "No se actualizo la información");
+
+        }
+
+        PrimeFaces.current().executeScript("PF('dlgmodificar').hide();");
+    }
+
+    public void ActivarInactivar(int opcion) {
+
+        System.out.println("valor: " + clasificador.getIdClasificador());
+        String dato = opcion == 1 ? "activó" : "inactivó";
+        int valor = cladao.eliminaClasificador(clasificador, opcion);
+        if (valor == 1) {
+
+            msg.info("Procesado..", "Registro se " + dato);
+        } else {
+            msg.warn("Error..", "No se " + dato + " el Registro");
+        }
+        PrimeFaces.current().executeScript("PF('dlgeliminar').hide();");
+    }
+    
+    public void reporte(){
+        String consulta = "SELECT CL.IDCLASIFICADOR,\n" +
+                                "  CL.DESCRIPCION,\n" +
+                                "  CL.CLASIFICADOROG,\n" +
+                                "  CL.FECHAREGISTRO,\n" +
+                                "  CL.OBSERVACIONES,\n" +
+                                "  CL.IDFAMILIA,\n" +
+                                "  CL.IDSUBFAMILIA,\n" +
+                                "  CL.IDESTATUS,\n" +
+                                "  SF.SUBFAMILIA,\n" +
+                                "  FA.FAMILIA\n" +
+                                "FROM CLASIFICADOR CL,\n" +
+                                "  SUBFAMILIA SF,\n" +
+                                "  FAMILIA FA\n" +
+                                "WHERE CL.IDSUBFAMILIA = SF.IDSUBFAMILIA\n" +
+                                "and CL.IDFAMILIA      = FA.IDFAMILIA\n" +
+                                "ORDER BY 1",
+                tituloReporte = "REPORTE CLASIFICADOR",
+                nombreReporte = "REPORTE_CLASIFICADOR",
+                noUsuario = "";
+
+     file=rc.generaExcelReporte(consulta, tituloReporte, nombreReporte,noUsuario);
+        }
+
+    public void llenarlistas() {
+        clasificadores = cladao.traeRegistros(2);
+    }
+
+    public void cancelarActualizar() {
+        PrimeFaces.current().executeScript("PF('dlgmodificar').hide();");
+    }
+
+    public void cancelarEliminar() {
+        PrimeFaces.current().executeScript("PF('dlgeliminar').hide();");
+    }
+
+    public void buscarFamilia(int opcion) {
+
+        for (Subfamilia sub : listSubfamilias) {
+            if (opcion == 1 && (sub.getIdSubFamilia() == clasificador.getIdSubFamilia())) {
+                System.out.println(sub.toString());
+                clasificador.setSubfamilia(sub);
+                break;
+            } else if(opcion == 2 && (sub.getIdSubFamilia() == clasificadorEditar.getIdSubFamilia())) {
+                System.out.println(sub.toString());
+                clasificadorEditar.setSubfamilia(sub);
+                break;
+            }
+        }
+
+    }
+}
